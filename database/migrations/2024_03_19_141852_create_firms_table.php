@@ -20,11 +20,7 @@ return new class extends Migration
 
             $table->string('slogan', 255)->nullable();
 
-            $table->text('address')->nullable();
-
             $table->string('url')->nullable();
-
-            $table->string('slug');
 
             $table->timestamps();
         });

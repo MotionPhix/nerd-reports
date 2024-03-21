@@ -8,18 +8,27 @@
     "devDependencies": {
         "@headlessui/vue": "^1.7.19",
         "@inertiajs/vue3": "^1.0.0",
+        "@tabler/icons-vue": "^3.1.0",
         "@tailwindcss/forms": "^0.5.3",
         "@types/lodash": "^4.17.0",
         "@vitejs/plugin-vue": "^5.0.0",
         "@vueuse/components": "^10.9.0",
         "autoprefixer": "^10.4.12",
+        "autosize": "^6.0.1",
         "axios": "^1.6.8",
+        "class-variance-authority": "^0.7.0",
         "laravel-vite-plugin": "^1.0",
+        "libphonenumber-js": "^1.10.58",
         "lodash": "^4.17.21",
+        "maz-ui": "^3.36.2",
+        "pinia": "^2.1.7",
         "postcss": "^8.4.31",
+        "tailwind-scrollbar": "^3.1.0",
         "tailwindcss": "^3.2.1",
+        "unplugin-vue-define-options": "^1.4.2",
         "vfonts": "^0.0.3",
         "vite": "^5.0",
-        "vue": "^3.4.0"
+        "vue": "^3.4.0",
+        "vue-toastification": "^2.0.0-rc.5"
     }
 }

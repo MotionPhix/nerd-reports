@@ -13,6 +13,7 @@
         "propaganistas/laravel-phone": "^5.2",
         "spatie/laravel-data": "^4.4",
         "spatie/laravel-tags": "^4.6",
+        "spatie/laravel-typescript-transformer": "^2.4",
         "tightenco/ziggy": "^2.0"
     },
     "require-dev": {

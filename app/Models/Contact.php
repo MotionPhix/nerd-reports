@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Data\FirmData;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -27,11 +28,15 @@ class Contact extends Model
         'nickname'
     ];
 
-    protected $casts = [
-        'created_at' => 'date:d m, Y',
-        'deleted_at' => 'date:d M, Y',
-        'last_interaction' => 'datetime',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'created_at' => 'date:d m, Y',
+            'deleted_at' => 'date:d M, Y',
+            'last_interaction' => 'datetime',
+            'firm' => FirmData::class,
+        ];
+    }
 
     public function addresses(): MorphMany
     {

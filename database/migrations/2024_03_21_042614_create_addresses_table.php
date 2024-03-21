@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('addresses', function (Blueprint $table) {
             $table->id();
 
-            $table->string('type');
+            $table->enum('type', ['home', 'work'])->default('work');
 
             $table->string('street');
 
