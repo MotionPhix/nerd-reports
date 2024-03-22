@@ -19,6 +19,11 @@ defineOptions({
 
   <Head title="Get Started" />
 
+  <!-- /**
+ * @property \App\Data\EmailData[] $emails
+ * @property \App\Data\PhoneData[] $phones
+ */ -->
+
   <article class="max-w-6xl mx-auto">
 
     <header class="z-50 flex flex-wrap w-full py-4 mb-auto text-sm sm:justify-start sm:flex-nowrap">

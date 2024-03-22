@@ -9,9 +9,9 @@ class PhoneData extends Data
 {
     public function __construct(
         public ?int $id,
-        public ?string $country_code = '',
+        public ?string $country_code,
         public string $number = '',
-        public ?PhoneType $phone,
+        public ?PhoneType $type,
         public bool $is_primary_phone = false,
         public ?string $formatted
     ) {}

@@ -8,10 +8,10 @@ import PhoneRepeater from '@/Components/PhoneRepeater.vue'
 import PrimaryButton from '@/Components/PrimaryButton.vue'
 import Spinner from '@/Components/Spinner.vue'
 import TextInput from '@/Components/TextInput.vue'
-import AuthenticatedLayout from '@/Layouts/AuthLayout.vue'
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { useFieldStore } from '@/Stores/fieldStore'
 import { useNotificationStore } from '@/Stores/notificationStore'
-import type { Address, Company, Contact, Email, Phone } from '@/types'
+import type { Address, Company, Email, Phone } from '@/types'
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import { IconPlus } from '@tabler/icons-vue'
@@ -27,19 +27,22 @@ interface FormData {
   nickname?: string;
   bio?: string;
   title?: string;
+  job_title?: string;
   phones?: Phone[];
   emails?: Email[];
-  company?: Company;
+  firm?: Company;
   addresses?: Address[];
 }
 
 const props = defineProps<{
-  contact: Contact
+  contact: Object
 }>()
 
 defineOptions({
   layout: AuthenticatedLayout,
 })
+
+console.log(props.contact);
 
 const error = ref()
 
@@ -69,21 +72,16 @@ const form = useForm({
   bio: props.contact.bio ?? '',
   middle_name: props.contact.middle_name,
   title: props.contact.title,
+  job_title: props.contact.job_title,
   nickname: props.contact.nickname,
   emails: props.contact.emails,
   phones: props.contact.phones,
-  addresses: props.contact.addresses,
-  company_id: props.contact.company?.id,
-  company_job_title: props.contact.company?.job_title,
-  company_address: props.contact.company?.address,
-  company_name: props.contact.company?.name,
-  company_slogan: props.contact.company?.slogan,
-  company_url: props.contact.company?.url,
-  company_department: props.contact.company?.department,
+  addresses: props.contact?.addresses,
+  firm: props.contact.firm
 })
 
 const loadCompanies = debounce((query: string, setOptions: any) => {
-  axios.get(query ? `/companies/${query}` : '/companies')
+  axios.get(query ? `/api/companies/${query}` : '/api/companies')
     .then((resp) => {
       setOptions(
         resp.data.map((company: Company) => company),
@@ -92,7 +90,7 @@ const loadCompanies = debounce((query: string, setOptions: any) => {
 }, 500)
 
 function createCompany(option: Partial<{ label?: string }>, setSelected: Function) {
-  axios.post('/companies', {
+  axios.post('/api/companies', {
     name: option.label,
   }, {
     headers: {
@@ -117,7 +115,8 @@ function onSubmit() {
       first_name: data.first_name,
       last_name: data.last_name,
       phones: data.phones,
-      emails: data.emails
+      emails: data.emails,
+      firm: data.firm
     }
 
     // Include optional fields only if they are filled
@@ -129,6 +128,9 @@ function onSubmit() {
 
     if (hasNickname.value || !!data.nickname)
       formData.nickname = data.nickname
+
+    if (hasJobTitle.value || !!data.job_title)
+        formData.job_title = data.job_title
 
     if (data.bio?.length || !!data.bio?.charAt(5))
       formData.bio = data.bio
@@ -142,25 +144,19 @@ function onSubmit() {
     )
       formData.addresses = data.addresses
 
-    if (data.company_id?.value) {
-      formData.company = {
-        id: data.company_id.value,
+    if (data.firm?.value.id) {
+      formData.firm = {
+        id: data.firm.id,
       }
 
-      if (hasSlogan.value || !!data.company_slogan)
-        formData.company.slogan = data.company_slogan
+      if (hasSlogan.value || !!data.firm?.slogan)
+        formData.firm.slogan = data.firm.slogan
 
-      if (hasUrl.value || !!data.company_url)
-        formData.company.url = data.company_url
+      if (hasUrl.value || !!data.firm?.url)
+        formData.firm.url = data.firm.url
 
-      if (hasDepartment.value || !!data.company_department)
-        formData.company.department = data.company_department
-
-      if (hasLocation.value || !!data.company_address)
-        formData.company.address = data.company_address
-
-      if (hasJobTitle.value || !!data.company_job_title)
-        formData.company.job_title = data.company_job_title
+      if (hasLocation.value || !!data.firm?.address)
+        formData.firm.address = data.firm.address
     }
 
     return formData
@@ -202,9 +198,9 @@ function onSubmit() {
 <template>
   <Head :title="contact.cid ? `Edit ${contact.first_name} ${contact.last_name}` : 'Create new contact'" />
 
-  <form class="flex flex-col max-w-2xl gap-6 px-4 pb-16 my-16 mb-4 sm:pb-0 sm:px-8 md:mx-auto" @submit.prevent="onSubmit">
-    <section class="flex gap-6">
-      <div v-if="hasTitle || !!form.title">
+  <form class="flex flex-col w-full gap-6 px-4 pb-16 my-16 mb-4 sm:pb-0 sm:px-8 md:mx-auto" @submit.prevent="onSubmit">
+    <section class="flex w-full gap-6">
+      <div v-if="hasTitle || !!form.title" class="w-full">
         <label for="title" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
           Title
         </label>
@@ -212,7 +208,7 @@ function onSubmit() {
         <TextInput
           id="title"
           v-model="form.title" type="text"
-          placeholder="Dr., Mr., Mrs.," />
+          placeholder="Mr, Mrs, Ms" />
 
         <InputError :message="$page.props.errors.title" />
       </div>
@@ -225,6 +221,7 @@ function onSubmit() {
         <TextInput
           id="name"
           v-model="form.first_name" type="text"
+          class="w-full"
           placeholder="Enter first name" />
 
         <InputError :message="$page.props.errors.first_name" />
@@ -242,6 +239,19 @@ function onSubmit() {
         placeholder="Enter middle name" />
 
       <InputError :message="$page.props.errors.middle_name" />
+    </div>
+
+    <div v-if="hasJobTitle || !!form.job_title">
+        <label for="job_title" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+            Job title
+        </label>
+
+        <TextInput
+            id="job_title"
+            v-model="form.job_title" type="text"
+            placeholder="Enter job title" />
+
+        <InputError :message="$page.props.errors['job_title']" />
     </div>
 
     <div>
@@ -323,76 +333,50 @@ function onSubmit() {
         Company
       </label>
 
-      <Combobox v-model="form.company_id" :create-option="createCompany" :load-options="loadCompanies" />
+      <Combobox v-model="form.firm.id" :create-option="createCompany" :load-options="loadCompanies" />
 
       <InputError :message="error" />
 
-      <InputError :message="$page.props.errors['company.id']" />
+      <InputError :message="$page.props.errors['firm.id']" />
     </div>
 
-    <div v-if="hasJobTitle || !!form.company_job_title">
-      <label for="job_title" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-        Job title
-      </label>
-
-      <TextInput
-        id="job_title"
-        v-model="form.company_job_title" type="text"
-        placeholder="Enter job title" />
-
-      <InputError :message="$page.props.errors['company.job_title']" />
-    </div>
-
-    <div v-if="hasDepartment || !!form.company_department">
-      <label for="department" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-        Department
-      </label>
-
-      <TextInput
-        id="department"
-        v-model="form.company_department" type="text"
-        placeholder="Enter department name" />
-
-      <InputError :message="$page.props.errors['company.department']" />
-    </div>
-
-    <div v-if="hasLocation || !!form.company_address">
+    <div v-if="hasLocation || !!form.firm.address">
       <label for="company_address" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
         Address
       </label>
 
       <TextInput
         id="company_address"
-        v-model="form.company_address" type="text"
+        v-model="form.firm.address" type="text"
         placeholder="Enter work address" />
 
-      <InputError :message="$page.props.errors['company.address']" />
+      <InputError :message="$page.props.errors['firm.address']" />
     </div>
 
-    <div v-if="hasUrl || !!form.company_url">
+    <div v-if="hasUrl || !!form.firm.url">
       <label for="company_website" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
         Website
       </label>
 
       <TextInput
         id="company_website"
-        v-model="form.company_url" type="text"
+        v-model="form.firm.url" type="text"
         placeholder="Enter office website e.g. https://www.example.com" />
 
-      <InputError :message="$page.props.errors['company.url']" />
+      <InputError :message="$page.props.errors['firm.url']" />
     </div>
 
-    <div v-if="hasSlogan || !!form.company_slogan">
+    <div v-if="hasSlogan || !!form.firm.slogan">
       <label for="company_slogan" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-        Motto/Slogan
+        Slogan
       </label>
 
       <TextInput
         id="company_slogan"
-        v-model="form.company_slogan" type="text"
+        v-model="form.firm.slogan" type="text"
         placeholder="Enter slogan" />
 
-      <InputError :message="$page.props.errors['company.slogan']" />
+      <InputError :message="$page.props.errors['firm.slogan']" />
     </div>
 
     <div class="col-span-2">
@@ -407,16 +391,13 @@ function onSubmit() {
           leave-from-class="scale-100 opacity-100" leave-to-class="scale-90 opacity-0">
           <MenuItems
             class="absolute left-0 z-10 w-48 mt-2 overflow-hidden origin-top-left bg-white border rounded-md shadow-lg -top-44 focus:outline-none">
+
             <MenuItem v-slot="{ active }" @click="hasJobTitle = !hasJobTitle">
             <span :class="{ 'bg-gray-100': active }" class="block px-4 py-2 text-sm text-gray-700">Job title</span>
             </MenuItem>
 
-            <MenuItem v-slot="{ active }" @click="hasDepartment = !hasDepartment">
-            <span :class="{ 'bg-gray-100': active }" class="block px-4 py-2 text-sm text-gray-700">Department</span>
-            </MenuItem>
-
             <MenuItem v-slot="{ active }" @click="hasLocation = !hasLocation">
-            <span :class="{ 'bg-gray-100': active }" class="block px-4 py-2 text-sm text-gray-700">Office location</span>
+            <span :class="{ 'bg-gray-100': active }" class="block px-4 py-2 text-sm text-gray-700">Address</span>
             </MenuItem>
 
             <MenuItem v-slot="{ active }" @click="hasUrl = !hasUrl">
@@ -426,6 +407,7 @@ function onSubmit() {
             <MenuItem v-slot="{ active }" @click="hasSlogan = !hasSlogan">
             <span :class="{ 'bg-gray-100': active }" class="block px-4 py-2 text-sm text-gray-700">Motto</span>
             </MenuItem>
+
           </MenuItems>
         </transition>
       </Menu>

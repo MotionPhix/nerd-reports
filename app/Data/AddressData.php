@@ -12,9 +12,9 @@ class AddressData extends Data
     public function __construct(
         public ?int $id,
         public AddressType $type,
-        public string $street,
-        public string $city,
+        public string $street = '',
+        public string $city = '',
         public ?string $state,
-        public string $country,
+        public ?string $country,
     ) {}
 }

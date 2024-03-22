@@ -6,7 +6,7 @@ import NavTabs from '@/Components/NavTabs.vue';
 import PrimaryButtonLink from '@/Components/PrimaryButtonLink.vue';
 import InteractionsTab from '@/Components/Tab/InteractionsTab.vue';
 import OverviewTab from '@/Components/Tab/OverviewTab.vue';
-import AuthenticatedLayout from '@/Layouts/AuthLayout.vue';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { useContactStore } from '@/Stores/contactStore';
 import type { Contact, ContactsBase, Phone } from '@/types/index';
 import { Head, Link, router } from '@inertiajs/vue3';

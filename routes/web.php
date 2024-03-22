@@ -26,7 +26,7 @@ Route::middleware('auth')->group(function () {
         )->name('contacts.index');
 
         Route::get(
-            '/create',
+            '/c/new',
             \App\Http\Controllers\Contacts\Form::class
         )->name('contacts.create');
 
