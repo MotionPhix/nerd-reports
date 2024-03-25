@@ -30,7 +30,20 @@ interface FormData {
     job_title?: string;
     phones?: App.Data.PhoneData[];
     emails?: App.Data.EmailData[];
-    firm?: App.Data.FirmData;
+    firm?: {
+        id?: number | null;
+        fid?: string | null;
+        job_title?: string;
+        slogan?: string;
+        url?: string;
+        address?: {
+            id?: number;
+            city?: string;
+            street?: string;
+            state?: string;
+            country?: string
+        };
+    };
 }
 
 const props = defineProps<{
@@ -65,26 +78,24 @@ const { toggleField, unSet } = fieldStore
 const form = useForm({
     first_name: props.contact.first_name,
     last_name: props.contact.last_name,
-    bio: props.contact.bio ?? '',
-    middle_name: props.contact.middle_name ?? '',
-    title: props.contact.title ?? '',
-    job_title: props.contact.job_title ?? '',
-    nickname: props.contact.nickname ?? '',
+    bio: props.contact.bio ?? null,
+    middle_name: props.contact.middle_name ?? null,
+    title: props.contact.title ?? null,
+    job_title: props.contact.job_title ?? null,
+    nickname: props.contact.nickname ?? null,
     emails: props.contact.emails,
     phones: props.contact.phones,
-    firm: {
-        id: props.contact.firm?.id ?? 0,
-        fid: props.contact.firm?.fid ?? '',
-        name: props.contact.firm?.name ?? '',
-        url: props.contact.firm?.url ?? 'null',
-        slogan: props.contact.firm?.slogan ?? '',
-        address: {
-            city: props.contact.firm?.address?.city ?? '',
-            street: props.contact.firm?.address?.street ?? '',
-            state: props.contact.firm?.address?.state ?? '',
-            country: props.contact.firm?.address?.country ?? '',
-        }
-    },
+    firm_keys: props.contact.firm?.fid ? { fid: props.contact?.firm?.fid, name: props.contact?.firm?.name } : { name: '', fid: null },
+    firm_name: props.contact.firm?.name ?? null,
+    firm_url: props.contact.firm?.url ?? null,
+    firm_slogan: props.contact.firm?.slogan ?? null,
+    firm_address: {
+        id: props.contact.firm?.address?.id ?? null,
+        city: props.contact.firm?.address?.city ?? null,
+        street: props.contact.firm?.address?.street ?? null,
+        state: props.contact.firm?.address?.state ?? null,
+        country: props.contact.firm?.address?.country ?? null,
+    }
 })
 
 const loadFirms = debounce((query: string, setOptions: Function) => {
@@ -96,7 +107,7 @@ const loadFirms = debounce((query: string, setOptions: Function) => {
         })
 }, 500)
 
-function createFirm(option: Partial<{ name?: string }>, setSelected: Function) {
+function createFirm(option: Partial<{ name: string }>, setSelected: Function) {
     axios.post('/api/companies', {
         name: option.name,
     }, {
@@ -106,7 +117,7 @@ function createFirm(option: Partial<{ name?: string }>, setSelected: Function) {
     })
         .then((resp) => {
             setSelected({
-                id: resp.data.id,
+                fid: resp.data.fid,
                 name: resp.data.name,
             })
         })
@@ -118,7 +129,7 @@ function createFirm(option: Partial<{ name?: string }>, setSelected: Function) {
 function onSubmit() {
     form.transform((data) => {
 
-        const formData: FormData = {
+        let formData: Partial<FormData> = {
             first_name: data.first_name,
             last_name: data.last_name,
             phones: data.phones,
@@ -126,36 +137,41 @@ function onSubmit() {
         }
 
         // Include optional fields only if they are filled
-        if (hasTitle.value || !!data.title)
-            formData.title = data.title
+        if (hasTitle.value || !!data?.title)
+            formData.title = data?.title
 
-        if (hasMiddleName.value || !!data.middle_name)
-            formData.middle_name = data.middle_name
+        if (hasMiddleName.value || !!data?.middle_name)
+            formData.middle_name = data?.middle_name
 
-        if (hasNickname.value || !!data.nickname)
-            formData.nickname = data.nickname
+        if (hasNickname.value || !!data?.nickname)
+            formData.nickname = data?.nickname
 
-        if (data.bio?.length || !!data.bio?.charAt(5))
+        if (data.bio?.length || !!data?.bio.charAt(5))
             formData.bio = data.bio
 
-        if (hasFirm.value || !!data.firm?.id) {
+        if (hasFirm.value || !!data?.firm_keys?.fid) {
 
-            formData.firm = data.firm
+            if (data.firm_keys) {
 
-            if (data.firm?.id) {
+                const firm: Partial<FormData['firm']> = { fid: null }
 
-                if (hasJobTitle.value || !!data.job_title)
-                    formData.job_title = data.job_title
+                formData.firm = firm
 
-                if (hasSlogan.value || !!data.firm?.slogan)
-                    formData.firm.slogan = data.firm.slogan
+                formData.firm.fid = data?.firm_keys?.fid
 
-                if (hasUrl.value || !!data.firm?.url)
-                    formData.firm.url = data.firm.url
+                if (hasJobTitle.value || !!data?.job_title)
+                    formData.job_title = data?.job_title
 
-                if (hasAddress.value || !!data.firm?.address)
-                    formData.firm.address = data.firm.address
+                if (hasSlogan.value || !!data?.firm_slogan)
+                    formData.firm.slogan = data?.firm_slogan
+
+                if (hasUrl.value || !!data?.firm_url)
+                    formData.firm.url = data?.firm_url
+
+                if (hasAddress.value || !!data?.firm_address?.city)
+                    formData.firm.address = data?.firm_address
             }
+
         }
 
         return formData
@@ -199,8 +215,6 @@ function onSubmit() {
     })
 }
 
-console.log(props.contact);
-
 </script>
 
 <template>
@@ -212,10 +226,14 @@ console.log(props.contact);
 
         <SecondaryButton
             class="flex items-center gap-2 font-bold text-blue-300 transition duration-300 rounded-full dark:text-lime-300 hover:text-blue-500"
-            v-if="! hasFirm"
+            v-if="! hasFirm && ! form.firm_keys?.fid"
             @click="toggleField('hasFirm')">
             <IconPlus class="w-6 h-6" /> <span>Add company</span>
         </SecondaryButton>
+
+        <h2 v-else class="flex items-center gap-2 text-xl font-bold text-gray-800 dark:text-gray-200">
+            <IconArrowLeft /> <span>{{ props.contact.firm.name }}</span>
+        </h2>
 
         <span class="flex-1"></span>
 
@@ -349,7 +367,7 @@ console.log(props.contact);
             <PhoneRepeater v-model="form.phones" />
         </div>
 
-        <section v-if="hasFirm" class="flex flex-col gap-6">
+        <section v-if="hasFirm || !!form.firm_keys?.fid" class="flex flex-col gap-6">
 
             <div>
                 <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
@@ -357,7 +375,7 @@ console.log(props.contact);
                 </label>
 
                 <FirmInput
-                    v-model="form.firm"
+                    v-model="form.firm_keys"
                     :create-option="createFirm"
                     :load-options="loadFirms"
                     placeholder="Pick a company" />
@@ -377,39 +395,29 @@ console.log(props.contact);
                 <InputError :message="$page.props.errors['job_title']" />
             </div>
 
-            <div v-if="hasAddress || !!form.firm.address">
-                <!-- <label for="company_address" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                    Address
-                </label>
+            <div v-if="hasAddress || !!form.firm_address.id">
 
-                <TextInput
-                    id="company_address"
-                    v-model="form.firm.address" type="text"
-                    placeholder="Enter work address" />
-
-                <InputError :message="$page.props.errors['firm.address']" /> -->
-
-                <AddressInput v-model="form.firm.address" />
+                <AddressInput v-model="form.firm_address" />
 
             </div>
 
-            <div v-if="hasUrl || !!form.firm.url">
+            <div v-if="hasUrl || !!form.firm_url">
                 <label for="company_website" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                     Website
                 </label>
 
-                <TextInput id="company_website" v-model="form.firm.url" type="text"
+                <TextInput id="company_website" v-model="form.firm_url" type="text"
                     placeholder="Enter office website e.g. https://www.example.com" />
 
                 <InputError :message="$page.props.errors['firm.url']" />
             </div>
 
-            <div v-if="hasSlogan || !!form.firm.slogan">
+            <div v-if="hasSlogan || !!form.firm_slogan">
                 <label for="company_slogan" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                     Slogan
                 </label>
 
-                <TextInput id="company_slogan" v-model="form.firm.slogan" type="text" placeholder="Enter slogan" />
+                <TextInput id="company_slogan" v-model="form.firm_slogan" type="text" placeholder="Enter slogan" />
 
                 <InputError :message="$page.props.errors['firm.slogan']" />
             </div>

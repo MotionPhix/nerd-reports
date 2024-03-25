@@ -11,10 +11,10 @@ class FirmData extends Data
     public function __construct(
         public int|Optional $id,
         public string|Optional $fid,
-        public string|Optional $slogan,
-        public AddressData|Optional $address,
-        public string|Optional $url,
-        public string $name
+        public string|null|Optional $slogan,
+        public AddressData|null|Optional $address,
+        public string|null|Optional $url,
+        public string|null|Optional $name
     ) {
     }
 }

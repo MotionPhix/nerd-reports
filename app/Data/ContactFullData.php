@@ -58,7 +58,8 @@ class ContactFullData extends Data
             'job_title' => 'sometimes|filled',
             'bio' => 'sometimes|filled',
 
-            'firm.id' => 'sometimes|exists:firms,id',
+            'firm.fid' => 'sometimes|exists:firms,fid',
+            'firm.name' => 'required_if:firm.fid,null',
             'firm.url' => 'sometimes|filled|url:http,https',
             'firm.slogan' => 'sometimes|filled',
             'firm.address.type' => ['required_unless:firm.id,null', Rule::enum(AddressType::class)],
@@ -85,8 +86,9 @@ class ContactFullData extends Data
             'first_name.required' => 'Enter first name',
             'last_name.required' => 'Enter surname',
 
-            'firm.id.exists' => 'Oops! We don\'t have that company yet!',
+            'firm.fid.exists' => 'Oops! We don\'t have that company yet!',
             'firm.url.filled' => 'You should fill out the company website',
+            'firm.name.required_if' => 'Fill out the company\'s name',
             'firm.url.url' => 'You entered an invalid web URL.',
             'firm.address.type.required' => 'Address type is missing',
             'firm.address.type.enum' => 'Address type can only be "office" or "home"',

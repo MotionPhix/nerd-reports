@@ -46,11 +46,11 @@ class Index extends Controller
       $companiesQuery->where('name', 'LIKE', "%{$request->q}%");
     }
 
-    $companies = $companiesQuery->get(['id', 'name'])
+    $companies = $companiesQuery->get(['fid', 'name'])
       ->map(function ($company) {
         return [
-          'label' => $company->name,
-          'value' => $company->id,
+          'name' => $company->name,
+          'fid' => $company->fid,
         ];
       });
 

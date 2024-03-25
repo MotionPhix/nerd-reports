@@ -88,11 +88,12 @@ router.on('navigate', (e) => {
                 <ContactEmail :emails="contact?.emails" />
             </p>
 
-            <p class="text-sm text-gray-500 truncate dark:text-gray-400">
-                {{
-                    (contact?.emails.filter(email => email.is_primary_email)[0] || {}).email
-                    || 'No primary email'
-                }}
+            <span class="w-px h-4 bg-rose-500" v-if="props.contact?.job_title"></span>
+
+            <p class="text-sm text-gray-500 truncate dark:text-gray-400" v-if="props.contact?.job_title">
+               <strong>
+                    {{ contact?.job_title }}
+               </strong>
             </p>
 
         </section>

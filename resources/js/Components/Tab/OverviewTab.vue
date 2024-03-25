@@ -12,7 +12,7 @@ const props = defineProps<Props>()
 
 <template>
   <section
-    class="flex flex-col flex-1 flex-grow gap-10 py-6 xl:flex-row">
+    class="grid grid-cols-2 gap-10 py-6 lg:flex-row">
 
     <div class="space-y-8">
 
@@ -90,47 +90,13 @@ const props = defineProps<Props>()
           </p>
         </div>
       </section>
-
-      <section
-        class="flex gap-6">
-        <IconNote class="shrink-0 h-7" />
-
-        <div class="w-full">
-          <h3 class="mb-4 text-lg font-semibold">Notes</h3>
-
-          <section v-html="props.contact.bio" v-if="props.contact.bio" class="empty:hidden" />
-
-          <div class="flex flex-col items-center gap-3 text-gray-500 empty:hidden" v-else>
-            <IconNote class="w-48 h-48 text-gray-400" stroke-width="1" />
-
-            <h2 class="mt-6 text-xl font-semibold leading-none text-center">
-              No notes found!
-            </h2>
-
-            <p class="text-sm text-center">
-              Add <strong>{{ props.contact.first_name }}</strong>'s notes here.
-            </p>
-
-            <div>
-              <Link as="button"
-                class="flex gap-2 items-center text-gray-500 border-gray-500 border hover:border-gray-900 rounded-lg dark:border-slate-600 dark:text-gray-500 font-semibold my-4 px-3 py-1.5 dark:hover:text-gray-400 dark:hover:border-gray-400 hover:text-gray-900 transition duration-300"
-                :href="route('contacts.edit', props.contact.cid)" preserve-scroll>
-
-                <IconNotes class="w-5 h-5" />
-                <span>Add notes</span>
-
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
     </div>
 
     <div class="space-y-8">
 
       <section
         class="flex gap-6"
-        v-if="props.contact.firm?.id">
+        v-if="props.contact.firm?.fid">
         <IconBuildingArch class="shrink-0 h-7" />
 
         <div>
@@ -183,6 +149,40 @@ const props = defineProps<Props>()
       </section> -->
 
     </div>
+
+    <article
+        class="col-span-2 flex gap-6 mt-6">
+        <IconNote class="shrink-0 h-7" />
+
+        <div class="w-full">
+          <h3 class="mb-4 text-lg font-semibold">Notes</h3>
+
+          <section v-html="props.contact.bio" v-if="props.contact.bio" class="empty:hidden" />
+
+          <div class="flex flex-col items-center gap-3 text-gray-500 empty:hidden" v-else>
+            <IconNote class="w-48 h-48 text-gray-400" stroke-width="1" />
+
+            <h2 class="mt-6 text-xl font-semibold leading-none text-center">
+              No notes found!
+            </h2>
+
+            <p class="text-sm text-center">
+              Add <strong>{{ props.contact.first_name }}</strong>'s notes here.
+            </p>
+
+            <div>
+              <Link as="button"
+                class="flex gap-2 items-center text-gray-500 border-gray-500 border hover:border-gray-900 rounded-lg dark:border-slate-600 dark:text-gray-500 font-semibold my-4 px-3 py-1.5 dark:hover:text-gray-400 dark:hover:border-gray-400 hover:text-gray-900 transition duration-300"
+                :href="route('contacts.edit', props.contact.cid)" preserve-scroll>
+
+                <IconNotes class="w-5 h-5" />
+                <span>Add notes</span>
+
+              </Link>
+            </div>
+          </div>
+        </div>
+      </article>
 
   </section>
 </template>

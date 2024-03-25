@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Contacts;
 
 use App\Data\ContactFullData;
 use App\Http\Controllers\Controller;
+use App\Models\Address;
 use App\Models\Contact;
 use App\Models\Email;
 use App\Models\Firm;
@@ -69,7 +70,10 @@ class Update extends Controller
                 if (isset($email['id'])) {
                     $email_exists = Email::find($email['id']);
 
-                    if ($email_exists && $email['email'] !== $email_exists->email) {
+                    if (
+                        ($email_exists && $email['email'] !== $email_exists->email) ||
+                        (!! $email['is_primary_email'] !== !! $email_exists->is_primary_email)
+                    ) {
                         $email_exists->update($email);
                     }
 
@@ -120,13 +124,39 @@ class Update extends Controller
 
         if (isset($validated['firm'])) {
 
-            $firmData = array_intersect_key($validated['firm'], array_flip(['url', 'slogan']));
+            $firmData = array_intersect_key($validated['firm'], array_flip(['url', 'slogan', 'name']));
 
-            $firm = Firm::updateOrCreate(['id' => $validated['firm']['id']], $firmData);
+            if (isset($validated['firm']['fid'])) {
+
+                $firm_exists = Firm::where('fid', $validated['firm']['fid'])->first();
+
+                if ($firm_exists) {
+
+                    $firm_exists->update($firmData);
+
+                    $contact->firm_id = $firm_exists->id;
+
+                    $contact->save();
+                }
+
+            } else {
+
+                $newFirm = new Firm($firmData);
+                $contact->firm()->save($newFirm);
+
+            }
 
             // update or create address for contact with firm id
             if (isset($validated['firm']['address'])) {
-                $firm->address()->updateOrCreate(['id' => $firm->address?->id], [$firm->address]);
+
+                $addressData = array_intersect_key($validated['firm']['address'], array_flip(['id', 'city', 'state', 'street', 'country']));
+
+                $address = Address::updateOrCreate(['id' => $addressData['id']], $addressData);
+
+                $contact->firm->address()->associate($address);
+
+                $contact->firm->save();
+
             }
 
         }
