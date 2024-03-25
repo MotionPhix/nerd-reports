@@ -14,8 +14,8 @@ const currentTab = ref(1)
 </script>
 
 <template>
-  <MazTabs v-model="currentTab" class="mt-8" >
-    <div class="pb-2 border-b maz-flex maz-items-center">
+  <MazTabs v-model="currentTab" class="mt-8">
+    <div class="pb-2 maz-flex maz-items-center">
       <MazTabsBar :items="tabs" persistent no-elevation block />
     </div>
 

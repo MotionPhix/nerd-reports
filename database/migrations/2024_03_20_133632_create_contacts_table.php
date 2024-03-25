@@ -22,7 +22,7 @@ return new class extends Migration
 
             $table->string('job_title', 70)->nullable();
 
-            $table->enum('title', ['Mr', 'Mrs', 'Ms', 'Sr', 'Dr', 'Prof'])->nullable();
+            $table->enum('title', ['mr', 'mrs', 'ms', 'sr', 'dr', 'prof'])->nullable();
 
             $table->string('middle_name', 50)->nullable();
 

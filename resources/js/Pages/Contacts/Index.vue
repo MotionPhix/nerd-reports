@@ -7,7 +7,7 @@ import { Head, Link } from '@inertiajs/vue3'
 import { IconPlus } from '@tabler/icons-vue'
 
 interface Props {
-  contacts: Object
+  contacts: App.Data.ContactData[]
 }
 
 const props = defineProps<Props>()
@@ -21,7 +21,7 @@ defineOptions({ layout: AuthenticatedLayout })
   <ContactActionMenu :contacts="props.contacts" />
 
   <div class="py-12">
-    <div class="flex max-w-5xl px-6 mx-auto">
+    <div class="flex max-w-3xl px-6 mx-auto">
       <!-- <template v-if="Object.keys(baseGroup).length"> -->
         <!-- <section> -->
           <!-- <div
@@ -34,10 +34,10 @@ defineOptions({ layout: AuthenticatedLayout })
               {{ group }}
             </span> -->
 
-            <ul v-if="props.contacts.length" role="list" class="divide-y divide-gray-200 dark:divide-gray-500">
+            <ul v-if="props.contacts.length" role="list" class="w-full space-y-6">
               <ContactCard
                 v-for="(contact) in props.contacts"
-                :key="contact.id"
+                :key="contact.cid"
                 :contact="contact"
               />
             </ul>

@@ -1,3 +1,4 @@
+import 'maz-ui/styles';
 import '../css/app.css';
 import './bootstrap';
 

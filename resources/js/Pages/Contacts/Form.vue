@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import AddressRepeater from '@/Components/AddressRepeater.vue'
+import AddressInput from '@/Components/AddressInput.vue'
 import AutosizeTextarea from '@/Components/AutosizeTextarea.vue'
-import Combobox from '@/Components/Combobox.vue'
 import EmailRepeater from '@/Components/EmailRepeater.vue'
+import FirmInput from '@/Components/FirmInput.vue'
 import InputError from '@/Components/InputError.vue'
 import PhoneRepeater from '@/Components/PhoneRepeater.vue'
 import PrimaryButton from '@/Components/PrimaryButton.vue'
+import SecondaryButton from '@/Components/SecondaryButton.vue'
 import Spinner from '@/Components/Spinner.vue'
 import TextInput from '@/Components/TextInput.vue'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { useFieldStore } from '@/Stores/fieldStore'
 import { useNotificationStore } from '@/Stores/notificationStore'
-import type { Address, Company, Email, Phone } from '@/types'
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import { IconPlus } from '@tabler/icons-vue'
@@ -21,28 +21,25 @@ import { storeToRefs } from 'pinia'
 import { ref } from 'vue'
 
 interface FormData {
-  first_name: string;
-  last_name: string;
-  middle_name?: string;
-  nickname?: string;
-  bio?: string;
-  title?: string;
-  job_title?: string;
-  phones?: Phone[];
-  emails?: Email[];
-  firm?: Company;
-  addresses?: Address[];
+    first_name: string;
+    last_name: string;
+    middle_name?: string;
+    nickname?: string;
+    bio?: string;
+    title?: string;
+    job_title?: string;
+    phones?: App.Data.PhoneData[];
+    emails?: App.Data.EmailData[];
+    firm?: App.Data.FirmData;
 }
 
 const props = defineProps<{
-  contact: Object
+    contact: App.Data.ContactFullData
 }>()
 
 defineOptions({
-  layout: AuthenticatedLayout,
+    layout: AuthenticatedLayout,
 })
-
-console.log(props.contact);
 
 const error = ref()
 
@@ -53,403 +50,427 @@ const fieldStore = useFieldStore()
 const { notify } = toastStore
 
 const {
-  hasMiddleName,
-  hasNickname,
-  hasTitle,
-  hasJobTitle,
-  hasLocation,
-  hasDepartment,
-  hasAddresses,
-  hasSlogan,
-  hasUrl,
+    hasMiddleName,
+    hasNickname,
+    hasTitle,
+    hasJobTitle,
+    hasAddress,
+    hasSlogan,
+    hasUrl,
+    hasFirm,
 } = storeToRefs(fieldStore)
 
 const { toggleField, unSet } = fieldStore
 
 const form = useForm({
-  first_name: props.contact.first_name,
-  last_name: props.contact.last_name,
-  bio: props.contact.bio ?? '',
-  middle_name: props.contact.middle_name,
-  title: props.contact.title,
-  job_title: props.contact.job_title,
-  nickname: props.contact.nickname,
-  emails: props.contact.emails,
-  phones: props.contact.phones,
-  addresses: props.contact?.addresses,
-  firm: props.contact.firm
+    first_name: props.contact.first_name,
+    last_name: props.contact.last_name,
+    bio: props.contact.bio ?? '',
+    middle_name: props.contact.middle_name ?? '',
+    title: props.contact.title ?? '',
+    job_title: props.contact.job_title ?? '',
+    nickname: props.contact.nickname ?? '',
+    emails: props.contact.emails,
+    phones: props.contact.phones,
+    firm: {
+        id: props.contact.firm?.id ?? 0,
+        fid: props.contact.firm?.fid ?? '',
+        name: props.contact.firm?.name ?? '',
+        url: props.contact.firm?.url ?? 'null',
+        slogan: props.contact.firm?.slogan ?? '',
+        address: {
+            city: props.contact.firm?.address?.city ?? '',
+            street: props.contact.firm?.address?.street ?? '',
+            state: props.contact.firm?.address?.state ?? '',
+            country: props.contact.firm?.address?.country ?? '',
+        }
+    },
 })
 
-const loadCompanies = debounce((query: string, setOptions: any) => {
-  axios.get(query ? `/api/companies/${query}` : '/api/companies')
-    .then((resp) => {
-      setOptions(
-        resp.data.map((company: Company) => company),
-      )
-    })
+const loadFirms = debounce((query: string, setOptions: Function) => {
+    axios.get(query ? `/api/companies/${query}` : '/api/companies')
+        .then((resp) => {
+            setOptions(
+                resp.data.map((company: App.Data.FirmData) => company),
+            )
+        })
 }, 500)
 
-function createCompany(option: Partial<{ label?: string }>, setSelected: Function) {
-  axios.post('/api/companies', {
-    name: option.label,
-  }, {
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  })
-    .then((resp) => {
-      setSelected({
-        value: resp.data.id,
-        label: resp.data.name,
-      })
+function createFirm(option: Partial<{ name?: string }>, setSelected: Function) {
+    axios.post('/api/companies', {
+        name: option.name,
+    }, {
+        headers: {
+            'Content-Type': 'application/json',
+        },
     })
-    .catch((err) => {
-      error.value = err.response.data.message
-    }).finally(() => error.value = null)
+        .then((resp) => {
+            setSelected({
+                id: resp.data.id,
+                name: resp.data.name,
+            })
+        })
+        .catch((err) => {
+            error.value = err.response.data.message
+        })
 }
 
 function onSubmit() {
-  form.transform((data) => {
+    form.transform((data) => {
 
-    const formData: FormData = {
-      first_name: data.first_name,
-      last_name: data.last_name,
-      phones: data.phones,
-      emails: data.emails,
-      firm: data.firm
-    }
+        const formData: FormData = {
+            first_name: data.first_name,
+            last_name: data.last_name,
+            phones: data.phones,
+            emails: data.emails,
+        }
 
-    // Include optional fields only if they are filled
-    if (hasTitle.value || !!data.title)
-      formData.title = data.title
+        // Include optional fields only if they are filled
+        if (hasTitle.value || !!data.title)
+            formData.title = data.title
 
-    if (hasMiddleName.value || !!data.middle_name)
-      formData.middle_name = data.middle_name
+        if (hasMiddleName.value || !!data.middle_name)
+            formData.middle_name = data.middle_name
 
-    if (hasNickname.value || !!data.nickname)
-      formData.nickname = data.nickname
+        if (hasNickname.value || !!data.nickname)
+            formData.nickname = data.nickname
 
-    if (hasJobTitle.value || !!data.job_title)
-        formData.job_title = data.job_title
+        if (data.bio?.length || !!data.bio?.charAt(5))
+            formData.bio = data.bio
 
-    if (data.bio?.length || !!data.bio?.charAt(5))
-      formData.bio = data.bio
+        if (hasFirm.value || !!data.firm?.id) {
 
-    if (
-      data.addresses && (data.addresses[0].id
-        || form?.addresses[0].street
-        || data.addresses[0].city
-        || data.addresses[0].state
-        || data.addresses[0].country)
-    )
-      formData.addresses = data.addresses
+            formData.firm = data.firm
 
-    if (data.firm?.value.id) {
-      formData.firm = {
-        id: data.firm.id,
-      }
+            if (data.firm?.id) {
 
-      if (hasSlogan.value || !!data.firm?.slogan)
-        formData.firm.slogan = data.firm.slogan
+                if (hasJobTitle.value || !!data.job_title)
+                    formData.job_title = data.job_title
 
-      if (hasUrl.value || !!data.firm?.url)
-        formData.firm.url = data.firm.url
+                if (hasSlogan.value || !!data.firm?.slogan)
+                    formData.firm.slogan = data.firm.slogan
 
-      if (hasLocation.value || !!data.firm?.address)
-        formData.firm.address = data.firm.address
-    }
+                if (hasUrl.value || !!data.firm?.url)
+                    formData.firm.url = data.firm.url
 
-    return formData
-  })
+                if (hasAddress.value || !!data.firm?.address)
+                    formData.firm.address = data.firm.address
+            }
+        }
 
-  if (props.contact.cid) {
-
-    form.patch(route('contacts.update', props.contact.cid), {
-      preserveScroll: true,
-      onSuccess: () => {
-
-        unSet()
-
-        form.reset()
-
-        notify({ title: true, message: 'Contact was updated!' })
-      }
+        return formData
     })
 
-    return
+    if (props.contact.cid) {
 
-  }
+        form.patch(route('contacts.update', props.contact.cid), {
 
-  form.post(route('contacts.store'), {
-    preserveScroll: true,
-    onSuccess: () =>  {
+            preserveScroll: true,
 
-      unSet()
+            onSuccess: () => {
 
-      form.reset()
+                unSet()
 
-      notify({ title: true })
+                form.reset()
+
+                notify({ title: true, message: 'Contact was updated!' })
+            }
+
+        })
+
+        return
 
     }
-  })
+
+    form.post(route('contacts.store'), {
+
+        preserveScroll: true,
+
+        onSuccess: () => {
+
+            unSet()
+
+            form.reset()
+
+            notify({ title: true })
+
+        }
+
+    })
 }
+
+console.log(props.contact);
+
 </script>
 
 <template>
-  <Head :title="contact.cid ? `Edit ${contact.first_name} ${contact.last_name}` : 'Create new contact'" />
 
-  <form class="flex flex-col w-full gap-6 px-4 pb-16 my-16 mb-4 sm:pb-0 sm:px-8 md:mx-auto" @submit.prevent="onSubmit">
-    <section class="flex w-full gap-6">
-      <div v-if="hasTitle || !!form.title" class="w-full">
-        <label for="title" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-          Title
-        </label>
+    <Head :title="contact.cid ? `Edit ${contact.first_name} ${contact.last_name}` : 'Create new contact'" />
 
-        <TextInput
-          id="title"
-          v-model="form.title" type="text"
-          placeholder="Mr, Mrs, Ms" />
+    <nav
+        class="sticky z-50 flex items-center w-full h-16 gap-6 p-6 pl-8 mt-4 bg-gray-100 border rounded-full dark:bg-gray-900 top-4 dark:text-white dark:border-gray-700">
 
-        <InputError :message="$page.props.errors.title" />
-      </div>
+        <SecondaryButton
+            class="flex items-center gap-2 font-bold text-blue-300 transition duration-300 rounded-full dark:text-lime-300 hover:text-blue-500"
+            v-if="! hasFirm"
+            @click="toggleField('hasFirm')">
+            <IconPlus class="w-6 h-6" /> <span>Add company</span>
+        </SecondaryButton>
 
-      <div class="flex-1">
-        <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-          First name
-        </label>
+        <span class="flex-1"></span>
 
-        <TextInput
-          id="name"
-          v-model="form.first_name" type="text"
-          class="w-full"
-          placeholder="Enter first name" />
+        <PrimaryButton @click.prevent="onSubmit" type="submit" :disabled="form.processing" class="gap-2 rounded-full">
 
-        <InputError :message="$page.props.errors.first_name" />
-      </div>
-    </section>
+            <IconPlus class="w-6 h-6 fill-current" />
 
-    <div v-if="hasMiddleName || !!form.middle_name">
-      <label for="middle_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-        Middle name
-      </label>
-
-      <TextInput
-        id="middle_name"
-        v-model="form.middle_name" type="text"
-        placeholder="Enter middle name" />
-
-      <InputError :message="$page.props.errors.middle_name" />
-    </div>
-
-    <div v-if="hasJobTitle || !!form.job_title">
-        <label for="job_title" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-            Job title
-        </label>
-
-        <TextInput
-            id="job_title"
-            v-model="form.job_title" type="text"
-            placeholder="Enter job title" />
-
-        <InputError :message="$page.props.errors['job_title']" />
-    </div>
-
-    <div>
-      <label for="last_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-        Surname
-      </label>
-
-      <TextInput
-        id="last_name"
-        v-model="form.last_name" type="text"
-        placeholder="Type surname" />
-
-      <InputError :message="$page.props.errors.last_name" />
-    </div>
-
-    <div v-if="hasNickname || !!form.nickname">
-      <label for="nickname" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-        Nickname
-      </label>
-
-      <TextInput
-        id="nickname"
-        v-model="form.nickname" type="text"
-        placeholder="Enter nickname" />
-
-      <InputError :message="$page.props.errors.nickname" />
-    </div>
-
-    <div v-if="fieldStore.showTag">
-      <Menu as="div" class="relative z-10 inline-flex">
-        <MenuButton
-          class="flex items-center gap-2 font-bold text-blue-300 transition duration-300 dark:text-lime-300 hover:text-blue-500">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" stroke-width="2"
-            stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-            <path d="M12 5l0 14" />
-            <path d="M5 12l14 0" />
-          </svg>
-          <span>Add field</span>
-        </MenuButton>
-
-        <transition enter-active-class="transition duration-100 ease-out transform" enter-from-class="scale-90 opacity-0"
-          enter-to-class="scale-100 opacity-100" leave-active-class="transition duration-100 ease-in transform"
-          leave-from-class="scale-100 opacity-100" leave-to-class="scale-90 opacity-0">
-          <MenuItems
-            class="absolute left-0 w-48 mt-2 overflow-hidden origin-top-left bg-white border rounded-md shadow-lg focus:outline-none">
-            <MenuItem v-slot="{ active }" @click="toggleField('hasTitle')">
-            <span :class="{ 'bg-gray-100': active }" class="block px-4 py-2 text-sm text-gray-700">
-              Title
+            <span>
+                {{ contact.id ? 'Update' : 'Create' }}
             </span>
-            </MenuItem>
 
-            <MenuItem v-slot="{ active }" @click="toggleField('hasMiddleName')">
-            <span :class="{ 'bg-gray-100': active }" class="block px-4 py-2 text-sm text-gray-700">Middle name</span>
-            </MenuItem>
+            <Spinner v-if="form.processing" />
 
-            <MenuItem v-slot="{ active }" @click="toggleField('hasNickname')">
-            <span :class="{ 'bg-gray-100': active }" class="block px-4 py-2 text-sm text-gray-700">Nick name</span>
-            </MenuItem>
-          </MenuItems>
-        </transition>
-      </Menu>
-    </div>
+        </PrimaryButton>
 
-    <div>
-      <EmailRepeater v-model="form.emails" />
-    </div>
+        <Link as="button" :href="route('contacts.index')"
+            class="py-2.5 text-gray-800 font-semibold dark:text-white hover:text-opacity-40 transition duration-300 inline-flex items-center border-gray-700 hover:border-opacity-40 focus:ring-4 focus:outline-none focus:ring-gray-300 rounded-full px-5 text-center border dark:border-gray-600 dark:hover:border-gray-700 dark:focus:ring-gray-800">
+            Cancel
+        </Link>
 
-    <div>
-      <PhoneRepeater v-model="form.phones" />
-    </div>
+    </nav>
 
-    <div v-if="hasAddresses || !!form.addresses">
-      <AddressRepeater v-model="form.addresses" />
-    </div>
+    <form class="flex flex-col max-w-3xl gap-6 px-4 pb-16 my-16 sm:pb-0 sm:px-8 md:mx-auto">
+        <div class="mb-8">
+            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-200">
+                Contact profile
+            </h2>
 
-    <div>
-      <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-        Company
-      </label>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+                Manage contact personal information, company data, and account settings.
+            </p>
+        </div>
 
-      <Combobox v-model="form.firm.id" :create-option="createCompany" :load-options="loadCompanies" />
+        <section class="flex flex-wrap w-full gap-6">
 
-      <InputError :message="error" />
+            <div v-if="hasTitle || !!form.title" class="flex-1">
+                <label for="title" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                    Title
+                </label>
 
-      <InputError :message="$page.props.errors['firm.id']" />
-    </div>
+                <TextInput id="title" v-model="form.title" type="text" placeholder="Mr, Mrs, Ms" />
 
-    <div v-if="hasLocation || !!form.firm.address">
-      <label for="company_address" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-        Address
-      </label>
+                <InputError :message="$page.props.errors.title" />
+            </div>
 
-      <TextInput
-        id="company_address"
-        v-model="form.firm.address" type="text"
-        placeholder="Enter work address" />
+            <div class="flex-1">
+                <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                    First name
+                </label>
 
-      <InputError :message="$page.props.errors['firm.address']" />
-    </div>
+                <TextInput id="name" v-model="form.first_name" type="text" placeholder="Enter first name" />
 
-    <div v-if="hasUrl || !!form.firm.url">
-      <label for="company_website" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-        Website
-      </label>
+                <InputError :message="$page.props.errors.first_name" />
+            </div>
+        </section>
 
-      <TextInput
-        id="company_website"
-        v-model="form.firm.url" type="text"
-        placeholder="Enter office website e.g. https://www.example.com" />
+        <div class="flex-1" v-if="hasMiddleName || !!form.middle_name">
+            <label for="middle_name" class="flex-1 mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                Middle name
+            </label>
 
-      <InputError :message="$page.props.errors['firm.url']" />
-    </div>
+            <TextInput id="middle_name" v-model="form.middle_name" type="text" placeholder="Enter middle name" />
 
-    <div v-if="hasSlogan || !!form.firm.slogan">
-      <label for="company_slogan" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-        Slogan
-      </label>
+            <InputError :message="$page.props.errors.middle_name" />
+        </div>
 
-      <TextInput
-        id="company_slogan"
-        v-model="form.firm.slogan" type="text"
-        placeholder="Enter slogan" />
+        <div class="flex-1">
+            <label for="last_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                Surname
+            </label>
 
-      <InputError :message="$page.props.errors['firm.slogan']" />
-    </div>
+            <TextInput id="last_name" v-model="form.last_name" type="text" placeholder="Type surname" />
 
-    <div class="col-span-2">
-      <Menu as="div" class="relative">
-        <MenuButton
-          class="flex items-center gap-2 font-bold text-blue-300 transition duration-300 dark:text-lime-300 hover:text-blue-500">
-          <IconPlus /> <span>Add work field</span>
-        </MenuButton>
+            <InputError :message="$page.props.errors.last_name" />
+        </div>
 
-        <transition enter-active-class="transition duration-100 ease-out transform" enter-from-class="scale-90 opacity-0"
-          enter-to-class="scale-100 opacity-100" leave-active-class="transition duration-100 ease-in transform"
-          leave-from-class="scale-100 opacity-100" leave-to-class="scale-90 opacity-0">
-          <MenuItems
-            class="absolute left-0 z-10 w-48 mt-2 overflow-hidden origin-top-left bg-white border rounded-md shadow-lg -top-44 focus:outline-none">
+        <div v-if="hasNickname || !!form.nickname" class="flex-1">
+            <label for="nickname" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                Nickname
+            </label>
 
-            <MenuItem v-slot="{ active }" @click="hasJobTitle = !hasJobTitle">
-            <span :class="{ 'bg-gray-100': active }" class="block px-4 py-2 text-sm text-gray-700">Job title</span>
-            </MenuItem>
+            <TextInput id="nickname" v-model="form.nickname" type="text" placeholder="Enter nickname" />
 
-            <MenuItem v-slot="{ active }" @click="hasLocation = !hasLocation">
-            <span :class="{ 'bg-gray-100': active }" class="block px-4 py-2 text-sm text-gray-700">Address</span>
-            </MenuItem>
+            <InputError :message="$page.props.errors.nickname" />
+        </div>
 
-            <MenuItem v-slot="{ active }" @click="hasUrl = !hasUrl">
-            <span :class="{ 'bg-gray-100': active }" class="block px-4 py-2 text-sm text-gray-700">Office website</span>
-            </MenuItem>
+        <div v-if="fieldStore.showTag">
+            <Menu as="div" class="relative z-10 inline-flex">
+                <MenuButton
+                    class="flex items-center gap-2 font-bold text-blue-300 transition duration-300 dark:text-lime-300 hover:text-blue-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" stroke-width="2"
+                        stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <path d="M12 5l0 14" />
+                        <path d="M5 12l14 0" />
+                    </svg>
+                    <span>Add field</span>
+                </MenuButton>
 
-            <MenuItem v-slot="{ active }" @click="hasSlogan = !hasSlogan">
-            <span :class="{ 'bg-gray-100': active }" class="block px-4 py-2 text-sm text-gray-700">Motto</span>
-            </MenuItem>
+                <transition enter-active-class="transition duration-100 ease-out transform"
+                    enter-from-class="scale-90 opacity-0" enter-to-class="scale-100 opacity-100"
+                    leave-active-class="transition duration-100 ease-in transform"
+                    leave-from-class="scale-100 opacity-100" leave-to-class="scale-90 opacity-0">
+                    <MenuItems
+                        class="absolute left-0 w-48 mt-2 overflow-hidden origin-top-left bg-white border rounded-md shadow-lg focus:outline-none">
+                        <MenuItem v-slot="{ active }" @click="toggleField('hasTitle')">
+                        <span :class="{ 'bg-gray-100': active }" class="block px-4 py-2 text-sm text-gray-700">
+                            Title
+                        </span>
+                        </MenuItem>
 
-          </MenuItems>
-        </transition>
-      </Menu>
-    </div>
+                        <MenuItem v-slot="{ active }" @click="toggleField('hasMiddleName')">
+                        <span :class="{ 'bg-gray-100': active }" class="block px-4 py-2 text-sm text-gray-700">Middle
+                            name</span>
+                        </MenuItem>
 
-    <div class="mt-4">
-      <label for="bio" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-        Notes
-      </label>
+                        <MenuItem v-slot="{ active }" @click="toggleField('hasNickname')">
+                        <span :class="{ 'bg-gray-100': active }" class="block px-4 py-2 text-sm text-gray-700">Nick
+                            name</span>
+                        </MenuItem>
+                    </MenuItems>
+                </transition>
+            </Menu>
+        </div>
 
-      <section>
-        <AutosizeTextarea v-model="form.bio" placeholder="Write down some notes" />
-      </section>
+        <div>
+            <EmailRepeater v-model="form.emails" />
+        </div>
 
-      <InputError :message="$page.props.errors.bio" />
-    </div>
+        <div>
+            <PhoneRepeater v-model="form.phones" />
+        </div>
 
-    <div class="flex items-center justify-end col-span-4 gap-4 pt-4">
-      <PrimaryButton type="submit" :disabled="form.processing" class="gap-2">
+        <section v-if="hasFirm" class="flex flex-col gap-6">
 
-        <IconPlus class="w-6 h-6 fill-current" />
+            <div>
+                <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                    Company
+                </label>
 
-        <span>
-          {{ contact.id ? 'Update' : 'Create' }}
-        </span>
+                <FirmInput
+                    v-model="form.firm"
+                    :create-option="createFirm"
+                    :load-options="loadFirms"
+                    placeholder="Pick a company" />
 
-        <Spinner v-if="form.processing" />
+                <InputError :message="error" />
 
-      </PrimaryButton>
+                <InputError :message="$page.props.errors['firm.id']" />
+            </div>
 
-      <Link as="button" :href="route('contacts.index')"
-        class="py-2.5 text-gray-800 font-semibold dark:text-white hover:text-opacity-40 transition duration-300 inline-flex items-center border-gray-700 hover:border-opacity-40 focus:ring-4 focus:outline-none focus:ring-gray-300 rounded-lg px-5 text-center border dark:border-gray-600 dark:hover:border-gray-700 dark:focus:ring-gray-800">
-        Cancel
-      </Link>
-    </div>
-  </form>
+            <div v-if="hasJobTitle || !!form.job_title">
+                <label for="job_title" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                    Job title
+                </label>
+
+                <TextInput id="job_title" v-model="form.job_title" type="text" placeholder="Enter job title" />
+
+                <InputError :message="$page.props.errors['job_title']" />
+            </div>
+
+            <div v-if="hasAddress || !!form.firm.address">
+                <!-- <label for="company_address" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                    Address
+                </label>
+
+                <TextInput
+                    id="company_address"
+                    v-model="form.firm.address" type="text"
+                    placeholder="Enter work address" />
+
+                <InputError :message="$page.props.errors['firm.address']" /> -->
+
+                <AddressInput v-model="form.firm.address" />
+
+            </div>
+
+            <div v-if="hasUrl || !!form.firm.url">
+                <label for="company_website" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                    Website
+                </label>
+
+                <TextInput id="company_website" v-model="form.firm.url" type="text"
+                    placeholder="Enter office website e.g. https://www.example.com" />
+
+                <InputError :message="$page.props.errors['firm.url']" />
+            </div>
+
+            <div v-if="hasSlogan || !!form.firm.slogan">
+                <label for="company_slogan" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                    Slogan
+                </label>
+
+                <TextInput id="company_slogan" v-model="form.firm.slogan" type="text" placeholder="Enter slogan" />
+
+                <InputError :message="$page.props.errors['firm.slogan']" />
+            </div>
+
+            <div class="col-span-2">
+                <Menu as="div" class="relative">
+                    <MenuButton
+                        class="flex items-center w-full gap-2 font-bold text-blue-300 transition duration-300 dark:text-lime-300 hover:text-blue-500">
+                        <IconPlus class="w-6 h-6" /> <span>Add work field</span>
+                    </MenuButton>
+
+                    <transition enter-active-class="transition duration-100 ease-out transform"
+                        enter-from-class="scale-90 opacity-0" enter-to-class="scale-100 opacity-100"
+                        leave-active-class="transition duration-100 ease-in transform"
+                        leave-from-class="scale-100 opacity-100" leave-to-class="scale-90 opacity-0">
+                        <MenuItems
+                            class="absolute left-0 z-10 w-48 mt-2 overflow-hidden origin-top-left bg-white border rounded-md shadow-lg -top-44 focus:outline-none">
+
+                            <MenuItem v-slot="{ active }" @click="hasJobTitle = !hasJobTitle">
+                            <span :class="{ 'bg-gray-100': active }" class="block px-4 py-2 text-sm text-gray-700">Job
+                                title</span>
+                            </MenuItem>
+
+                            <MenuItem v-slot="{ active }" @click="hasAddress = !hasAddress">
+                            <span :class="{ 'bg-gray-100': active }"
+                                class="block px-4 py-2 text-sm text-gray-700">Address</span>
+                            </MenuItem>
+
+                            <MenuItem v-slot="{ active }" @click="hasUrl = !hasUrl">
+                            <span :class="{ 'bg-gray-100': active }"
+                                class="block px-4 py-2 text-sm text-gray-700">Office website</span>
+                            </MenuItem>
+
+                            <MenuItem v-slot="{ active }" @click="hasSlogan = !hasSlogan">
+                            <span :class="{ 'bg-gray-100': active }"
+                                class="block px-4 py-2 text-sm text-gray-700">Motto</span>
+                            </MenuItem>
+
+                        </MenuItems>
+                    </transition>
+                </Menu>
+            </div>
+
+        </section>
+
+        <div class="mt-4">
+            <label for="bio" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                Notes
+            </label>
+
+            <section>
+                <AutosizeTextarea v-model="form.bio" placeholder="Write down some notes" />
+            </section>
+
+            <InputError :message="$page.props.errors.bio" />
+        </div>
+    </form>
 </template>
 
 <style>
-
 .Vue-Toastification__toast--default {
-  @apply p-0 bg-transparent
+    @apply p-0 bg-transparent
 }
-
 </style>

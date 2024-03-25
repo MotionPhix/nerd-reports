@@ -6,9 +6,8 @@ interface FiedState {
   hasTitle: boolean
   hasNickname: boolean
   hasJobTitle: boolean
-  hasLocation: boolean
-  hasDepartment: Boolean
-  hasAddresses: Boolean
+  hasFirm: Boolean
+  hasAddress: Boolean
   hasSlogan: Boolean
   hasUrl: boolean
 }
@@ -19,9 +18,8 @@ export const useFieldStore = defineStore('field', () => {
     hasTitle: ref(false),
     hasNickname: ref(false),
     hasJobTitle: ref(false),
-    hasLocation: ref(false),
-    hasDepartment: ref(false),
-    hasAddresses: ref(false),
+    hasFirm: ref(false),
+    hasAddress: ref(false),
     hasSlogan: ref(false),
     hasUrl: ref(false),
   })
@@ -42,9 +40,8 @@ export const useFieldStore = defineStore('field', () => {
     state.hasTitle = false
     state.hasNickname = false
     state.hasJobTitle = false
-    state.hasLocation = false
-    state.hasDepartment = false
-    state.hasAddresses = false
+    state.hasFirm = false
+    state.hasAddress = false
     state.hasSlogan = false
     state.hasUrl = false
   }

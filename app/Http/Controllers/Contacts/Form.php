@@ -7,8 +7,10 @@ use App\Data\ContactFullData;
 use App\Data\EmailData;
 use App\Data\FirmData;
 use App\Data\PhoneData;
+use App\Enums\AddressType;
 use App\Http\Controllers\Controller;
 use App\Models\Contact;
+use App\Models\Firm;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -19,7 +21,7 @@ class Form extends Controller
      */
     public function __invoke(Contact $contact = null)
     {
-        if (!$contact) {
+        if (! $contact) {
             $contact = ContactFullData::from([
                 'first_name' => '',
                 'last_name' => '',
@@ -45,6 +47,28 @@ class Form extends Controller
                     ])
                 ]),
             ]);
+        } else {
+            $contact = ContactFullData::from($contact->load('phones', 'emails', 'firm'));
+
+            if (! $contact->firm?->id) {
+
+                $contact->firm = FirmData::from([
+
+                    'slogan' => '',
+
+                    'address' => AddressData::from([
+                        'type' => AddressType::Work,
+                        'street' => '',
+                        'city' => ''
+                    ]),
+
+                    'url' => '',
+
+                    'name' => '',
+
+                ]);
+
+            }
         }
 
         return Inertia::render('Contacts/Form', [

@@ -38,11 +38,6 @@ class Contact extends Model
         ];
     }
 
-    public function addresses(): MorphMany
-    {
-        return $this->morphMany(Address::class, 'addressable');
-    }
-
     public function phones(): MorphMany
     {
         return $this->morphMany(Phone::class, 'phoneable');
@@ -58,9 +53,9 @@ class Contact extends Model
         return $this->hasMany(Interaction::class);
     }
 
-    public function interaction(): HasOne
+    public function firm()
     {
-        return $this->hasOne(Interaction::class, 'id', 'last_interaction_id');
+        return $this->belongsTo(Firm::class);
     }
 
     protected function fullName(): Attribute

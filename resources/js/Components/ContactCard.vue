@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { useContactStore } from '@/Stores/contactStore';
-import type { Contact } from '@/types';
 import { Link, router } from '@inertiajs/vue3';
+import { IconMailForward } from '@tabler/icons-vue';
 import MazCheckbox from 'maz-ui/components/MazCheckbox';
 import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
+import ContactEmail from './ContactEmail.vue';
 
 const props = defineProps<{
-  contact: Contact,
+  contact: App.Data.ContactData,
 }>()
 
 const contactStore = useContactStore()
@@ -48,11 +49,11 @@ router.on('navigate', (e) => {
 
 <template>
   <li
-    class="relative px-4 py-3 transition duration-300 ease-in-out hover:rounded-md sm:py-4 hover:bg-gray-200 dark:hover:bg-gray-600"
+    class="relative flex px-4 py-3 transition duration-300 ease-in-out border rounded-full dark:border-gray-700 sm:py-4 hover:bg-gray-200 dark:hover:bg-gray-800"
     :class="{ 'bg-gray-300 dark:bg-gray-700': contact.cid === param.contact }">
     <div
-      class="absolute top-auto bottom-auto z-20 flex items-center justify-center flex-shrink-0 w-10 h-10 font-semibold transition duration-300 rounded-full cursor-pointer hover:bg-transparent group"
-      :class="selectedContacts.length ? '' : contact.is_favorite ? 'bg-blue-500 text-blue-50' : 'bg-lime-500 text-lime-900'">
+      class="absolute z-20 flex items-center justify-center flex-shrink-0 w-10 h-10 font-semibold transition duration-300 rounded-full cursor-pointer hover:bg-transparent group"
+      :class="selectedContacts.length ? '' : 'bg-lime-500 text-lime-900'">
 
       <span
         v-if="!selectedContacts.length"
@@ -72,31 +73,40 @@ router.on('navigate', (e) => {
 
     <Link
       class="flex items-center w-full gap-6 pl-16 text-left"
-      :href="contact.deleted_at ? route('contacts.index', { filter: 'deleted' }) : route('contacts.show', contact.cid)" as="button"
+      :href="route('contacts.show', contact.cid)" as="button"
       preserve-scroll>
 
       <div class="flex-1 min-w-0">
+
         <p class="text-2xl font-medium text-gray-900 truncate text-balance dark:text-white">
-          {{ full_name }}
+            {{ full_name }}
         </p>
 
-        <section class="flex items-center gap-2" v-if="contact.deleted_at">
+        <section class="flex items-center gap-2">
 
-          <p class="text-sm text-gray-500 truncate dark:text-gray-400">
-            Deleted {{ contact.deleted_at }}
-          </p>
+            <p class="text-sm text-gray-500 truncate dark:text-gray-400">
+                <ContactEmail :emails="contact?.emails" />
+            </p>
 
-        </section>
-
-        <section class="flex items-center gap-2" v-else>
-
-          <p class="text-sm text-gray-500 truncate dark:text-gray-400">
-            {{ contact.last_email?.email }}
-          </p>
+            <p class="text-sm text-gray-500 truncate dark:text-gray-400">
+                {{
+                    (contact?.emails.filter(email => email.is_primary_email)[0] || {}).email
+                    || 'No primary email'
+                }}
+            </p>
 
         </section>
       </div>
 
     </Link>
+
+    <div class="relative top-0 right-0 z-20 flex items-center justify-end cursor-pointer">
+
+        <p class="text-sm text-gray-500 dark:text-gray-400">
+            <IconMailForward class="w-6 h-6" />
+        </p>
+
+    </div>
+
   </li>
 </template>

@@ -15,7 +15,7 @@ class Index extends Controller
      */
     public function __invoke()
     {
-        $contactsQuery = ContactData::collect(Contact::all());
+        $contactsQuery = ContactData::collect(Contact::with('emails', 'firm')->get());
 
         /*if ($request->filter) {
             if ($request->filter === 'favourites') {
