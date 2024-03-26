@@ -232,7 +232,7 @@ function onSubmit() {
         </SecondaryButton>
 
         <h2 v-else class="flex items-center gap-2 text-xl font-bold text-gray-800 dark:text-gray-200">
-            <IconArrowLeft /> <span>{{ props.contact.firm.name }}</span>
+            <IconArrowLeft class="w-6 h-6" /> <span>{{ form.firm_keys?.name ?? props.contact.firm.name }}</span>
         </h2>
 
         <span class="flex-1"></span>

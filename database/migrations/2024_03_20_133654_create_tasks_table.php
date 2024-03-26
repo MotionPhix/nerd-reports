@@ -16,9 +16,15 @@ return new class extends Migration
 
             $table->string('name');
 
-            $table->enum('status', ['done', 'in_progress', 'cancelled'])->default('in_progress');
+            $table->longText('description')->nullable();
+
+            $table->boolean('is_completed')->default(false);
+
+            $table->enum('priority', ['normal', 'medium', 'high'])->default('normal');
 
             $table->foreignId('project_id')->index()->constrained('projects');
+
+            $table->foreignId('assigned_to')->index()->constrained('users');
 
             $table->timestamps();
         });

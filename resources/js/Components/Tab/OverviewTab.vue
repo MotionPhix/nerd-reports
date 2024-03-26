@@ -40,7 +40,7 @@ const props = defineProps<Props>()
           <h3 class="mb-4 text-lg font-semibold">Phone(s)</h3>
 
           <p
-            v-for="(phone, idx) in props.contact.phones"
+            v-for="(phone) in props.contact.phones"
             class="flex items-center justify-between pb-2 border-b last:border-b-0"
             :key="phone.id">
             <strong>

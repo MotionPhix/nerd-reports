@@ -16,15 +16,17 @@ return new class extends Migration
 
             $table->uuid('pid')->nullable();
 
-            $table->string('name', 100);
+            $table->string('name');
 
-            $table->text('description')->nullable();
+            $table->date('due_date')->nullable();
 
-            $table->date('start_date');
+            $table->longText('description')->nullable();
 
-            $table->date('end_date');
+            $table->enum('status', ['completed', 'in_progress', 'cancelled'])->default('in_progress');
 
             $table->foreignId('contact_id')->index()->constrained('contacts');
+
+            $table->foreignId('created_by')->index()->constrained('users');
 
             $table->timestamps();
         });
