@@ -14,7 +14,7 @@ import { useFieldStore } from '@/Stores/fieldStore'
 import { useNotificationStore } from '@/Stores/notificationStore'
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
-import { IconPlus } from '@tabler/icons-vue'
+import { IconArrowLeft, IconPlus } from '@tabler/icons-vue'
 import axios from 'axios'
 import { debounce } from 'lodash'
 import { storeToRefs } from 'pinia'
@@ -78,23 +78,23 @@ const { toggleField, unSet } = fieldStore
 const form = useForm({
     first_name: props.contact.first_name,
     last_name: props.contact.last_name,
-    bio: props.contact.bio ?? null,
-    middle_name: props.contact.middle_name ?? null,
-    title: props.contact.title ?? null,
-    job_title: props.contact.job_title ?? null,
-    nickname: props.contact.nickname ?? null,
+    bio: props.contact.bio ?? '',
+    middle_name: props.contact.middle_name ?? '',
+    title: props.contact.title ?? '',
+    job_title: props.contact.job_title ?? '',
+    nickname: props.contact.nickname ?? '',
     emails: props.contact.emails,
     phones: props.contact.phones,
     firm_keys: props.contact.firm?.fid ? { fid: props.contact?.firm?.fid, name: props.contact?.firm?.name } : { name: '', fid: null },
-    firm_name: props.contact.firm?.name ?? null,
-    firm_url: props.contact.firm?.url ?? null,
-    firm_slogan: props.contact.firm?.slogan ?? null,
+    firm_name: props.contact.firm?.name ?? '',
+    firm_url: props.contact.firm?.url ?? '',
+    firm_slogan: props.contact.firm?.slogan ?? '',
     firm_address: {
         id: props.contact.firm?.address?.id ?? null,
-        city: props.contact.firm?.address?.city ?? null,
-        street: props.contact.firm?.address?.street ?? null,
-        state: props.contact.firm?.address?.state ?? null,
-        country: props.contact.firm?.address?.country ?? null,
+        city: props.contact.firm?.address?.city ?? '',
+        street: props.contact.firm?.address?.street ?? '',
+        state: props.contact.firm?.address?.state ?? '',
+        country: props.contact.firm?.address?.country ?? '',
     }
 })
 
@@ -146,7 +146,7 @@ function onSubmit() {
         if (hasNickname.value || !!data?.nickname)
             formData.nickname = data?.nickname
 
-        if (data.bio?.length || !!data?.bio.charAt(5))
+        if (data.bio?.length || !!data?.bio?.charAt(5))
             formData.bio = data.bio
 
         if (hasFirm.value || !!data?.firm_keys?.fid) {

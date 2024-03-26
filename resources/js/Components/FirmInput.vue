@@ -88,7 +88,7 @@ function handleUpdateModelValue(selected) {
 <template>
     <Combobox by="value" :model-value="props.modelValue" @update:model-value="handleUpdateModelValue">
         <div class="relative mt-1">
-            <div class="relative w-full text-left rounded-lg shadow-md cursor-default sm:text-sm">
+            <div class="relative w-full text-left rounded-lg shadow-sm cursor-default sm:text-sm">
                 <ComboboxInput
                     class="w-full py-3 border-gray-300 rounded-md shadow-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-lime-500 dark:focus:border-lime-600 focus:ring-lime-500 dark:focus:ring-lime-600"
                     :placeholder="props.placeholder" :displayValue="option => option.name"
@@ -100,7 +100,7 @@ function handleUpdateModelValue(selected) {
             <TransitionRoot leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0"
                 @after-leave="query = ''">
                 <ComboboxOptions
-                    class="absolute z-50 w-full py-1 mt-1 overflow-auto text-base bg-white border-2 border-gray-300 rounded-md shadow-lg dark:border-gray-700 scrollbar-thin dark:bg-gray-800 max-h-60 ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                    class="absolute z-50 w-full py-1 mt-1 overflow-auto text-base bg-white border-2 border-gray-300 rounded-md shadow-sm dark:border-gray-700 scrollbar-thin dark:bg-gray-800 max-h-60 ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
                     <div v-if="filteredOptions.length === 0 &&
                         !isLoading &&
                         !queryOption &&
@@ -117,23 +117,25 @@ function handleUpdateModelValue(selected) {
                         <ComboboxOption
                             v-if="queryOption && !filteredOptions.length && props.createOption"
                             as="template" :value="queryOption" v-slot="{ active }">
-                            <li class="relative py-2 pl-10 pr-4 cursor-default select-none" :class="{
-                                'bg-lime-500 text-white': active,
-                                'text-gray-900': !active,
+                            <li class="relative py-2 pl-4 pr-4 font-semibold cursor-default select-none" :class="{
+                                'dark:bg-gray-700 dark:text-white': active,
+                                'text-gray-900 dark:text-gray-300': !active,
                             }">
                                 Create "{{ queryOption.name }}"
                             </li>
                         </ComboboxOption>
 
                         <ComboboxOption
-                            v-for="option in filteredOptions" as="template"
+                            v-for="option in filteredOptions" as="ul"
                             :key="option.fid" :value="option" v-slot="{ selected, active }">
                             <li
-                                class="relative py-2 pl-10 pr-4 cursor-default select-none"
+                                class="relative py-2 pl-10 pr-4 cursor-default select-none hover:bg-gray-200 dark:hover:bg-gray-600"
                                 :class="{
                                     'bg-lime-500 text-white': active,
-                                    'text-gray-900': !active,
-                                }">
+                                    'text-gray-900 dark:text-gray-200': !active,
+                                }"
+                                v-if="!!option.fid">
+
                                 <span class="block truncate"
                                     :class="{ 'font-medium': selected, 'font-normal': !selected }">
                                     {{ option.name }}
