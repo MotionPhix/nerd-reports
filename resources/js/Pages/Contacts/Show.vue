@@ -59,8 +59,9 @@ defineOptions({ layout: AuthenticatedLayout })
           </div>
 
           <div class="flex flex-col w-full gap-1">
-            <h3 class="text-3xl">
-              {{ `${props.contact.first_name} ${props.contact.last_name}` }}
+            <h3 class="text-3xl flex items-center gap-2">
+              <span class="capitalize" v-if="props.contact.title">{{ props.contact.title }}</span>
+              <span>{{ `${props.contact.first_name} ${props.contact.last_name}` }}</span>
             </h3>
 
             <span>{{ props.contact?.job_title }}</span>

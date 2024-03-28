@@ -59,6 +59,43 @@ Route::middleware('auth')->group(function () {
         )->name('contacts.restore');
     });
 
+    Route::prefix('projects')->group(function () {
+        Route::get(
+            '/',
+            \App\Http\Controllers\Projects\Index::class
+        )->name('projects.index');
+
+        Route::get(
+            '/c/p/{contact:cid?}',
+            \App\Http\Controllers\Projects\Form::class
+        )->name('projects.create');
+
+        Route::post(
+            '/store',
+            \App\Http\Controllers\Projects\Store::class
+        )->name('projects.store');
+
+        Route::get(
+            '/s/{project:pid}',
+            \App\Http\Controllers\Projects\Show::class
+        )->name('projects.show');
+
+        Route::get(
+            '/e/{project:pid}',
+            \App\Http\Controllers\Projects\Form::class
+        )->name('projects.edit');
+
+        Route::patch(
+            '/u/{project:pid}',
+            \App\Http\Controllers\Projects\Update::class
+        )->name('projects.update');
+
+        Route::delete(
+            '/d/{ids}',
+            \App\Http\Controllers\Projects\Destroy::class
+        )->name('projects.destroy');
+    });
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
 
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

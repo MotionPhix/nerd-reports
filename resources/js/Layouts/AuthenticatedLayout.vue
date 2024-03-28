@@ -36,7 +36,7 @@ const showingNavigationDropdown = ref(false);
                             Contacts
                         </NavLink>
 
-                        <NavLink :href="route('dashboard')" :active="route().current('dashboard')">
+                        <NavLink :href="route('projects.index')" :active="route().current('projects.*')">
                             Projects
                         </NavLink>
                     </div>

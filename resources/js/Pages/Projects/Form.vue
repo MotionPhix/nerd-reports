@@ -1,59 +1,68 @@
 <script setup lang="ts">
 import {
+ComboboxInput,
   Dialog,
   DialogPanel,
   DialogTitle,
   TransitionChild,
   TransitionRoot,
 } from '@headlessui/vue'
-import { router, useForm } from '@inertiajs/vue3'
+import { Head, router, useForm } from '@inertiajs/vue3'
 import axios from 'axios'
 import { computed, onMounted, reactive } from 'vue'
 import InputError from '@/Components/InputError.vue'
-import type { Company, ContactApiResponse, Project } from '@/types'
 import AutosizeTextarea from '@/Components/AutosizeTextarea.vue'
-import BaseList from '@/Components/BaseList.vue'
+import { debounce } from 'lodash'
+import ContactSelector from '@/Components/ContactSelector.vue'
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 
 const props = defineProps<{
-  action: number | null
-  open: boolean
-  width: string
-  companies: Company[]
   project: Project
 }>()
 
-const contacts = reactive<ContactApiResponse[]>([])
-const filtered_contacts = reactive<{ value?: number; label: string }[]>([])
-const filtered_companies = reactive<{ value?: number; label: string }[]>([])
+defineOptions({
+    layout: AuthenticatedLayout,
+})
 
 const form = useForm({
   name: props.project.name,
   description: props.project.description,
   status: props.project.status,
-  company_id: props.project.id ? props.project.company_id : '',
-  contact_id: props.project.id ? props.project.contact_id : '',
+  contact_id: props.project.id ? { id: props.project.contact_id } : {},
+  due_date: props.project.due_date ?? new Date(),
 })
 
-const computed_width = computed(() => props.width)
+const loadFirms = debounce((query: string, setOptions: Function) => {
+    axios.get(query ? `/api/companies/${query}` : '/api/companies')
+        .then((resp) => {
+            setOptions(
+                resp.data.map((company: App.Data.FirmData) => company),
+            )
+        })
+}, 500)
 
-function handleClose() {
-  router.get(route('projects.index'), {
-    preserveState: true,
-  })
+function createFirm(option: Partial<{ name: string }>, setSelected: Function) {
+    axios.post('/api/companies', {
+        name: option.name,
+    }, {
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+        .then((resp) => {
+            setSelected({
+                fid: resp.data.fid,
+                name: resp.data.name,
+            })
+        })
+        .catch((err) => {
+            error.value = err.response.data.message
+        })
 }
 
-onMounted(() => {
-  props.companies.forEach((company) => {
-    filtered_companies.push({
-      value: company.id,
-      label: company.name,
-    })
-  })
-})
-
 function submit() {
-  if (props.action) {
-    form.patch(`/projects/${props.project.id}`, {
+  if (props.project.pid) {
+    form.patch(`/projects/${props.project.pid}`, {
 
       preserveScroll: true,
 
@@ -63,32 +72,33 @@ function submit() {
       },
     })
   }
-  else {
-    form.post('/projects', {
 
-      preserveScroll: true,
+  form.post('/projects', {
 
-      onSuccess: () => {
-        // form.reset()
-        // handleClose()
-      },
-    })
-  }
+    preserveScroll: true,
+
+    onSuccess: () => {
+      // form.reset()
+      // handleClose()
+    },
+  })
+
 }
 
 async function fetchContacts() {
   form.reset('contact_id')
+
   Object.assign(contacts, null)
 
   filtered_contacts.splice(0)
 
-  await axios.get(`/companies/${form.company_id}/contacts`).then((response) => {
+  await axios.get(`/api/contacts`).then((response) => {
     Object.assign(contacts, response.data.contacts)
 
     response.data.contacts.forEach((contact: ContactApiResponse) => {
       filtered_contacts.push({
-        value: contact.id,
-        label: `${contact.first_name} ${contact.last_name}`,
+        id: contact.id,
+        name: `${contact.first_name} ${contact.last_name}`,
       })
     })
   })
@@ -96,40 +106,52 @@ async function fetchContacts() {
 </script>
 
 <template>
-  <div v-if="open" class="fixed inset-0 z-30 flex items-center justify-center backdrop-blur-xs bg-gray-400/70" />
 
-  <TransitionRoot appear :show="open" as="template">
-    <Dialog as="div" class="relative z-40">
-      <TransitionChild
-        as="template"
-        enter="duration-300 ease-out"
-        enter-from="opacity-0"
-        enter-to="opacity-100"
-        leave="duration-200 ease-in"
-        leave-from="opacity-100"
-        leave-to="opacity-0"
-      >
-        <div class="fixed inset-0 bg-black bg-opacity-25" />
-      </TransitionChild>
+  <Head :title="props.project.pid ? `Edit ${props.project.name}` : 'New project'" />
 
-      <div class="fixed inset-0 overflow-y-auto">
-        <div
-          class="flex items-center justify-center min-h-full p-4 text-center"
-        >
-          <TransitionChild
-            as="template"
-            enter="duration-300 ease-out"
-            enter-from="opacity-0 scale-95"
-            enter-to="opacity-100 scale-100"
-            leave="duration-200 ease-in"
-            leave-from="opacity-100 scale-100"
-            leave-to="opacity-0 scale-95"
-          >
-            <DialogPanel
-              class="relative p-4 overflow-hidden text-left align-middle transition-all transform bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5"
-              :class="computed_width"
-            >
-              <DialogTitle as="template">
+
+
+  <nav
+        class="sticky z-50 flex items-center w-full h-16 gap-6 p-6 pl-8 mt-4 bg-gray-100 border rounded-full dark:bg-gray-900 top-4 dark:text-white dark:border-gray-700">
+
+        <SecondaryButton
+            class="flex items-center gap-2 font-bold text-blue-300 transition duration-300 rounded-full dark:text-lime-300 hover:text-blue-500"
+            v-if="! hasFirm && ! form.firm_keys?.fid"
+            @click="toggleField('hasFirm')">
+            <IconPlus class="w-6 h-6" /> <span>Add company</span>
+        </SecondaryButton>
+
+        <h2 v-else class="flex items-center gap-2 text-xl font-bold text-gray-800 dark:text-gray-200">
+            <Link
+                :href="route('contacts.index')" as="button">
+                <IconArrowLeft stroke="2.5" class="w-6 h-6" />
+            </Link>
+            <span>{{ form.firm_keys?.name ?? props.contact.firm.name }}</span>
+        </h2>
+
+        <span class="flex-1"></span>
+
+        <PrimaryButton @click.prevent="onSubmit" type="submit" :disabled="form.processing" class="gap-2 rounded-full">
+
+            <IconPlus stroke="2.5" class="w-6 h-6 fill-current" />
+
+            <span>
+                {{ contact.id ? 'Update' : 'Create' }}
+            </span>
+
+            <Spinner v-if="form.processing" />
+
+        </PrimaryButton>
+
+        <Link as="button" :href="route('contacts.index')"
+            class="py-2.5 text-gray-800 font-semibold dark:text-white hover:text-opacity-40 transition duration-300 inline-flex items-center border-gray-700 hover:border-opacity-40 focus:ring-4 focus:outline-none focus:ring-gray-300 rounded-full px-5 text-center border dark:border-gray-600 dark:hover:border-gray-700 dark:focus:ring-gray-800">
+            Cancel
+        </Link>
+
+    </nav>
+
+
+<section>
                 <div class="flex items-center justify-between pb-4 mb-4 border-b rounded-t sm:mb-5 dark:border-gray-600">
                   <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                     {{ project.id ? 'Edit' : 'Add' }} project
@@ -144,7 +166,6 @@ async function fetchContacts() {
                     <span class="sr-only">Close modal</span>
                   </button>
                 </div>
-              </DialogTitle>
 
               <form
                 @submit.prevent="submit"
@@ -170,13 +191,10 @@ async function fetchContacts() {
                   </div>
 
                   <div>
-                    <label for="company" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Company</label>
-                    <BaseList v-model="form.company_id" :error="form.errors.company_id" placeholder="Select project's company" :options="filtered_companies" @update:modelValue="fetchContacts" />
-                  </div>
-
-                  <div>
-                    <label for="contact_id" class="block w-[16.5rem] mb-2 text-sm font-medium text-gray-900 dark:text-white">Contact person</label>
-                    <BaseList v-model="form.contact_id" :error="form.errors.contact_id" placeholder="Select a contact for the project" :options="filtered_contacts" />
+                    <label for="company" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Contact person</label>
+                    <ContactSelector
+                      v-model="form.contact_id"
+                      placeholder="Select project's company" />
                   </div>
 
                   <div class="col-span-2">
@@ -207,10 +225,5 @@ async function fetchContacts() {
                   </div>
                 </div>
               </form>
-            </DialogPanel>
-          </TransitionChild>
-        </div>
-      </div>
-    </Dialog>
-  </TransitionRoot>
+            </section>
 </template>

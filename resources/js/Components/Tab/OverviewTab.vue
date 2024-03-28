@@ -47,7 +47,7 @@ const props = defineProps<Props>()
               {{ phone.formatted }}
             </strong>
 
-            <small>
+            <small class="capitalizes">
               {{ phone.type }}
             </small>
           </p>

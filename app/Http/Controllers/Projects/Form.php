@@ -3,15 +3,39 @@
 namespace App\Http\Controllers\Projects;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Models\Contact;
+use App\Models\Project;
+use Inertia\Inertia;
 
 class Form extends Controller
 {
     /**
      * Handle the incoming request.
      */
-    public function __invoke(Request $request)
+    public function __invoke(Project $project = null, Contact $contact = null)
     {
-        //
+      if ($contact) {
+
+        if ($project) {
+
+          $project->contact()->associate($contact);
+
+        } else {
+
+          $project = (new Project())->fill(['contact_id' => $contact->id]);
+
+        }
+
+      } else {
+
+        $project = new Project();
+
+      }
+
+      return Inertia::render('Projects/Form', [
+
+        'project' => $project,
+
+      ]);
     }
 }
