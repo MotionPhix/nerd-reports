@@ -52,7 +52,7 @@ defineOptions({ layout: AuthenticatedLayout })
       <div class="p-2 sm:p-6 empty:hidden">
         <section class="sticky z-50 flex items-center gap-6 bg-gray-100 top-10 dark:bg-gray-900">
           <div
-            class="items-center justify-center hidden w-36 h-36 text-5xl font-bold rounded-full sm:flex shrink-0 bg-lime-500 text-lime-900">
+            class="items-center justify-center hidden text-5xl font-bold rounded-full w-36 h-36 sm:flex shrink-0 bg-lime-500 text-lime-900">
             <span>
               {{ `${props.contact.first_name[0]}${props.contact.last_name[0]}` }}
             </span>
@@ -78,6 +78,7 @@ defineOptions({ layout: AuthenticatedLayout })
 
               <a
                 :href="`tel:${(contact?.phones.filter(phone => phone.is_primary_phone)[0] || {}).number}`"
+                :style="{ 'pointer-events': (contact?.phones.filter(phone => phone.is_primary_phone)[0] || {}).number ? 'auto' : 'none' }"
                 v-if="contact?.phones?.length">
                 <IconPhone class="h-7" />
               </a>

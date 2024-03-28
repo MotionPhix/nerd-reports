@@ -48,7 +48,7 @@ class Form extends Controller
                 ]),
             ]);
         } else {
-            $contact = ContactFullData::from($contact->load('phones', 'emails', 'firm'));
+            $contact = ContactFullData::from($contact->load('phones', 'emails', 'firm.address'));
 
             if (! $contact->firm?->id) {
 

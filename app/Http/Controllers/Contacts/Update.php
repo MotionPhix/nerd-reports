@@ -48,6 +48,7 @@ class Update extends Controller
                     }
 
                     $phoneIds[] = $phone['id'];
+
                 } else {
 
                     $new_phone = new Phone($phone);
@@ -90,38 +91,6 @@ class Update extends Controller
             $contact->emails()->whereNotIn('id', $emailIds)->delete();
         }
 
-        /*if (isset($validated['firm'])) {
-
-            $addressIds = [];
-
-            foreach ($request->addresses as $key => $address) {
-                if (isset($address['id'])) {
-                    $address_exists = Address::find($address['id']);
-
-                    if ($address_exists) {
-                        if (
-                            $address['city'] !== $address_exists->city ||
-                            $address['state'] !== $address_exists->state ||
-                            $address['street'] !== $address_exists->street ||
-                            $address['country'] !== $address_exists->country
-                        ) {
-                            $address_exists->update($address);
-                        }
-                    }
-
-                    $addressIds[] = $address['id'];
-                } else {
-
-                    $new_address = new Address($address);
-                    $contact->addresses()->save($new_address);
-
-                    $addressIds[] = $new_address->id;
-                }
-            }
-
-            $contact->addresses()->whereNotIn('id', $addressIds)->delete();
-        }*/
-
         if (isset($validated['firm'])) {
 
             $firmData = array_intersect_key($validated['firm'], array_flip(['url', 'slogan', 'name']));
@@ -134,9 +103,9 @@ class Update extends Controller
 
                     $firm_exists->update($firmData);
 
-                    $contact->firm_id = $firm_exists->id;
+                    // $contact->firm_id = $firm_exists->id;
 
-                    $contact->save();
+                    $contact->firm()->associate($firm_exists);
                 }
 
             } else {
@@ -146,11 +115,12 @@ class Update extends Controller
 
             }
 
-            // necessary for next actions with contact and firm models
-            $contact = $contact->load('firm');
+            $contact->save();
 
             // update or create address for contact with firm id
             if (isset($validated['firm']['address'])) {
+
+                $firm = Firm::where('fid', $validated['firm']['fid'])->first();
 
                 $addressData = array_intersect_key($validated['firm']['address'], array_flip(['type', 'city', 'state', 'street', 'country']));
 
@@ -158,12 +128,10 @@ class Update extends Controller
                     $address = Address::findOrFail($validated['firm']['address']['id']);
                     $address->update($addressData);
                 } else {
-                    $newAddress = new Address($addressData);
-                    $contact->firm->address()->save($newAddress);
+                    $address = new Address($addressData);
                 }
 
-                $contact->firm->address()->associate($address);
-                $contact->firm->save();
+                $address->addressable()->associate($firm)->save();
 
             }
 

@@ -24,7 +24,7 @@ class Contact extends Model
         'job_title',
         'title',
         'middle_name',
-        'firm_id',
+        'firm_fid',
         'nickname'
     ];
 

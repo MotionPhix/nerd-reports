@@ -91,6 +91,7 @@ const form = useForm({
     firm_slogan: props.contact.firm?.slogan ?? '',
     firm_address: {
         id: props.contact.firm?.address?.id ?? null,
+        type: props.contact.firm?.address?.type ?? 'work',
         city: props.contact.firm?.address?.city ?? '',
         street: props.contact.firm?.address?.street ?? '',
         state: props.contact.firm?.address?.state ?? '',
@@ -232,14 +233,18 @@ function onSubmit() {
         </SecondaryButton>
 
         <h2 v-else class="flex items-center gap-2 text-xl font-bold text-gray-800 dark:text-gray-200">
-            <IconArrowLeft class="w-6 h-6" /> <span>{{ form.firm_keys?.name ?? props.contact.firm.name }}</span>
+            <Link
+                :href="route('contacts.index')" as="button">
+                <IconArrowLeft stroke="2.5" class="w-6 h-6" />
+            </Link>
+            <span>{{ form.firm_keys?.name ?? props.contact.firm.name }}</span>
         </h2>
 
         <span class="flex-1"></span>
 
         <PrimaryButton @click.prevent="onSubmit" type="submit" :disabled="form.processing" class="gap-2 rounded-full">
 
-            <IconPlus class="w-6 h-6 fill-current" />
+            <IconPlus stroke="2.5" class="w-6 h-6 fill-current" />
 
             <span>
                 {{ contact.id ? 'Update' : 'Create' }}
@@ -406,7 +411,7 @@ function onSubmit() {
                     Website
                 </label>
 
-                <TextInput id="company_website" v-model="form.firm_url" type="text"
+                <TextInput id="company_website" v-model="form.firm_url" type="url"
                     placeholder="Enter office website e.g. https://www.example.com" />
 
                 <InputError :message="$page.props.errors['firm.url']" />

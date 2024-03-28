@@ -44,9 +44,6 @@ class Store extends Controller
             if (isset($validated['firm']['address'])) {
                 $contact->firm->address()->updateOrCreate(['id' => $validated['firm']['address']['id']], $validated['firm']['address']);
             }
-
-            // $pivotData = array_intersect_key($validated['company'], array_flip(['job_title', 'department']));
-            // $contact->companies()->sync([$company->id => $pivotData], false);
         }
 
         return redirect(route('contacts.index'));

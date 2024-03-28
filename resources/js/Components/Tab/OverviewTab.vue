@@ -96,7 +96,7 @@ const props = defineProps<Props>()
 
       <section
         class="flex gap-6"
-        v-if="props.contact.firm?.fid">
+        v-if="props.contact.firm?.id">
         <IconBuildingArch class="shrink-0 h-7" />
 
         <div>
@@ -110,7 +110,7 @@ const props = defineProps<Props>()
               </strong>
 
               <small
-                class="block empty:hidden"
+                class="block text-gray-500 empty:hidden dark:text-gray-400"
                 v-if="props.contact.firm.slogan">
                 {{ props.contact.firm.slogan }}
               </small>
@@ -151,7 +151,7 @@ const props = defineProps<Props>()
     </div>
 
     <article
-        class="col-span-2 flex gap-6 mt-6">
+        class="flex col-span-2 gap-6 mt-6">
         <IconNote class="shrink-0 h-7" />
 
         <div class="w-full">
