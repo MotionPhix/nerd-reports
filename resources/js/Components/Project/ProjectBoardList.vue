@@ -1,18 +1,20 @@
 <script setup lang="ts">
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
+
 import { router } from '@inertiajs/vue3'
+
 import { ref, watch } from 'vue'
+
 import draggable from 'vuedraggable'
 
-import CreateTaskForm from '../Tasks/CreateTaskForm.vue'
+import CreateTaskForm from '@/Components/Project/ProjectTaskForm.vue'
 
-import Task from '../Tasks/Task.vue'
+import Task from '@/Components/Project/ProjectTask.vue'
 
-import RenameBoard from './RenameBoard.vue'
+import RenameBoard from '@/Components/Project/ProjectBoardRenameForm.vue'
 
-import type { Board } from '@/types'
+// import ConfirmDialog from '@/Shared/ConfirmDialog.vue'
 
-import ConfirmDialog from '@/Shared/ConfirmDialog.vue'
 import { IconDotsVertical } from '@tabler/icons-vue'
 
 const props = defineProps<Props>()
@@ -22,7 +24,7 @@ const tasks = ref(props.board.tasks)
 watch(() => props.board.tasks, newTasks => tasks.value = newTasks)
 
 interface Props {
-  board: Board
+  board: App.Data.BoardData
 }
 
 const boardRef = ref()
@@ -77,9 +79,6 @@ function deleteBoard() {
 <template>
   <article class="text-gray-700 border-2 border-gray-200 rounded-xl dark:bg-transparent dark:text-gray-100 dark:border-gray-700">
     <div class="flex items-center justify-between px-3 py-2">
-      <!-- <h3 class="text-xs font-semibold uppercase truncate">
-        {{ board.name }}
-      </h3> -->
 
       <RenameBoard :board="board" />
 

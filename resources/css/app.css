@@ -5,3 +5,28 @@
 .m-tabs-bar {
     @apply border border-gray-300 dark:border-gray-600 !important;
 }
+
+.tiptap p.is-empty::before {
+    @apply text-gray-500 dark:text-gray-600;
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    pointer-events: none;
+  }
+
+  hr.ProseMirror-selectednode {
+  border-top: 1px solid #68CEF8;
+}
+
+.m-radio-buttons {
+  display: grid !important;
+  @apply grid-cols-2 md:grid-cols-3;
+}
+
+.m-radio-buttons__items {
+  @apply shadow-none border border-gray-300 rounded-lg dark:border-gray-700 dark:bg-gray-800 !important;
+}
+
+.--is-selected {
+  @apply dark:bg-lime-500 dark:text-gray-800 bg-gray-400 font-semibold !important;
+}

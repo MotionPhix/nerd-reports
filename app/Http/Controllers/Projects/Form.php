@@ -18,11 +18,11 @@ class Form extends Controller
 
         if ($project) {
 
-          $project->contact()->associate($contact);
+          $project = $project->contact()->associate($contact);
 
         } else {
 
-          $project = (new Project())->fill(['contact_id' => $contact->id]);
+          $project = (new Project())->fill(['contact_id' => $contact->cid]);
 
         }
 

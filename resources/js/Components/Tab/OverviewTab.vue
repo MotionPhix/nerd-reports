@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { Link } from '@inertiajs/vue3';
-import { IconBuildingArch, IconMail, IconMap2, IconNote, IconNotes, IconPhone } from '@tabler/icons-vue';
+import { IconBuildingArch, IconMail, IconMap2, IconNote, IconNotes, IconPhone, IconTag } from '@tabler/icons-vue';
+import HeadlessTags from "@/Components/HeadlessTags.vue"
 
 interface Props {
   contact: App.Data.ContactFullData
@@ -47,7 +48,7 @@ const props = defineProps<Props>()
               {{ phone.formatted }}
             </strong>
 
-            <small class="capitalizes">
+            <small class="capitalize">
               {{ phone.type }}
             </small>
           </p>
@@ -137,16 +138,17 @@ const props = defineProps<Props>()
         </div>
       </section>
 
-      <!-- <section
-        class="flex gap-6">
-        <IconTag class="shrink-0" />
+      <section
+        class="flex gap-6"
+        v-if="!! props.contact?.firm">
+        <IconTag class="shrink-0 h-7" />
 
         <div>
-          <h3 class="mb-4 text-lg font-semibold">Categories</h3>
+          <h3 class="mb-4 text-lg font-semibold">Tags</h3>
 
-          <HeadlessTags v-model="props.contact.tags" :contact="props.contact" />
+          <HeadlessTags v-model="props.contact.firm.tags" :contact="props.contact" />
         </div>
-      </section> -->
+      </section>
 
     </div>
 
@@ -157,7 +159,7 @@ const props = defineProps<Props>()
         <div class="w-full">
           <h3 class="mb-4 text-lg font-semibold">Notes</h3>
 
-          <section v-html="props.contact.bio" v-if="props.contact.bio" class="empty:hidden" />
+          <section v-html="props.contact.bio" v-if="props.contact.bio" class="empty:hidden prose prose-invert pt-6" />
 
           <div class="flex flex-col items-center gap-3 text-gray-500 empty:hidden" v-else>
             <IconNote class="w-48 h-48 text-gray-400" stroke-width="1" />

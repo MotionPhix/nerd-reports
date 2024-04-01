@@ -2,8 +2,12 @@
 
 namespace App\Data;
 
+use DateTime;
+use Illuminate\Support\Collection;
 use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Optional;
 
+/** @typescript **/
 class ProjectData extends Data
 {
     public function __construct(
@@ -11,15 +15,12 @@ class ProjectData extends Data
 
         public readonly string $name,
 
+        public readonly string $created_at,
+
         public readonly string $due_date,
 
-        public readonly Title|Optional $title,
+        public readonly string $status,
 
-        public readonly string|null|Optional $job_title,
-
-        public readonly FirmData|null|Optional $firm,
-
-        /** @var Collection<EmailData> */
-        public Collection|Optional $emails,
+        public readonly ContactData $contact,
     ) {}
 }

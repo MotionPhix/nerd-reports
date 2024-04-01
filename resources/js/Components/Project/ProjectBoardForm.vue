@@ -29,9 +29,9 @@ const form = useForm({
 })
 
 function onSubmit() {
-  form.post(route('boards.store', props.project.id), {
+  form.post(route('boards.store', props.project.pid), {
     onError: (err) => {
-      form.reset()
+      // form.reset()
 
       toast.add({
         title: 'Resolve errors',

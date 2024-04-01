@@ -20,9 +20,11 @@ return new class extends Migration
 
             $table->boolean('is_completed')->default(false);
 
+            $table->double('position')->nullable();
+
             $table->enum('priority', ['normal', 'medium', 'high'])->default('normal');
 
-            $table->foreignId('project_id')->index()->constrained('projects');
+            $table->foreignId('board_id')->index()->constrained('boards')->onDelete('cascade');
 
             $table->foreignId('assigned_to')->index()->constrained('users');
 

@@ -1,23 +1,77 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Models\Project;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+Route::get('/users/{project}', function (Project $project) {
+
+  return response()->json([
+
+    'users' => $project->users
+
+  ]);
+
+});
 
 Route::group(
-    ['prefix' => 'companies'], function () {
+  ['prefix' => 'companies'],
+  function () {
 
     Route::post(
       '/',
       \App\Http\Controllers\Firms\Store::class
-    )->name('firms.store');
+    )->name('api.firms.store');
 
     Route::get(
       '/{q?}',
       \App\Http\Controllers\Firms\Index::class
-    )->name('firms.index');
+    )->name('api.firms.index');
+  }
+);
 
-  });
+Route::group(
+  ['prefix' => 'contacts'],
+  function () {
+
+    Route::get(
+      '/',
+      \App\Http\Controllers\Contacts\Api\Index::class
+    )->name('api.contacts.index');
+
+  }
+);
+
+Route::group(
+  ['prefix' => 'tags'], function () {
+
+  Route::get(
+    '/',
+    \App\Http\Controllers\Tags\Api\Index::class
+  )->name('tags.index');
+
+  Route::post(
+    '/{contact:cid}',
+    \App\Http\Controllers\Tags\Api\Store::class
+  )->name('tags.store');
+
+  Route::patch(
+    '/{contact:cid}',
+    \App\Http\Controllers\Tags\Api\Detach::class
+  )->name('tags.detach');
+
+  Route::put(
+    '/{contact:cid}',
+    \App\Http\Controllers\Tags\Api\Update::class
+  )->name('tags.update');
+
+  Route::delete(
+    'delete/{tag:name}',
+    \App\Http\Controllers\Tags\Api\Destroy::class
+  )->name('tags.destroy');
+
+  Route::get(
+    '/{filter}',
+    \App\Http\Controllers\Tags\Api\Filtered::class
+  )->name('tags.filter');
+
+});

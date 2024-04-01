@@ -5,7 +5,6 @@ namespace App\Data;
 use App\Enums\Title;
 use Illuminate\Support\Collection;
 use Spatie\LaravelData\Data;
-use Spatie\LaravelData\Lazy;
 use Spatie\LaravelData\Optional;
 
 /**

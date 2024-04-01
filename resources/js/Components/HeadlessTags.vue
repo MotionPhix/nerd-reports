@@ -34,7 +34,8 @@ const error = ref(null)
 const removeTag = (tag) => {
   tags.value = tags.value.filter((t) => t !== tag);
 
-  router.patch(route('tags.detach', props.contact.cid),
+  axios
+    .patch(route('tags.detach', props.contact.cid),
     {
       name: tag.label
     },
@@ -57,7 +58,7 @@ const addSelectedTag = (tag) => {
   if (!tags.value.some((existingTag) => existingTag.label.trim().toLowerCase() === trimmedLabel)) {
     tags.value.push({ label: tag.label });
 
-    router
+    axios
       .put(route('tags.update', props.contact.cid), {
         name: tag.label,
       },
@@ -100,7 +101,7 @@ const filterTags = () => {
 
 const loadTags = debounce((query = null) => {
   axios
-    .get(query ? `/tags/${query}` : '/tags')
+    .get(query ? `/api/tags/${query}` : '/api/tags')
     .then((resp) => {
       availableTags.value = resp.data
     })
@@ -111,7 +112,7 @@ const loadTags = debounce((query = null) => {
 }, 500)
 
 async function createTag(tag) {
-  router
+  axios
     .post(route('tags.store', props.contact.cid), {
       name: tag,
     },
@@ -146,10 +147,10 @@ onMounted(() => {
       as="div"
       class="relative z-10 inline-flex">
       <MenuButton
-        class="flex hover:opacity-75 duration-300 transition items-center gap-2 py-1 bg-blue-100 text-gray-800 m-0.5 text-xs font-medium px-2.5 rounded dark:bg-gray-900 dark:text-gray-300"
+        class="flex hover:opacity-75 duration-300 transition items-center gap-2 py-1 bg-blue-300 text-gray-800 m-0.5 px-2.5 rounded dark:bg-blue-700 dark:text-gray-300"
       >
-        <IconPlus />
-        <span>Add</span>
+        <IconPlus stroke="2.5" class="h-5" />
+        <span class="font-bold">New</span>
       </MenuButton>
 
       <transition
@@ -158,8 +159,7 @@ onMounted(() => {
         enter-to-class="scale-100 opacity-100"
         leave-active-class="transition duration-100 ease-in transform"
         leave-from-class="scale-100 opacity-100"
-        leave-to-class="scale-90 opacity-0"
-      >
+        leave-to-class="scale-90 opacity-0">
         <MenuItems
           class="absolute w-40 right-[50%] left-[-50%] overflow-hidden overflow-y-auto origin-center bg-white rounded-lg shadow max-h-40 scrollbar-none dark:border dark:border-gray-500 bottom-full dark:bg-gray-700 dark:divide-gray-600"
         >
@@ -175,12 +175,10 @@ onMounted(() => {
             v-slot="{ active }"
             v-for="tag in filteredTags"
             @click="addSelectedTag(tag)"
-            :key="tag.id || tag"
-          >
+            :key="tag.id || tag">
             <span
               :class="{ 'font-semibold bg-blue-500 dark:bg-lime-500': active }"
-            class="flex items-center p-2.5 rounded hover:bg-gray-100 dark:hover:bg-gray-600"
-            >
+            class="flex items-center p-2.5 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
             {{ tag.label || tag }}
             </span>
           </MenuItem>

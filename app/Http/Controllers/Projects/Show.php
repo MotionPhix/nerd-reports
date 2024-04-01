@@ -2,16 +2,20 @@
 
 namespace App\Http\Controllers\Projects;
 
+use App\Data\ProjectFullData;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Models\Project;
+use Inertia\Inertia;
 
 class Show extends Controller
 {
-    /**
-     * Handle the incoming request.
-     */
-    public function __invoke(Request $request)
+    public function __invoke(Project $project)
     {
-        //
+      $project = ProjectFullData::from($project->load('contact.firm', 'contact.emails', 'boards.tasks'));
+
+      return Inertia::render('Projects/Show', [
+        'project' => $project // $projectFullData->load(['owner', 'contact.company', 'users', 'boards.tasks' => fn($query) => $query->orderBy('position')])
+      ]);
+
     }
 }

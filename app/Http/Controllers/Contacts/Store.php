@@ -39,7 +39,7 @@ class Store extends Controller
         if (isset($validated['firm'])) {
 
             $firmFields = array_intersect_key($validated['firm'], array_flip(['url', 'slogan']));
-            Firm::updateOrCreate(['id' => $validated['firm']['id']], $firmFields);
+            Firm::updateOrCreate(['fid' => $validated['firm']['fid']], $firmFields);
 
             if (isset($validated['firm']['address'])) {
                 $contact->firm->address()->updateOrCreate(['id' => $validated['firm']['address']['id']], $validated['firm']['address']);
