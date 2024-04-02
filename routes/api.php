@@ -5,9 +5,18 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/users/{project}', function (Project $project) {
 
+  $users = [];
+
+  foreach ($project->users as $key => $user) {
+    $users[$key] = [
+      'value' => $user->id,
+      'label' => "{$user->first_name} {$user->last_name}"
+    ];
+  }
+
   return response()->json([
 
-    'users' => $project->users
+    'users' => $users
 
   ]);
 

@@ -1,0 +1,78 @@
+<script setup lang="ts">
+import { Link } from "@inertiajs/vue3"
+import { IconTrash } from "@tabler/icons-vue"
+
+interface Props {
+  project: App.Data.ProjectData
+}
+
+defineProps<Props>()
+</script>
+
+<template>
+  <li
+    class="relative overflow-hidden transition duration-500 bg-orange-500 rounded-lg hover:bg-opacity-50"
+  >
+    <Link
+      as="button"
+      method="delete"
+      :href="route('projects.destroy', project.pid)"
+      class="absolute z-50 hidden p-2 transition duration-500 rounded-lg right-5 top-3 bg-slate-400 group-hover:grid place-content-center"
+    >
+      <IconTrash class="w-6 h-6" />
+    </Link>
+
+    <svg
+      class="absolute bottom-0 left-0 mb-8"
+      viewBox="0 0 375 283"
+      fill="none"
+      style="transform: scale(1.5); opacity: 0.1"
+    >
+      <rect
+        x="159.52"
+        y="175"
+        width="152"
+        height="152"
+        rx="8"
+        transform="rotate(-45 159.52 175)"
+        fill="white"
+      />
+      <rect
+        y="107.48"
+        width="152"
+        height="152"
+        rx="8"
+        transform="rotate(-45 0 107.48)"
+        fill="white"
+      />
+    </svg>
+
+    <Link :href="route('projects.show', project.pid)" as="button">
+      <div
+        class="relative px-6 pt-6 text-sm text-gray-100"
+        v-if="!! project.contact?.firm?.fid">
+        <div class="absolute top-0 left-0 block w-48 h-48" />
+
+        {{ project.contact?.firm?.name }}
+      </div>
+
+      <div class="relative px-6 pb-6 mt-6 text-white">
+        <span class="block -mb-1 opacity-75">
+          {{ `${project.contact?.first_name} ${project.contact?.last_name}` }}
+        </span>
+
+        <div class="flex justify-between">
+          <span class="block text-2xl font-thin leading-none">
+            {{ project.name }}
+          </span>
+        </div>
+      </div>
+    </Link>
+
+    <div class="relative flex items-center px-6 bg-indigo-600 bg-opacity-80">
+      <span class="block my-2 font-semibold text-gray-200 opacity-75">
+        Due By {{ `${project.due_date}` }}
+      </span>
+    </div>
+  </li>
+</template>

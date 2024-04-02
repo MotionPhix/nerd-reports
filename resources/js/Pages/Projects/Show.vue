@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import Tooltip from '@/Components/Tooltip.vue'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head, Link } from '@inertiajs/vue3'
-import { IconArrowLeft, IconBuildingFortress, IconClockUp, IconHome, IconLayoutCards } from '@tabler/icons-vue'
+import { IconArrowLeft, IconBuildingFortress, IconClockUp } from '@tabler/icons-vue'
 import { computed } from 'vue'
-import BoardList from '@/Components/Project/ProjectBoardList.vue'
-import CreateBoardForm from '@/Components/Project/ProjectBoardForm.vue'
+import ProjectBoardList from '@/Components/Project/ProjectBoardList.vue'
+import ProjectBoardForm from '@/Components/Project/ProjectBoardForm.vue'
 import ProjectNameForm from './ProjectNameForm.vue'
 import useStickyTop from "@/Composables/useStickyTop"
 
@@ -151,18 +150,20 @@ const { navClasses } = useStickyTop();
 
     <!-- start -->
 
-    <div class="flex-1 overflow-x-auto">
-      <div class="inline-flex items-start h-full gap-4">
-        <BoardList
+    <h2 class="text-3xl dark:text-gray-400">
+      Project tasks
+    </h2>
+
+    <div class="flex-1 overflow-x-auto scrollbar-thin">
+      <div class="grid items-start h-full grid-cols-1 gap-4 sm:grid-cols-2">
+        <ProjectBoardList
           v-for="board in project.boards"
           :key="board.id"
           :board="board"
-          class="flex flex-col max-h-full bg-gray-200 rounded-md w-72"
+          class="h-full rounded-md"
         />
 
-        <article class="w-72">
-          <CreateBoardForm :project="project" />
-        </article>
+        <ProjectBoardForm :project="project" />
       </div>
     </div>
 

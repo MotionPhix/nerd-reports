@@ -7,6 +7,12 @@ country: any | string;
 street: string;
 city: string;
 };
+export type BoardData = {
+id: any | number | null;
+name: string;
+project_id: any | number;
+tasks: Array<App.Data.TaskData> | Array<any> | null;
+};
 export type ContactData = {
 cid: string;
 first_name: string;
@@ -69,7 +75,7 @@ status: string;
 description: any | string | null;
 contact_id: any | string | null;
 contact: App.Data.ContactData | any;
-boards: Array<any> | Array<any> | null;
+boards: Array<App.Data.BoardData> | Array<any> | null;
 };
 export type TagData = {
 id: any | number;
@@ -82,9 +88,10 @@ export type TaskData = {
 id: any | string | null;
 name: string;
 priority: string;
-status: string;
+is_completed: boolean;
 description: any | string | null;
 board_id: number;
+position: any | number | null;
 assigned_to: number;
 };
 export type UserData = {

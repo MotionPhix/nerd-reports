@@ -1,43 +1,134 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3'
-import { IconCheck, IconPlus } from '@tabler/icons-vue'
-import { UseDark } from '@vueuse/components'
+
+import { IconCheck } from '@tabler/icons-vue'
+
 import axios from 'axios'
-import { DatePicker } from 'v-calendar'
-import { computed, nextTick, onMounted, reactive, ref } from 'vue'
+
+import { onMounted, reactive, ref, watch } from 'vue'
+
 import toast from '@/Stores/toast'
+
 import { openForm } from '@/Stores/task-form'
+
 import InputError from '@/Components/InputError.vue'
-import AutosizeTextarea from '@/Components/AutosizeTextarea.vue'
+
+import MazCheckbox from 'maz-ui/components/MazCheckbox'
+
 import TextInput from "@/Components/TextInput.vue"
 
-const props = defineProps<{
-  board: Board
-}>()
+import TipTap from "@/Components/TipTap.vue"
+
+import SelectInput from "@/Components/SelectInput.vue"
+
+import { storeToRefs } from "pinia"
+
+import { useTaskStore } from "@/Stores/taskStore"
+
+import { useBoardStore } from '@/Stores/boardStore'
 
 const emit = defineEmits(['created'])
 
-const formShowing = computed(() => openForm.value.add_task_form_id === props.board.id)
+const taskStore = useTaskStore();
 
-const users = reactive<User[]>([])
+const boardStore = useBoardStore();
+
+const {
+  task,
+  isEditing
+} = storeToRefs(taskStore);
+
+const {
+  board
+} = storeToRefs(boardStore);
+
+const { unSet } = taskStore;
+
+const { unSetBoard } = boardStore;
+
+const users = ref<App.Data.UserData[]>([])
 
 const titleRef = ref()
 function focusInput() {
   titleRef.value.focus()
 }
-async function showForm() {
-  openForm.value.add_task_form_id = props.board.id
-  await nextTick()
-  focusInput()
-}
+
+const priorities = [
+  {
+    value: 'normal',
+    label: 'Normal'
+  },
+
+  {
+    value: 'medium',
+    label: 'Medium'
+  },
+
+  {
+    value: 'high',
+    label: 'High'
+  }
+]
 
 const form = useForm({
-  name: '',
-  description: '',
-  board_id: props.board.id,
+  name: task.value?.name ?? '',
+
+  description: task.value?.description ?? '',
+
+  assigned_to: task.value?.assigned_to ?? null,
+
+  is_completed: task.value?.is_completed ?? false,
+
+  priority: task.value?.priority ?? 'normal',
+
+  board_id: board.value?.id,
 })
 
 function onSubmit() {
+  form.transform((data) => {
+
+    let formData: Partial<App.Data.TaskData> = {
+      name: data.name,
+      priority: data.priority,
+      is_completed: data.is_completed,
+      assigned_to: data.assigned_to,
+      board_id: data.board_id,
+    };
+
+    if (!! form.description) {
+      formData.description = form.description
+    }
+
+    return formData
+
+  })
+
+  if (task.value.id) {
+
+    form.patch(route('tasks.update', { task: task.value }), {
+      onError: (errors) => {
+
+        for (const prop in errors) {
+          toast.add({
+            title: 'Resolve errors',
+            type: 'warning',
+            message: errors[prop],
+          })
+        }
+
+      },
+
+      onSuccess: () => {
+        form.reset()
+        focusInput()
+        unSet()
+        emit('created')
+      },
+    })
+
+    return
+  }
+
   form.post(route('tasks.store'), {
     onError: (errors) => {
       // form.reset()
@@ -49,105 +140,141 @@ function onSubmit() {
           message: errors[prop],
         })
       }
+
     },
 
     onSuccess: () => {
       form.reset()
       focusInput()
-      openForm.value.add_task_form_id = 0
+      unSet()
       emit('created')
     },
   })
 }
 
 function close() {
-  openForm.value.add_task_form_id = 0
+  unSet()
   form.reset()
 }
 
-const disabledDates = ref([
-  {
-    repeat: {
-      weekdays: [1, 7],
-    },
-  },
-])
+watch(() => task.value, newValue => {
 
-onMounted(async () => {
-  Object.assign(users, null)
+  form.name = newValue?.name ?? ''
 
-  await axios.get(`/api/users/${props.board.project_id}`).then((response) => {
-    Object.assign(users, response.data.users)
-  })
+  form.description = newValue?.description ?? ''
+
+  form.assigned_to = newValue?.assigned_to ?? null
+
+  form.is_completed = newValue?.is_completed ?? false
+
+  form.priority = newValue?.priority ?? 'normal'
+
+  form.board_id = board.value?.id
+
+}, { immediate: true })
+
+onMounted(() => {
+
+  const projectId = board.value?.project_id;
+
+  axios
+    .get(`/api/users/${projectId}`)
+    .then((response) => {
+      users.value = response.data.users;
+    })
+
 })
 </script>
 
 <template>
+  <section>
+  <div class="fixed inset-0 z-10 bg-gray-500 bg-opacity-25" v-if="isEditing" />
+
   <form
-    v-if="formShowing"
-    class="fixed grid grid-cols-2 gap-6 border dark:border-gray-700 z-40 overflow-y-auto max-h-[60dvh] scrollbar-none p-4 mb-4 rounded-lg w-[22em] right-10 bottom-4"
-    @keydown.esc="openForm.add_task_form_id = 0"
+    v-if="isEditing"
+    class="fixed grid grid-cols-2 gap-6 border bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 z-40 overflow-y-auto max-h-[60dvh] scrollbar-none p-4 mb-4 rounded-lg w-[22em] right-10 bottom-4 shadow-lg"
+    @keydown.esc="unSet()"
     @submit.prevent="onSubmit()">
     <div class="col-span-2">
-      <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Task name</label>
+      <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+        Task
+      </label>
 
       <TextInput
         id="title"
-        ref="titleRef" v-model="form.name"
+        ref="titleRef"
+        v-model="form.name"
         type="text"
-        placeholder="Enter task name" />
+        placeholder="Enter a task" />
 
       <InputError :message="form.errors.name" />
     </div>
 
     <div class="col-span-2">
-      <label for="user_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Assign task</label>
-      <select id="user_id" v-model="form.user_id" placeholder="Assign a user" required class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
-        <option value="" disabled selected>
-          Assign task to someone
-        </option>
+      <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Assign task</label>
 
-        <option :value="$page.props.auth.user.id">
-          Me
-        </option>
+      <SelectInput
+        placeholder="Select a person"
+        v-model="form.assigned_to"
+        :options="users"
+      />
 
-        <option v-for="user in users" :key="user.id" :value="user.id">
-          {{ user.name }}
-        </option>
-      </select>
+      <InputError :message="form.errors.assigned_to" />
+    </div>
 
-      <InputError :message="form.errors.user_id" />
+    <div class="col-span-2">
+      <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+        Priority
+      </label>
+
+      <SelectInput
+        placeholder="Set task priority"
+        v-model="form.priority"
+        :options="priorities"
+      />
+
+      <InputError :message="form.errors.priority" />
     </div>
 
     <div class="sm:col-span-2">
       <label for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Description</label>
-      <AutosizeTextarea
-        id="description"
-        v-model="form.description"
-        class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-        placeholder="Explain a bit about the task"
-      />
+
+      <TipTap v-model="form.description" />
 
       <InputError :message="form.errors.description" />
     </div>
 
-    <div class="sticky z-50 flex justify-between col-span-2 gap-2 px-2 py-1 mt-2 bg-blue-600 rounded-lg -bottom-4 -left-0 -right-0">
-      <button type="submit" class="flex items-center gap-2 px-3 py-2 font-semibold text-white transition duration-300 rounded-md bg-white/10 hover:bg-white/20">
+    <div class="sm:col-span-2">
+      <MazCheckbox
+        v-model="form.is_completed"
+        color="success">
+        Task is completed
+      </MazCheckbox>
+
+      <InputError :message="form.errors.is_completed" />
+    </div>
+
+    <div class="sticky bottom-0 z-50 flex justify-between col-span-2 gap-2 px-2 py-2 mt-2 bg-gray-500 rounded-full dark:bg-gray-700">
+      <button
+        type="submit"
+        class="flex items-center gap-2 px-3 py-2 font-semibold text-white transition duration-300 rounded-full bg-white/10 hover:bg-white/20">
         <IconCheck class="w-5 h-5" />
-        <span>Create task</span>
+        <span>
+          {{ task?.id ? 'Update' : 'Create' }} task
+        </span>
       </button>
 
-      <button type="button" class="px-3 py-2 font-semibold text-white transition duration-300 rounded-md hover:text-white/60" @click="close">
+      <button
+        type="button"
+        class="px-3 py-2 font-semibold text-white transition duration-300 rounded-md hover:text-white/60"
+        @click="close">
         <span>Cancel</span>
       </button>
     </div>
   </form>
 
-  <button
-    v-else
-    class="inline-flex items-center w-full gap-1 px-2 py-1 font-medium text-gray-600 transition duration-300 rounded-md dark:text-gray-400 dark:hover:text-gray-900 dark:hover:bg-gray-500 hover:text-gray-800 hover:bg-gray-300"
-    @click="showForm()">
-    <IconPlus class="h-6" stroke="2.5" />
-    <span>Add task</span>
-  </button>
+  <template v-else>
+    <slot />
+  </template>
+</section>
 </template>

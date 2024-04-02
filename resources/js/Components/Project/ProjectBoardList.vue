@@ -3,19 +3,29 @@ import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 
 import { router } from '@inertiajs/vue3'
 
-import { ref, watch } from 'vue'
+import { nextTick, ref, watch } from "vue"
 
 import draggable from 'vuedraggable'
 
-import CreateTaskForm from '@/Components/Project/ProjectTaskForm.vue'
+import ProjectTaskForm from '@/Components/Project/ProjectTaskForm.vue'
 
-import Task from '@/Components/Project/ProjectTask.vue'
+import ProjectTask from '@/Components/Project/ProjectTask.vue'
 
 import RenameBoard from '@/Components/Project/ProjectBoardRenameForm.vue'
 
-// import ConfirmDialog from '@/Shared/ConfirmDialog.vue'
+import ConfirmDialog from '@/Components/ConfirmDialog.vue'
 
-import { IconDotsVertical } from '@tabler/icons-vue'
+import { IconDotsVertical, IconPlus } from "@tabler/icons-vue"
+
+import { useTaskStore } from '@/Stores/taskStore'
+
+import { onMounted } from 'vue'
+
+import { useBoardStore } from '@/Stores/boardStore'
+
+interface Props {
+  board: App.Data.BoardData
+}
 
 const props = defineProps<Props>()
 
@@ -23,11 +33,16 @@ const tasks = ref(props.board.tasks)
 
 watch(() => props.board.tasks, newTasks => tasks.value = newTasks)
 
-interface Props {
-  board: App.Data.BoardData
-}
-
 const boardRef = ref()
+
+
+const taskStore = useTaskStore();
+
+const boardStore = useBoardStore();
+
+const { setIsEditing } = taskStore;
+
+const { setBoard } = boardStore;
 
 function onTaskCreated() {
   boardRef.value.scrollTop = boardRef.value.scrollHeight
@@ -74,11 +89,25 @@ function deleteBoard() {
 
   showDialog.value = false
 }
+
+onMounted(() => {
+  setBoard(props.board)
+})
+
+console.log(props.board);
+
+async function showForm() {
+  setIsEditing()
+  await nextTick()
+  // focusInput()
+}
 </script>
 
 <template>
-  <article class="text-gray-700 border-2 border-gray-200 rounded-xl dark:bg-transparent dark:text-gray-100 dark:border-gray-700">
-    <div class="flex items-center justify-between px-3 py-2">
+  <article
+    class="flex flex-col overflow-hidden text-gray-700 border-2 border-gray-200 rounded-xl dark:bg-transparent dark:text-gray-100 dark:border-gray-700">
+
+    <section class="flex items-center justify-between px-3 py-2">
 
       <RenameBoard :board="board" />
 
@@ -107,42 +136,50 @@ function deleteBoard() {
 
         </transition>
       </Menu>
-    </div>
+    </section>
 
-    <div class="flex flex-col max-w-sm pb-3 overflow-hidden bg-white border border-gray-200 rounded-b-lg dark:bg-gray-800 dark:border-gray-700">
-      <section ref="boardRef" class="relative flex-1 px-3 scrollbar-none overflow-y-auto">
-        <draggable
-          v-model="tasks"
-          group="tasks"
-          item-key="id"
-          class="mt-2 space-y-3"
-          ghost-class="ghost"
-          drag-class="drag"
-          tag="ul"
-          @change="onChange"
-        >
-          <template #item="{ element }">
-            <Task :task="element" />
-          </template>
-        </draggable>
-      </section>
+    <section ref="boardRef" class="relative flex-1 px-2 scrollbar-none">
+      <draggable
+        v-model="tasks"
+        group="tasks"
+        item-key="id"
+        class="h-full mt-2 space-y-6 cursor-move"
+        ghost-class="ghost"
+        drag-class="drag"
+        tag="ul"
+        @change="onChange"
+      >
+        <template #item="{ element }">
+          <ProjectTask
+            :task="element"
+            :board="props.board" />
+        </template>
+      </draggable>
+    </section>
 
-      <div class="px-3 mt-4">
-        <CreateTaskForm :board="board" class="z-20 shadow-lg" @created="onTaskCreated" />
+    <section class="p-3 mt-4">
+      <ProjectTaskForm
+        @created="onTaskCreated">
+        <button
+          class="inline-flex items-center w-full gap-1 px-2 py-3 bg-gray-300 rounded-md hover:bg-opacity-75 dark:bg-gray-700"
+          @click="showForm()">
+          <IconPlus class="h-6" stroke="2.5" />
+          <span class="font-semibold">Add task</span>
+        </button>
+      </ProjectTaskForm>
 
-        <ConfirmDialog v-if="showDialog" @cancel="showDialog = false" @confirm="deleteBoard()">
-          <div class="relative w-full max-w-md max-h-full">
-            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
-              <div class="p-6">
-                <svg aria-hidden="true" class="mx-auto mb-4 text-gray-400 w-14 h-14 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
-                  Are you sure you want to delete this board? All tasks on this board will be deleted, too
-                </h3>
-              </div>
+      <ConfirmDialog v-if="showDialog" @cancel="showDialog = false" @confirm="deleteBoard()">
+        <div class="relative w-full max-w-md max-h-full">
+          <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+            <div class="p-6">
+              <svg aria-hidden="true" class="mx-auto mb-4 text-gray-400 w-14 h-14 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
+                Are you sure you want to delete this board? All tasks on this board will be deleted, too
+              </h3>
             </div>
           </div>
-        </ConfirmDialog>
-      </div>
-    </div>
+        </div>
+      </ConfirmDialog>
+    </section>
   </article>
 </template>

@@ -66,14 +66,11 @@ class Project extends Model
 
   public function getUsersAttribute()
   {
-    $loggedInUserId = auth()->id();
-
     $users = \DB::table('users')
       ->select(['users.id', 'users.first_name', 'users.last_name'])
-      ->where('users.id', '<>', $loggedInUserId)
+      ->where('users.id', '!=', auth()->id())
       ->orderBy('users.first_name')
       ->orderBy('users.last_name')
-      ->groupBy('users.id')
       ->get();
 
     return $users;

@@ -100,19 +100,31 @@ Route::middleware('auth')->group(function () {
   Route::prefix('boards')->group(function () {
 
     Route::post(
-      '/s/{project:pid}/boards',
+      '/s/{project:pid}',
       \App\Http\Controllers\Boards\Store::class
     )->name('boards.store');
 
     Route::patch(
-      '/u/{project:pid}/boards/{board}',
+      '/u/{project:pid}/{board}',
       \App\Http\Controllers\Boards\Update::class
     )->name('boards.update');
 
     Route::delete(
-      'd/{project:pid}/boards/{board}',
+      'd/{project:pid}/{board}',
       \App\Http\Controllers\Boards\Destroy::class
     )->name('boards.destroy');
+
+  });
+
+  Route::prefix('tasks')->group(function () {
+
+    Route::get('/', \App\Http\Controllers\Tasks\Index::class)->name('tasks.index');
+//    Route::get('/{board}/create', \App\Http\Controllers\Tasks\Form::class)->name('tasks.create');
+    Route::post('/', \App\Http\Controllers\Tasks\Store::class)->name('tasks.store');
+    Route::get('/s/{task}', \App\Http\Controllers\Tasks\Show::class)->name('tasks.show');
+    Route::patch('/u/{task}', \App\Http\Controllers\Tasks\Update::class)->name('tasks.update');
+    Route::delete('/d/{task}', \App\Http\Controllers\Tasks\Destroy::class)->name('tasks.destroy');
+    Route::put('/m/{task}', \App\Http\Controllers\Tasks\Move::class)->name('tasks.move');
 
   });
 

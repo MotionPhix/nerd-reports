@@ -21,6 +21,16 @@ class Task extends Model
 
   const POSITION_MIN = 0.00002;
 
+  protected $fillable = [
+    'name',
+    'description',
+    'assigned_to',
+    'board_id',
+    'position',
+    'priority',
+    'is_completed'
+  ];
+
   protected function casts(): array
   {
     return [
@@ -63,7 +73,7 @@ class Task extends Model
       $task->position = self::query()->where('board_id', $task->board_id)->orderByDesc('position')->first()?->position + self::POSITION_GAP;
     });
 
-    static::saved(function ($task) {
+    /*static::saved(function ($task) {
       if ($task->position < self::POSITION_MIN) {
         \DB::statement("SET @previousPosition := 0");
         \DB::statement("
@@ -75,6 +85,26 @@ class Task extends Model
           self::POSITION_GAP,
           $task->board_id
         ]);
+      }
+    });*/
+
+    static::saved(function ($task) {
+
+      if ($task->position < self::POSITION_MIN) {
+
+        $previousPosition = 0;
+
+        $tasks = \DB::table('tasks')
+          ->select('id')
+          ->where('board_id', $task->board_id)
+          ->orderBy('position')
+          ->get();
+
+        foreach ($tasks as $task) {
+          \DB::table('tasks')
+            ->where('id', $task->id)
+            ->update(['position' => $previousPosition += self::POSITION_GAP]);
+        }
       }
     });
   }
