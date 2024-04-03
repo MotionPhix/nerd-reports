@@ -140,7 +140,7 @@ function isBlackOrWhite(color) {
 
           <section v-html="props.task.description" class="prose dark:prose-invert line-clamp-2 mt-6 text-xs" />
 
-          <div class="flex items-center w-full mt-3 text-xs font-medium text-gray-400">
+          <div class="flex items-center w-full mt-3 text-xs font-medium text-gray-200">
 
             <div class="flex items-center">
               <IconCalendar class="h-4 w-4" />

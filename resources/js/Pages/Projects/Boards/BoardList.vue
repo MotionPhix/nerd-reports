@@ -10,17 +10,15 @@ const props = defineProps({
 </script>
 
 <template>
-  <div class="flex-1 overflow-x-auto scrollbar-thin scroll-smooth">
+  <div class="flex-1 overflow-x-auto scrollbar-thin scroll-smooth px-6">
 
-    <div class="inline-flex h-full items-start space-x-4">
-
-  <!--    grid grid-cols-1 sm:grid-cols-2 gap-4 h-full items-start-->
+    <div class="inline-flex items-start space-x-4">
 
       <BoardItem
         v-for="board in project.boards"
         :key="board.id"
         :board="board"
-        class="w-72 dark:text-gray-200 max-h-full flex flex-col rounded-md mb-4" />
+        class="w-80 dark:text-gray-200 max-h-full flex flex-col rounded-md" />
 
         <div>
 

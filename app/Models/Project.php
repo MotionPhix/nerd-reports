@@ -24,11 +24,14 @@ class Project extends Model
     'status',
   ];
 
+  protected $appends = ['deadline'];
+
   protected function casts(): array
   {
     return [
       'due_date' => 'date:j F, Y',
       'description' => PurifyHtmlOnGet::class,
+      'name' => PurifyHtmlOnGet::class,
     ];
   }
 
@@ -36,6 +39,13 @@ class Project extends Model
   {
     return Attribute::make(
       get: fn ($value) => Carbon::createFromTimeString($value)->format('j F, Y')
+    );
+  }
+
+  protected function deadline(): Attribute
+  {
+    return Attribute::make(
+      get: fn () => Carbon::parse($this->due_date)->diffForHumans()
     );
   }
 

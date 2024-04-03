@@ -1,11 +1,13 @@
 <script setup>
-import { IconDots } from '@tabler/icons-vue';
+import { IconDots, IconPlus, IconTrash } from '@tabler/icons-vue';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue';
 import TaskCreateForm from "../Tasks/TaskCreateForm.vue";
 import TaskItem from "../Tasks/TaskItem.vue";
-import { router } from "@inertiajs/vue3"
+import { Link, router } from "@inertiajs/vue3"
 import { ref, watch } from "vue"
 import draggable from "vuedraggable"
+import { useFormStore } from '@/Stores/formStore';
+import { storeToRefs } from 'pinia';
 
 const props = defineProps({
   board: Object
@@ -14,6 +16,17 @@ const props = defineProps({
 const boardRef = ref();
 
 const tasks = ref(props.board.tasks);
+
+const formStore = useFormStore()
+
+const {
+  currentBoardId
+} = storeToRefs(formStore);
+
+const {
+  setCurrentBoardId,
+  unSetCurrentBoardId,
+} = formStore
 
 watch(() => props.board.tasks, (newTasks) => tasks.value = newTasks);
 
@@ -48,7 +61,6 @@ function onChange(e) {
     board_id: props.board.id
   });
 
-  console.log(e);
 }
 
 function generateColor() {
@@ -67,7 +79,7 @@ function generateColor() {
 
     <div class="flex items-center justify-between px-3 py-2">
 
-      <h3 class="font-semibold">
+      <h3 class="font-semibold text-xl">
         {{ props.board.name }}
       </h3>
 
@@ -94,22 +106,26 @@ function generateColor() {
 
             <MenuItem v-slot="{ active }">
 
-            <a
-              :class="{ 'bg-gray-100': active }"
-              class="block px-4 py-2 text-sm dark:hover:bg-gray-600"
-              href="#">
-              Add task
-            </a>
+              <button
+                :class="{ 'bg-gray-100': active }"
+                class="flex items-center gap-2 px-4 py-2 text-sm dark:hover:bg-gray-600 w-full"
+                @click="setCurrentBoardId(props.board.id)">
+                <IconPlus stroke="2.5" class="h-4 w-4" />
+                <span>Add task</span>
+              </button>
 
             </MenuItem>
 
             <MenuItem
               v-slot="{ active }">
-              <a :class="{ 'bg-gray-100': active }"
-               class="block px-4 py-2 text-sm text-red-600 dark:hover:bg-gray-600"
-               href="#">
-                Delete board
-              </a>
+              <Link
+                as="button"
+                method="delete"
+                class="flex items-center gap-2 px-4 py-2 text-sm dark:hover:bg-gray-600 w-full"
+                :href="route('boards.destroy', { project: props.board.project_id, board: props.board })">
+                <IconTrash stroke="2.5" class="h-4 w-4" />
+                <span>Delete board</span>
+              </Link>
             </MenuItem>
 
           </MenuItems>
@@ -120,7 +136,7 @@ function generateColor() {
 
     </div>
 
-    <div class="pb-3 flex flex-col overflow-hidden h-full">
+    <div class="pb-3 flex flex-col overflow-hidden">
 
       <div
         ref="boardRef"
@@ -128,7 +144,7 @@ function generateColor() {
 
       <div
         ref="boardRef"
-        class="flex-1 overflow-y-auto h-[65dvh] scrollbar-none">
+        class="flex-1 overflow-y-auto h-[70dvh] scrollbar-none">
 
         <draggable
           v-model="tasks"

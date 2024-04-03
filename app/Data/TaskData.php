@@ -17,6 +17,8 @@ class TaskData extends Data
 
     public string $priority,
 
+    public string|null|Optional $created_at,
+
     public string|null|Optional $description,
 
     public int $board_id,

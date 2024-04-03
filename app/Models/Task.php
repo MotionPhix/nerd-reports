@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Stevebauman\Purify\Casts\PurifyHtmlOnGet;
@@ -26,9 +28,17 @@ class Task extends Model
   protected function casts(): array
   {
     return [
-      'due_date' => 'date:j F, Y',
+      'created_at' => 'date:j F, Y',
       'description' => PurifyHtmlOnGet::class,
+      'name' => PurifyHtmlOnGet::class,
     ];
+  }
+
+  protected function createdAt(): Attribute
+  {
+    return Attribute::make(
+      get: fn ($value) => Carbon::parse($value)->diffForHumans(),
+    );
   }
 
   public function board()

@@ -59,7 +59,7 @@ const editor = useEditor({
   editorProps: {
     attributes: {
       class:
-        `border max-w-full border-gray-300 rounded-md dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 prose dark:prose-headings:text-gray-300 prose-headings:text-gray-800 mx-auto focus:outline-none p-4 shadow-sm min-h-32 scrollbar-none text-gray-900 overflow-y-auto scroll-smooth scrollbar-none ${props.height}`,
+        `border max-w-full border-gray-300 rounded-md dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 prose dark:prose-headings:text-gray-300 prose-headings:text-gray-800 mx-auto focus:outline-none p-4 shadow-sm scrollbar-none text-gray-900 overflow-y-auto scroll-smooth scrollbar-none h-48`,
     },
   },
 

@@ -3,6 +3,7 @@ import { useForm } from '@inertiajs/vue3'
 import { nextTick, ref } from 'vue'
 import type { Project } from '@/types'
 import toast from '@/Stores/toast'
+import TextInput from "@/Components/TextInput.vue"
 
 const props = defineProps<{
   project: Project
@@ -13,7 +14,10 @@ const form = useForm({
 })
 
 const isEditing = ref(false)
+
 const input = ref()
+
+const emit = defineEmits(['saved'])
 
 // watch(() => form.name, async () => {
 //   await nextTick()
@@ -27,7 +31,17 @@ async function edit() {
 
 function onSubmit() {
   isEditing.value = false
-  form.put(route('projects.rename', props.project.id), {
+
+  form.transform((data) => {
+
+    const { boards, contact, ...formData } = props.project;
+
+    formData.name = data.name
+
+    return formData;
+  })
+
+  form.patch(route('projects.update', props.project.pid), {
     onError: (err) => {
       form.reset()
 
@@ -38,8 +52,9 @@ function onSubmit() {
       })
     },
 
-    onSuccess: () => {
-      form.reset()
+    onSuccess: (resp) => {
+      form.name = resp.props.project.name
+      emit('saved', resp.props.project.name)
     },
   })
 }
@@ -56,7 +71,12 @@ function onSubmit() {
     </h3>
 
     <form v-show="isEditing" @submit.prevent="onSubmit()" @focusout="onSubmit()">
-      <input ref="input" v-model="form.name" type="text" placeholder="Project name" class="absolute inset-0 px-3 text-xl font-thin placeholder-gray-500 py-1.5 rounded-md focus:ring-2 focus:ring-lime-600">
+      <input
+          ref="input"
+          v-model="form.name"
+          type="text"
+          placeholder="Project name"
+          class="absolute inset-0 dark:bg-gray-800 px-3 text-xl font-thin placeholder-gray-500 py-1.5 rounded-md focus:ring-2 focus:ring-lime-600" />
     </form>
   </div>
 </template>

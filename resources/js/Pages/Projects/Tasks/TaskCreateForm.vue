@@ -17,6 +17,7 @@ import TipTap from "@/Components/TipTap.vue"
 
 import SelectInput from "@/Components/SelectInput.vue"
 import axios from "axios"
+import { watch } from 'vue';
 
 const props = defineProps({
   board: Object
@@ -70,12 +71,21 @@ const form = useForm({
   board_id: props.board.id,
 });
 
-async function showForm() {
-  setCurrentBoardId(props.board.id)
+watch(() => currentBoardId.value, async (newBoardId, oldBoardId) => {
 
   await nextTick();
 
-  inputNameRef.value.focus();
+  if (!! newBoardId) {
+
+    inputNameRef.value.focus();
+
+  }
+
+}, { immediate: true })
+
+async function showForm() {
+  setCurrentBoardId(props.board.id)
+
 }
 
 function onSubmit() {
@@ -138,9 +148,10 @@ onMounted(() => {
 
 <template>
   <form
+    class="grid grid-cols-2 gap-6 bg-gray-700 py-4 p-2 z-30 rounded-md fixed bottom-5 right-5 max-w-sm"
     @keydown.esc="unSetCurrentBoardId()"
-    v-if="isShowingForm"
-    @submit.prevent="onSubmit()">
+    @submit.prevent="onSubmit()"
+    v-if="isShowingForm">
 
 <!--    start-->
 
@@ -159,36 +170,38 @@ onMounted(() => {
       <InputError :message="form.errors.name" />
     </div>
 
-    <div class="col-span-2">
-      <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Assign task</label>
+    <div class="col-span-2 grid grid-cols-2 gap-2">
+      <div class="col-span-1">
+        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Assign task</label>
 
-      <SelectInput
-        placeholder="Select a person"
-        v-model="form.assigned_to"
-        :options="users"
-      />
+        <SelectInput
+          placeholder="Select a person"
+          v-model="form.assigned_to"
+          :options="users"
+        />
 
-      <InputError :message="form.errors.assigned_to" />
-    </div>
+        <InputError :message="form.errors.assigned_to" />
+      </div>
 
-    <div class="col-span-2">
-      <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-        Priority
-      </label>
+      <div class="col-span-1">
+        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+          Priority
+        </label>
 
-      <SelectInput
-        placeholder="Set task priority"
-        v-model="form.priority"
-        :options="priorities"
-      />
+        <SelectInput
+          placeholder="Set task priority"
+          v-model="form.priority"
+          :options="priorities"
+        />
 
-      <InputError :message="form.errors.priority" />
+        <InputError :message="form.errors.priority" />
+      </div>
     </div>
 
     <div class="sm:col-span-2">
       <label for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Description</label>
 
-      <TipTap v-model="form.description" />
+      <TipTap v-model="form.description" height="h-54" />
 
       <InputError :message="form.errors.description" />
     </div>
@@ -213,7 +226,7 @@ onMounted(() => {
 
 <!--    end-->
 
-    <div class="mt-2 space-x-2">
+    <div class="flex justify-between col-span-2">
       <button
         class="px-4 py-2 text-sm font-medium text-white bg-rose-600 hover:bg-rose-500 rounded-md shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 focus:outline-none"
         type="submit">
@@ -228,12 +241,4 @@ onMounted(() => {
       </button>
     </div>
   </form>
-
-  <button
-    @click="showForm()"
-    v-if="!isShowingForm"
-    class="flex items-center p-2 text-sm font-medium text-gray-600 dark:text-gray-300 dark:hover:bg-gray-600 dark:bg-gray-800 hover:text-black hover:bg-gray-300 w-full rounded-md">
-    <IconPlus stroke="2.5" class="h-5 w-5"></IconPlus>
-    <span class="ml-1">Add task</span>
-  </button>
 </template>

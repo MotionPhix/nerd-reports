@@ -6,25 +6,27 @@ use Illuminate\Support\Collection;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Optional;
 
-/** @typescript **/
+/** @typescript * */
 class ProjectFullData extends Data
 {
   public function __construct(
-    public string|null|Optional $pid,
+    public string|null|Optional     $pid,
 
-    public string $name,
+    public string                   $name,
 
-    public string|null|Optional $created_at,
+    public string|null|Optional     $created_at,
 
-    public string $due_date,
+    public string|null              $due_date,
 
-    public string $status,
+    public string|null|Optional     $deadline,
 
-    public string|null|Optional $description,
+    public string                   $status,
 
-    public string|null|Optional $contact_id,
+    public string|null|Optional     $description,
 
-    public ContactData|Optional $contact,
+    public string|int|null|Optional $contact_id,
+
+    public ContactData|Optional     $contact,
 
     /** @var Collection<BoardData> */
     public Collection|null|Optional $boards,
@@ -39,7 +41,7 @@ class ProjectFullData extends Data
 
       'contact_id' => 'required|exists:contacts,cid',
 
-      'due_date' => 'required|date|after_or_equal:today',
+     'due_date' => 'required|date|after_or_equal:today',
 
       'documents.*' => 'sometimes|mimes:jpg,jpeg,png,gif,pdf,doc,docx,xls,xlsx',
     ];

@@ -2,9 +2,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head, Link } from '@inertiajs/vue3'
 import { IconArrowLeft, IconBuildingFortress, IconClockUp, IconClockDown } from '@tabler/icons-vue'
-import { computed } from 'vue'
-import ProjectBoardList from '@/Components/Project/ProjectBoardList.vue'
-import ProjectBoardForm from '@/Components/Project/ProjectBoardForm.vue'
+import { computed, ref } from "vue"
 import ProjectNameForm from './ProjectNameForm.vue'
 import useStickyTop from "@/Composables/useStickyTop"
 import BoardList from '@/Pages/Projects/Boards/BoardList.vue'
@@ -19,17 +17,24 @@ defineOptions({
   layout: AuthenticatedLayout,
 })
 
-const title = computed(() => props.project.contact?.firm?.name)
+const projectName = ref(props.project.name);
+
+const title = computed(() => props.project.contact?.firm?.name ?? props.project.contact.first_name + ' ' + props.project.contact.last_name)
 
 const { navClasses } = useStickyTop();
+
+function updateProjectName (project_name: string) {
+  projectName.value = project_name
+}
 </script>
 
 <template>
   <Head :title="title" />
 
   <nav
-    class="flex items-center w-full h-16 gap-6 px-8 dark:text-white dark:border-gray-700"
+    class="flex items-center max-w-4xl mx-auto w-full h-16 gap-6 px-8 dark:text-white dark:border-gray-700"
     :class="navClasses">
+
     <Link
       :href="route('projects.index')"
       as="button"
@@ -38,10 +43,15 @@ const { navClasses } = useStickyTop();
       <IconArrowLeft class="h-7" stroke="2.5" />
     </Link>
 
-    <ProjectNameForm :project="project" class="font-display capitalize" />
+    <ProjectNameForm
+        :project="project"
+        class="font-display capitalize"
+        @saved="updateProjectName"
+    />
+
   </nav>
 
-  <section class="flex flex-col max-w-3xl gap-24 px-6 pt-12 mx-auto relative z-20">
+  <section class="flex flex-col max-w-3xl gap-24 px-6 pt-12 mx-auto relative">
 
     <article class="flex" v-if="!! props.project.contact.firm">
 
@@ -108,7 +118,7 @@ const { navClasses } = useStickyTop();
     <div class="space-y-6">
 
       <h2 class="text-5xl font-display dark:text-gray-300">
-        {{ props.project.name }}
+        {{ projectName }}
       </h2>
 
       <hr class="dark:border-gray-600">
@@ -144,18 +154,32 @@ const { navClasses } = useStickyTop();
         <p class="flex items-center gap-2">
           <IconClockDown class="h-6" />
 
-          <span>
-            {{ project.due_date }}
-          </span>
+          <div class="flex flex-col">
+            <span>
+              {{ project.due_date }}
+            </span>
+
+            <span class="text-xs dark:text-gray-500 font-sans text-gray-400">
+              Deadline {{ project.deadline.includes('now') ? 'is' : 'was'}} {{ project.deadline }}.
+            </span>
+          </div>
         </p>
       </div>
     </section>
 
-    <!-- start -->
+  </section>
 
-    <h2 class="text-3xl dark:text-gray-400 font-display">
+  <section>
+
+    <!-- start -->
+  <div class="flex flex-col max-w-3xl gap-24 px-6 py-12 mx-auto">
+
+    <h2
+      class="text-3xl dark:text-gray-400 font-display">
       Tasks
     </h2>
+
+  </div>
 
     <!-- <div class="flex-1 overflow-x-auto scrollbar-thin">
       <div class="grid items-start h-full grid-cols-1 gap-4 sm:grid-cols-2">

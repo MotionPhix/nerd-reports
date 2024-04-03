@@ -70,10 +70,11 @@ export type ProjectFullData = {
 pid: any | string | null;
 name: string;
 created_at: any | string | null;
-due_date: string;
+due_date: string | null;
+deadline: any | string | null;
 status: string;
 description: any | string | null;
-contact_id: any | string | null;
+contact_id: any | string | number | null;
 contact: App.Data.ContactData | any;
 boards: Array<App.Data.BoardData> | Array<any> | null;
 };
@@ -88,7 +89,7 @@ export type TaskData = {
 id: any | string | null;
 name: string;
 priority: string;
-is_completed: boolean;
+created_at: any | string | null;
 description: any | string | null;
 board_id: number;
 position: any | number | null;
