@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head, Link } from '@inertiajs/vue3'
-import { IconArrowLeft, IconBuildingFortress, IconClockUp } from '@tabler/icons-vue'
+import { IconArrowLeft, IconBuildingFortress, IconClockUp, IconClockDown } from '@tabler/icons-vue'
 import { computed } from 'vue'
 import ProjectBoardList from '@/Components/Project/ProjectBoardList.vue'
 import ProjectBoardForm from '@/Components/Project/ProjectBoardForm.vue'
 import ProjectNameForm from './ProjectNameForm.vue'
 import useStickyTop from "@/Composables/useStickyTop"
+import BoardList from '@/Pages/Projects/Boards/BoardList.vue'
 
 const props = defineProps<Props>()
 
@@ -37,16 +38,16 @@ const { navClasses } = useStickyTop();
       <IconArrowLeft class="h-7" stroke="2.5" />
     </Link>
 
-    <ProjectNameForm :project="project" />
+    <ProjectNameForm :project="project" class="font-display capitalize" />
   </nav>
 
-  <section class="flex flex-col max-w-3xl gap-24 px-6 py-12 mx-auto">
+  <section class="flex flex-col max-w-3xl gap-24 px-6 pt-12 mx-auto relative z-20">
 
     <article class="flex" v-if="!! props.project.contact.firm">
 
       <div class="flex-none bg-gray-300 dark:bg-gray-700 rounded-xl">
         <IconBuildingFortress
-          class="w-72 dark:text-gray-400" />
+          class="w-72 dark:text-gray-400" stroke="0.75" />
       </div>
 
       <form class="flex-auto p-6">
@@ -105,6 +106,7 @@ const { navClasses } = useStickyTop();
     </article>
 
     <div class="space-y-6">
+
       <h2 class="text-5xl font-display dark:text-gray-300">
         {{ props.project.name }}
       </h2>
@@ -117,9 +119,10 @@ const { navClasses } = useStickyTop();
         v-if="props.project.description" />
     </div>
 
-    <section class="grid grid-cols-1 gap-6 dark:text-white md:grid-cols-2">
+    <section class="grid grid-cols-1 gap-4 dark:text-white md:grid-cols-2 font-display">
 
-      <div class="p-4 space-y-2 border border-gray-400 rounded-md dark:border-gray-700">
+      <div
+        class="p-4 space-y-2 border border-gray-400 rounded-md dark:border-gray-700">
         <p class="font-semibold">
           Start date
         </p>
@@ -139,7 +142,7 @@ const { navClasses } = useStickyTop();
         </p>
 
         <p class="flex items-center gap-2">
-          <IconClockUp class="h-6" />
+          <IconClockDown class="h-6" />
 
           <span>
             {{ project.due_date }}
@@ -150,11 +153,11 @@ const { navClasses } = useStickyTop();
 
     <!-- start -->
 
-    <h2 class="text-3xl dark:text-gray-400">
-      Project tasks
+    <h2 class="text-3xl dark:text-gray-400 font-display">
+      Tasks
     </h2>
 
-    <div class="flex-1 overflow-x-auto scrollbar-thin">
+    <!-- <div class="flex-1 overflow-x-auto scrollbar-thin">
       <div class="grid items-start h-full grid-cols-1 gap-4 sm:grid-cols-2">
         <ProjectBoardList
           v-for="board in project.boards"
@@ -165,7 +168,9 @@ const { navClasses } = useStickyTop();
 
         <ProjectBoardForm :project="project" />
       </div>
-    </div>
+    </div> -->
+
+    <BoardList :project="project" />
 
   </section>
 </template>

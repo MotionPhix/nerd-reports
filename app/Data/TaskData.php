@@ -17,8 +17,6 @@ class TaskData extends Data
 
     public string $priority,
 
-    public bool $is_completed,
-
     public string|null|Optional $description,
 
     public int $board_id,
@@ -37,8 +35,6 @@ class TaskData extends Data
       ],
 
       'description' => 'sometimes|min:20',
-
-      'is_completed' => 'required|boolean',
 
       'assigned_to' => 'required|exists:users,id',
 

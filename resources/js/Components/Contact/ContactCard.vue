@@ -49,7 +49,7 @@ router.on('navigate', (e) => {
 
 <template>
   <li
-    class="relative flex px-4 py-3 transition duration-300 ease-in-out border border-gray-300 rounded-full dark:border-gray-700 sm:py-4 hover:bg-gray-200 dark:hover:bg-gray-800"
+    class="relative flex px-4 py-3 transition duration-300 ease-in-out border border-gray-300 rounded-xl dark:border-gray-700 sm:py-4 hover:bg-gray-200 dark:hover:bg-gray-800"
     :class="{ 'bg-gray-300 dark:bg-gray-700': props.contact.cid === param.contact }">
     <div
       class="absolute z-20 flex items-center justify-center flex-shrink-0 w-10 h-10 font-semibold transition duration-300 rounded-full cursor-pointer hover:bg-transparent group"
@@ -78,27 +78,33 @@ router.on('navigate', (e) => {
 
       <div class="flex-1 min-w-0">
 
-        <p class="flex items-end gap-2 text-2xl font-medium text-gray-900 truncate text-balance dark:text-white">
-            <span class="capitalize">{{ props.contact.title }}</span>
-            <span>{{ full_name }}</span>
+        <p class="flex items-center gap-2 text-2xl font-medium text-gray-900 truncate text-balance dark:text-white">
+          <span class="capitalize">{{ props.contact.title }}</span>
+
+          <span>{{ full_name }}</span>
+
+          <span
+            class="pl-2 text-sm text-gray-500 dark:text-gray-400"
+            :class="{ 'border-l dark:border-lime-500': props.contact?.firm?.fid }">
+            <ContactEmail :emails="props.contact?.emails" />
+          </span>
         </p>
 
-        <section class="flex items-center gap-2">
-
-            <p class="py-1 px-2 text-sm text-gray-500 border-gray-300 border rounded-md dark:border-gray-600 dark:text-gray-400">
-                <ContactEmail :emails="props.contact?.emails" />
-            </p>
+        <section class="flex items-center gap-2 mt-1">
 
             <p class="flex items-center gap-2 text-sm text-gray-500 truncate dark:text-gray-400" v-if="props.contact?.job_title">
-               <span>
-                  {{ props.contact?.firm?.name }}
-               </span>
 
-               <span class="w-2 h-2 rounded-full bg-lime-500" />
 
                <span>
                   {{ props.contact?.job_title }}
                </span>
+
+               at
+
+               <strong>
+                  {{ props.contact?.firm?.name }}
+               </strong>
+
             </p>
 
         </section>

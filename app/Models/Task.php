@@ -10,13 +10,6 @@ class Task extends Model
 {
   use HasFactory;
 
-  const STATUSES = [
-    'new' => 'New',
-    'in_progress' => 'In Progress',
-    'cancelled' => 'Cancelled',
-    'done' => 'Completed'
-  ];
-
   const POSITION_GAP = 60000;
 
   const POSITION_MIN = 0.00002;
@@ -27,8 +20,7 @@ class Task extends Model
     'assigned_to',
     'board_id',
     'position',
-    'priority',
-    'is_completed'
+    'priority'
   ];
 
   protected function casts(): array
@@ -47,24 +39,6 @@ class Task extends Model
   public function assignedTo()
   {
     return $this->belongsTo(User::class, 'assigned_to');
-  }
-
-  public function getStatusColorAttribute()
-  {
-    return [
-      'done' => 'green',
-      'cancelled' => 'red',
-      'in_progress' => 'blue'
-    ][$this->status] ?? 'gray';
-  }
-
-  public function getStatusDisplayAttribute()
-  {
-    return [
-      'done' => 'Completed',
-      'cancelled' => 'Cancelled',
-      'in_progress' => 'In Progress'
-    ][$this->status] ?? 'New';
   }
 
   public static function booted()
