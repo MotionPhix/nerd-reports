@@ -3,11 +3,14 @@ import { IconDots, IconPlus, IconTrash } from '@tabler/icons-vue';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue';
 import TaskCreateForm from "../Tasks/TaskCreateForm.vue";
 import TaskItem from "../Tasks/TaskItem.vue";
-import { Link, router } from "@inertiajs/vue3"
+import { Link } from "@inertiajs/vue3"
 import { ref, watch } from "vue"
-import draggable from "vuedraggable"
 import { useFormStore } from '@/Stores/formStore';
 import { storeToRefs } from 'pinia';
+import { VueDraggableNext } from "vue-draggable-next"
+import VueDraggable from "vue3-draggable-next"
+import { Container, Draggable } from "vue-dndrop";
+import { applyDrag } from "../../Utils";
 
 const props = defineProps({
   board: Object
@@ -68,16 +71,24 @@ function onChange(e) {
 }
 
 function generateColor() {
-  const hue = Math.floor(Math.random() * 360); // Generate a random hue value between 0 and 359
-  const saturation = 70; // You can adjust saturation and lightness as needed
-  const lightness = 40;
-  const color = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-
-  return color;
+  const hue = Math.floor(Math.random() * 360), saturation = 70, lightness = 40
+  return `hsl(${hue}, ${saturation}%, ${lightness}%`
 }
 
 const onCheckMove = function(e) {
-  window.console.log("Future index: " + e.relatedContext.component.name);
+
+  console.log(e);
+}
+
+const onDrop = (dropResult) => {
+  tasks.value = applyDrag(tasks.value, dropResult);
+};
+
+const dragOptions = {
+  animation: 0,
+  group: "description",
+  disabled: false,
+  ghostClass: "ghost"
 }
 </script>
 
@@ -153,7 +164,20 @@ const onCheckMove = function(e) {
         ref="boardRef"
         class="flex-1 overflow-y-auto h-[70dvh] scrollbar-none">
 
-        <draggable
+        <Container @drop="onDrop" tag="ul" group-name="tasks">
+
+          <Draggable v-for="task in props.board.tasks" :key="task.id" tag="li">
+
+            <TaskItem
+              :task="task"
+              :style="{ 'background-color': generateColor() }"
+              class="list-group-item" />
+
+          </Draggable>
+
+        </Container>
+
+        <!-- <VueDraggableNext
           v-model="tasks"
           group="tasks"
           item-key="id"
@@ -161,26 +185,50 @@ const onCheckMove = function(e) {
           ghost-class="ghost"
           drag-class="drag"
           :move="onCheckMove"
-          tag="transition-group"
-          :component-data="{
-            tag: 'ul',
-            type: 'transition-group',
-            name: !drag ? 'flip-list' : null
-          }"
           @change="onChange"
           @start="drag = true"
-          @end="drag = false">
+          @end="drag = false"
+          tag="ul">
 
-            <template #item="{ element }">
+          <transition-group name="flip-list">
 
-              <TaskItem
-                :task="element"
-                :style="{ 'background-color': generateColor() }"
-                class="list-group-item" />
+            <TaskItem
+              :task="task"
+              :key="task.id"
+              :style="{ 'background-color': generateColor() }"
+              v-for="task in tasks"
+              class="list-group-item" />
 
-            </template>
+          </transition-group>
 
-        </draggable>
+        </VueDraggableNext>  -->
+
+         <!-- <vue-draggable
+          item-key="id"
+          drag-class="drag"
+          ghost-class="ghost"
+          tag="transition-group"
+          class="mt-2 space-y-6 cursor-move list-group"
+          :component-data="{ tag: 'ul', name: 'flip-list', type: 'transition' }"
+          v-model="tasks"
+          v-bind="dragOptions"
+          group="tasks"
+          :move="onCheckMove"
+          @start="drag = true"
+          @end="drag = false"
+          @change="onChange">
+
+          <template #item="{ element }">
+
+            <TaskItem
+              :task="element"
+              :key="element.id"
+              :style="{ 'background-color': generateColor() }"
+              class="list-group-item" />
+
+          </template>
+
+        </vue-draggable> -->
 
       </div>
 

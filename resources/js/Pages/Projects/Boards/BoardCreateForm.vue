@@ -43,7 +43,7 @@ function onSubmit() {
     onSuccess: () => {
       form.reset()
       inputNameRef.value.focus();
-      isShowingForm = false
+      isShowingForm.value = false
       // formRef.value.scrollIntoView();
     },
   })
@@ -83,7 +83,7 @@ function onSubmit() {
   <button
     v-if="!isShowingForm"
     @click="showForm()"
-    class="fixed z-50 flex items-center justify-center w-16 h-16 p-2 text-white bg-gray-700 bottom-5 right-5 hover:bg-white/20 rounded-xl">
+    class="fixed z-50 flex items-center justify-center w-16 h-16 p-2 text-white bg-gray-700 bottom-5 right-5 hover:bg-gray-400 dark:hover:bg-white/20 rounded-xl">
     <IconPlus class="w-10 h-10"/>
   </button>
 </template>
