@@ -55,30 +55,35 @@ function onSubmit() {
     ref="formRef"
     v-if="isShowingForm"
     @submit.prevent="onSubmit()"
-    class="p-3 bg-gray-200 rounded-md fixed bottom-5 right-5"
+    class="fixed w-64 p-3 space-y-4 bg-gray-200 rounded-md bottom-5 right-5"
   >
     <input
       v-model="form.name"
       ref="inputNameRef"
-      class="block w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-blue-400 focus:ring-blue-400"
-      placeholder="Enter list name..."
+      class="block w-full py-3 text-sm border-gray-300 rounded-md shadow-sm focus:border-blue-400 focus:ring-blue-400"
+      placeholder="Enter board name..."
       type="text">
 
-    <div class="mt-2 space-x-2">
+    <div class="flex items-center justify-between">
       <button
         type="submit"
-        class="px-4 py-2 text-sm font-medium text-white bg-rose-600 hover:bg-rose-500 rounded-md shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 focus:outline-none">Add board</button>
+        class="px-4 py-2 text-sm font-medium text-white rounded-md shadow-sm bg-rose-600 hover:bg-rose-500 focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 focus:outline-none">
+        Add board
+      </button>
+
       <button
         type="button"
         @click="isShowingForm = false"
-        class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-black rounded-md focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 focus:outline-none">Cancel</button>
+        class="px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:text-black focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 focus:outline-none">
+        Cancel
+      </button>
     </div>
   </form>
 
   <button
     v-if="!isShowingForm"
     @click="showForm()"
-    class="fixed bottom-5 right-5 flex bg-gray-700 justify-center items-center h-16 w-16 hover:bg-white/20 text-white p-2 rounded-xl z-50">
+    class="fixed z-50 flex items-center justify-center w-16 h-16 p-2 text-white bg-gray-700 bottom-5 right-5 hover:bg-white/20 rounded-xl">
     <IconPlus class="w-10 h-10"/>
   </button>
 </template>

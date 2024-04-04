@@ -1,14 +1,13 @@
 <?php
 
-namespace App\Http\Controllers\Tasks;
+namespace App\Http\Controllers\Tasks\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Task;
-use Illuminate\Http\RedirectResponse;
 
 class Move extends Controller
 {
-  public function __invoke(Task $task): RedirectResponse
+  public function __invoke(Task $task)
   {
     $board = \App\Models\Board::find(request()->board_id);
 
@@ -25,10 +24,15 @@ class Move extends Controller
       'Hooray!',
     ]);
 
-    return redirect()->back()->with('toast', [
-      'type' => 'success',
-      'title' => $toastTitles->random(),
-      'message' => 'Task was successfully moved!'
+
+    return response()->json([
+
+      'toast', [
+        'type' => 'success',
+        'title' => $toastTitles->random(),
+        'message' => 'Task was successfully moved!'
+      ]
+
     ]);
 
   }

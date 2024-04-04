@@ -77,7 +77,7 @@ function isBlackOrWhite(color) {
 
 <template>
   <li
-    class="group relative p-2 rounded-xl">
+    class="relative p-2 group rounded-xl">
 
     <form
       v-if="isShowingForm"
@@ -87,7 +87,7 @@ function isBlackOrWhite(color) {
       <textarea
         ref="inputTitleRef"
         v-model="form.name"
-        class="block w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-blue-400 focus:ring-blue-400"
+        class="block w-full text-sm border-gray-300 rounded-md shadow-sm focus:border-blue-400 focus:ring-blue-400"
         placeholder="Enter task title..."
         rows="3"
         @keydown.enter.prevent="onSubmit()">
@@ -95,13 +95,13 @@ function isBlackOrWhite(color) {
 
       <div class="mt-2 space-x-2">
         <button
-          class="px-4 py-2 text-sm font-medium text-white bg-rose-600 hover:bg-rose-500 rounded-md shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 focus:outline-none"
+          class="px-4 py-2 text-sm font-medium text-white rounded-md shadow-sm bg-rose-600 hover:bg-rose-500 focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 focus:outline-none"
           type="submit">
           Save task
         </button>
 
         <button
-          class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-black rounded-md focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 focus:outline-none"
+          class="px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:text-black focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 focus:outline-none"
           type="button"
           @click="unSetCurrentTaskId()">
           Cancel
@@ -118,7 +118,7 @@ function isBlackOrWhite(color) {
 <!--      </a>-->
 
 <!--      <button-->
-<!--        class="hidden absolute top-1 right-1 w-8 h-8 bg-gray-50 group-hover:grid place-content-center rounded-md text-gray-600 hover:text-black hover:bg-gray-200"-->
+<!--        class="absolute hidden w-8 h-8 text-gray-600 rounded-md top-1 right-1 bg-gray-50 group-hover:grid place-content-center hover:text-black hover:bg-gray-200"-->
 <!--        @click="showForm()">-->
 <!--        <IconPencil class="w-5 h-5"/>-->
 <!--      </button>-->
@@ -127,23 +127,23 @@ function isBlackOrWhite(color) {
 
         <div class="relative flex flex-col items-start">
           <button class="absolute top-0 right-0 items-center justify-center hidden w-5 h-5 text-gray-500 rounded hover:bg-gray-200 hover:text-gray-700 group-hover:flex">
-            <IconDotsVertical stroke="2.5" class="h-4 w-4" />
+            <IconDotsVertical stroke="2.5" class="w-4 h-4" />
           </button>
 
           <Priority :priority="props.task.priority">
             {{ props.task.priority }}
           </Priority>
 
-          <h4 class="mt-3 text-2xl font-medium font-display text-gray-800">
+          <h4 class="mt-3 text-2xl font-medium text-gray-800 font-display">
             {{ props.task.name }}
           </h4>
 
-          <section v-html="props.task.description" class="prose dark:prose-invert line-clamp-2 mt-6 text-xs" />
+          <section v-html="props.task.description" class="mt-6 text-xs prose dark:prose-invert line-clamp-2" />
 
           <div class="flex items-center w-full mt-3 text-xs font-medium text-gray-200">
 
             <div class="flex items-center">
-              <IconCalendar class="h-4 w-4" />
+              <IconCalendar class="w-4 h-4" />
 
               <span class="ml-1 leading-none">
                 {{ props.task.created_at }}
@@ -151,7 +151,7 @@ function isBlackOrWhite(color) {
             </div>
 
             <div class="relative flex items-center ml-4">
-              <IconMessage class="h-4 w-4" />
+              <IconMessage class="w-4 h-4" />
 
               <span class="ml-1 leading-none">4</span>
             </div>
@@ -181,10 +181,32 @@ function isBlackOrWhite(color) {
 }
 
 .ghost {
-  @apply bg-rose-600/40 rounded-lg
+  @apply bg-rose-600/40 rounded-lg;
+  opacity: 0.5;
+  background: #c8ebfb;
 }
 
 .ghost > div {
   opacity: 0.75;
+}
+
+.flip-list-move {
+  transition: transform 0.5s;
+}
+
+.no-move {
+  transition: transform 0s;
+}
+
+.list-group {
+  min-height: 20px;
+}
+
+.list-group-item {
+  cursor: move;
+}
+
+.list-group-item i {
+  cursor: pointer;
 }
 </style>

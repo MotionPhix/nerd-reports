@@ -19,7 +19,6 @@ Route::get('/users/{project}', function (Project $project) {
     'users' => $users
 
   ]);
-
 });
 
 Route::group(
@@ -46,41 +45,53 @@ Route::group(
       '/',
       \App\Http\Controllers\Contacts\Api\Index::class
     )->name('api.contacts.index');
+  }
+);
+
+Route::group(
+  ['prefix' => 'tasks'],
+  function () {
+
+    Route::put(
+      '/m/{task}',
+      \App\Http\Controllers\Tasks\Api\Move::class
+    )->name('tasks.move');
 
   }
 );
 
 Route::group(
-  ['prefix' => 'tags'], function () {
+  ['prefix' => 'tags'],
+  function () {
 
-  Route::get(
-    '/',
-    \App\Http\Controllers\Tags\Api\Index::class
-  )->name('tags.index');
+    Route::get(
+      '/',
+      \App\Http\Controllers\Tags\Api\Index::class
+    )->name('tags.index');
 
-  Route::post(
-    '/{contact:cid}',
-    \App\Http\Controllers\Tags\Api\Store::class
-  )->name('tags.store');
+    Route::post(
+      '/{contact:cid}',
+      \App\Http\Controllers\Tags\Api\Store::class
+    )->name('tags.store');
 
-  Route::patch(
-    '/{contact:cid}',
-    \App\Http\Controllers\Tags\Api\Detach::class
-  )->name('tags.detach');
+    Route::patch(
+      '/{contact:cid}',
+      \App\Http\Controllers\Tags\Api\Detach::class
+    )->name('tags.detach');
 
-  Route::put(
-    '/{contact:cid}',
-    \App\Http\Controllers\Tags\Api\Update::class
-  )->name('tags.update');
+    Route::put(
+      '/{contact:cid}',
+      \App\Http\Controllers\Tags\Api\Update::class
+    )->name('tags.update');
 
-  Route::delete(
-    'delete/{tag:name}',
-    \App\Http\Controllers\Tags\Api\Destroy::class
-  )->name('tags.destroy');
+    Route::delete(
+      'delete/{tag:name}',
+      \App\Http\Controllers\Tags\Api\Destroy::class
+    )->name('tags.destroy');
 
-  Route::get(
-    '/{filter}',
-    \App\Http\Controllers\Tags\Api\Filtered::class
-  )->name('tags.filter');
-
-});
+    Route::get(
+      '/{filter}',
+      \App\Http\Controllers\Tags\Api\Filtered::class
+    )->name('tags.filter');
+  }
+);

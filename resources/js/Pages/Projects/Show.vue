@@ -32,7 +32,7 @@ function updateProjectName (project_name: string) {
   <Head :title="title" />
 
   <nav
-    class="flex items-center max-w-4xl mx-auto w-full h-16 gap-6 px-8 dark:text-white dark:border-gray-700"
+    class="flex items-center w-full h-16 max-w-5xl gap-6 px-8 mx-auto dark:text-white dark:border-gray-700"
     :class="navClasses">
 
     <Link
@@ -45,13 +45,13 @@ function updateProjectName (project_name: string) {
 
     <ProjectNameForm
         :project="project"
-        class="font-display capitalize"
+        class="capitalize font-display"
         @saved="updateProjectName"
     />
 
   </nav>
 
-  <section class="flex flex-col max-w-3xl gap-24 px-6 pt-12 mx-auto relative">
+  <section class="relative flex flex-col max-w-3xl gap-24 px-6 pt-12 mx-auto">
 
     <article class="flex" v-if="!! props.project.contact.firm">
 
@@ -159,7 +159,7 @@ function updateProjectName (project_name: string) {
               {{ project.due_date }}
             </span>
 
-            <span class="text-xs dark:text-gray-500 font-sans text-gray-400">
+            <span class="font-sans text-xs text-gray-400 dark:text-gray-500">
               Deadline {{ project.deadline.includes('now') ? 'is' : 'was'}} {{ project.deadline }}.
             </span>
           </div>

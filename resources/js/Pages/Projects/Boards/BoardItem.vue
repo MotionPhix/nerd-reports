@@ -15,6 +15,8 @@ const props = defineProps({
 
 const boardRef = ref();
 
+const drag = ref(false)
+
 const tasks = ref(props.board.tasks);
 
 const formStore = useFormStore()
@@ -55,10 +57,12 @@ function onChange(e) {
   }
 
   axios.put(route('tasks.move', {task: task.id}), {
-    preserveScroll: true,
 
     position: position,
     board_id: props.board.id
+
+  }).then((resp) => {
+    // console.log(resp.data);
   });
 
 }
@@ -66,12 +70,15 @@ function onChange(e) {
 function generateColor() {
   const hue = Math.floor(Math.random() * 360); // Generate a random hue value between 0 and 359
   const saturation = 70; // You can adjust saturation and lightness as needed
-  const lightness = 60;
+  const lightness = 40;
   const color = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
 
   return color;
 }
 
+const onCheckMove = function(e) {
+  window.console.log("Future index: " + e.relatedContext.component.name);
+}
 </script>
 
 <template>
@@ -79,7 +86,7 @@ function generateColor() {
 
     <div class="flex items-center justify-between px-3 py-2">
 
-      <h3 class="font-semibold text-xl">
+      <h3 class="text-xl font-semibold">
         {{ props.board.name }}
       </h3>
 
@@ -87,30 +94,30 @@ function generateColor() {
         as="div"
         class="relative z-10">
 
-        <MenuButton class="hover:bg-gray-300 dark:hover:bg-gray-900 w-8 h-8 rounded-md grid place-content-center">
+        <MenuButton class="grid w-8 h-8 rounded-md hover:bg-gray-300 dark:hover:bg-gray-900 place-content-center">
 
           <IconDots class="w-5 h-5" />
 
         </MenuButton>
 
         <transition
-          enter-active-class="transition transform duration-100 ease-out"
-          enter-from-class="opacity-0 scale-90"
-          enter-to-class="opacity-100 scale-100"
-          leave-active-class="transition transform duration-100 ease-in"
-          leave-from-class="opacity-100 scale-100"
-          leave-to-class="opacity-0 scale-90">
+          enter-active-class="transition duration-100 ease-out transform"
+          enter-from-class="scale-90 opacity-0"
+          enter-to-class="scale-100 opacity-100"
+          leave-active-class="transition duration-100 ease-in transform"
+          leave-from-class="scale-100 opacity-100"
+          leave-to-class="scale-90 opacity-0">
 
           <MenuItems
-            class="overflow-hidden absolute right-0 top-5 w-40 dark:text-gray-300 bg-white rounded-md dark:bg-gray-800 dark:border-gray-700 border shadow-lg origin-top-left focus:outline-none">
+            class="absolute right-0 w-40 overflow-hidden origin-top-left bg-white border rounded-md shadow-lg top-5 dark:text-gray-300 dark:bg-gray-800 dark:border-gray-700 focus:outline-none">
 
             <MenuItem v-slot="{ active }">
 
               <button
                 :class="{ 'bg-gray-100': active }"
-                class="flex items-center gap-2 px-4 py-2 text-sm dark:hover:bg-gray-600 w-full"
+                class="flex items-center w-full gap-2 px-4 py-2 text-sm dark:hover:bg-gray-600"
                 @click="setCurrentBoardId(props.board.id)">
-                <IconPlus stroke="2.5" class="h-4 w-4" />
+                <IconPlus stroke="2.5" class="w-4 h-4" />
                 <span>Add task</span>
               </button>
 
@@ -121,9 +128,9 @@ function generateColor() {
               <Link
                 as="button"
                 method="delete"
-                class="flex items-center gap-2 px-4 py-2 text-sm dark:hover:bg-gray-600 w-full"
+                class="flex items-center w-full gap-2 px-4 py-2 text-sm dark:hover:bg-gray-600"
                 :href="route('boards.destroy', { project: props.board.project_id, board: props.board })">
-                <IconTrash stroke="2.5" class="h-4 w-4" />
+                <IconTrash stroke="2.5" class="w-4 h-4" />
                 <span>Delete board</span>
               </Link>
             </MenuItem>
@@ -136,11 +143,11 @@ function generateColor() {
 
     </div>
 
-    <div class="pb-3 flex flex-col overflow-hidden">
+    <div class="flex flex-col pb-3 overflow-hidden">
 
       <div
         ref="boardRef"
-        class="px-3 flex-1 overflow-y-auto text-rose-500">
+        class="flex-1 px-3 overflow-y-auto text-rose-500">
 
       <div
         ref="boardRef"
@@ -153,13 +160,26 @@ function generateColor() {
           class="h-full mt-2 space-y-6 cursor-move"
           ghost-class="ghost"
           drag-class="drag"
-          tag="ul"
+          :move="onCheckMove"
+          tag="transition-group"
+          :component-data="{
+            tag: 'ul',
+            type: 'transition-group',
+            name: !drag ? 'flip-list' : null
+          }"
           @change="onChange"
-        >
-          <template #item="{ element }">
-            <TaskItem
-              :task="element" :style="{ 'background-color': generateColor() }" />
-          </template>
+          @start="drag = true"
+          @end="drag = false">
+
+            <template #item="{ element }">
+
+              <TaskItem
+                :task="element"
+                :style="{ 'background-color': generateColor() }"
+                class="list-group-item" />
+
+            </template>
+
         </draggable>
 
       </div>

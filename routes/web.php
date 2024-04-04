@@ -124,7 +124,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/s/{task}', \App\Http\Controllers\Tasks\Show::class)->name('tasks.show');
     Route::patch('/u/{task}', \App\Http\Controllers\Tasks\Update::class)->name('tasks.update');
     Route::delete('/d/{task}', \App\Http\Controllers\Tasks\Destroy::class)->name('tasks.destroy');
-    Route::put('/m/{task}', \App\Http\Controllers\Tasks\Move::class)->name('tasks.move');
 
   });
 

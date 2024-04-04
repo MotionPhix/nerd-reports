@@ -18,9 +18,11 @@ defineOptions({ layout: AuthenticatedLayout });
 <template>
   <Head title="Explore Contacts" />
 
-  <ContactActionMenu :contacts="props.contacts" />
+  <div class="max-w-5xl mx-auto">
+    <ContactActionMenu :contacts="props.contacts" />
+  </div>
 
-  <article class="py-12 max-w-3xl px-6 mx-auto">
+  <article class="max-w-3xl px-6 py-12 mx-auto">
 
     <section v-if="props.contacts.length">
 
