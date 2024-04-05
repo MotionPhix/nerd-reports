@@ -111,17 +111,6 @@ function isBlackOrWhite(color) {
     </form>
 
     <template v-if="!isShowingForm">
-<!--      <a-->
-<!--        class="text-sm"-->
-<!--        href="#">-->
-<!--        {{ task.name }}-->
-<!--      </a>-->
-
-<!--      <button-->
-<!--        class="absolute hidden w-8 h-8 text-gray-600 rounded-md top-1 right-1 bg-gray-50 group-hover:grid place-content-center hover:text-black hover:bg-gray-200"-->
-<!--        @click="showForm()">-->
-<!--        <IconPencil class="w-5 h-5"/>-->
-<!--      </button>-->
 
       <div class="flex flex-col p-2">
 
@@ -209,4 +198,17 @@ function isBlackOrWhite(color) {
 .list-group-item i {
   cursor: pointer;
 }
+
+
+/* <!--      <a-->
+<!--        class="text-sm"-->
+<!--        href="#">-->
+<!--        {{ task.name }}-->
+<!--      </a>-->
+
+<!--      <button-->
+<!--        class="absolute hidden w-8 h-8 text-gray-600 rounded-md top-1 right-1 bg-gray-50 group-hover:grid place-content-center hover:text-black hover:bg-gray-200"-->
+<!--        @click="showForm()">-->
+<!--        <IconPencil class="w-5 h-5"/>-->
+<!--      </button>--> */
 </style>

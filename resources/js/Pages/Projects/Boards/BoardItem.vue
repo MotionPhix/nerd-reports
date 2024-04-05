@@ -1,7 +1,7 @@
 <script setup>
 import { IconDots, IconPlus, IconTrash } from '@tabler/icons-vue';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue';
-import TaskCreateForm from "../Tasks/TaskCreateForm.vue";
+import TaskCreateForm from "@/Pages/Projects/Tasks/TaskCreateForm.vue";
 import TaskItem from "../Tasks/TaskItem.vue";
 import { Link } from "@inertiajs/vue3"
 import { ref, watch } from "vue"
@@ -9,11 +9,10 @@ import { useFormStore } from '@/Stores/formStore';
 import { storeToRefs } from 'pinia';
 import { VueDraggableNext } from "vue-draggable-next"
 import VueDraggable from "vue3-draggable-next"
-import { Container, Draggable } from "vue-dndrop";
-import { applyDrag } from "../../Utils";
 
 const props = defineProps({
-  board: Object
+  board: Object,
+  position: Number
 });
 
 const boardRef = ref();
@@ -75,20 +74,57 @@ function generateColor() {
   return `hsl(${hue}, ${saturation}%, ${lightness}%`
 }
 
-const onCheckMove = function(e) {
+const boardFrom = ref();
+const boardTo = ref();
 
-  console.log(e);
+const onSetBoardFrom = function(idx) {
+
+  drag.value = true
+
+  boardFrom.value = idx
+
 }
 
-const onDrop = (dropResult) => {
-  tasks.value = applyDrag(tasks.value, dropResult);
-};
+const onMoveTask = function(e) {
+
+  console.log(e);
+
+}
+
+const onUnSetBoardFrom = function(e) {
+  console.log(e.to);
+
+  drag.value = false
+
+  console.log('from: ' + boardFrom.value, 'to: ' + e.from);
+
+}
 
 const dragOptions = {
   animation: 0,
   group: "description",
   disabled: false,
   ghostClass: "ghost"
+}
+
+function generateColorForBoard(boardId) {
+  const hashCode = boardId => {
+    let hash = 0;
+    for (let i = 0; i < boardId.length; i++) {
+      hash = boardId.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return hash;
+  };
+
+  // Convert the hash code to a valid hue value within the range [0, 360)
+  const hue = Math.abs(hashCode(boardId)) % 360;
+
+  // Set saturation and lightness values
+  const saturation = 70;
+  const lightness = 40;
+
+  // Return the HSL color string
+  return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
 }
 </script>
 
@@ -164,19 +200,6 @@ const dragOptions = {
         ref="boardRef"
         class="flex-1 overflow-y-auto h-[70dvh] scrollbar-none">
 
-        <Container @drop="onDrop" tag="ul" group-name="tasks">
-
-          <Draggable v-for="task in props.board.tasks" :key="task.id" tag="li">
-
-            <TaskItem
-              :task="task"
-              :style="{ 'background-color': generateColor() }"
-              class="list-group-item" />
-
-          </Draggable>
-
-        </Container>
-
         <!-- <VueDraggableNext
           v-model="tasks"
           group="tasks"
@@ -203,7 +226,7 @@ const dragOptions = {
 
         </VueDraggableNext>  -->
 
-         <!-- <vue-draggable
+        <vue-draggable
           item-key="id"
           drag-class="drag"
           ghost-class="ghost"
@@ -213,9 +236,9 @@ const dragOptions = {
           v-model="tasks"
           v-bind="dragOptions"
           group="tasks"
-          :move="onCheckMove"
-          @start="drag = true"
-          @end="drag = false"
+          :move="onMoveTask()"
+          @start="onSetBoardFrom(props.position)"
+          @end="onUnSetBoardFrom"
           @change="onChange">
 
           <template #item="{ element }">
@@ -223,12 +246,12 @@ const dragOptions = {
             <TaskItem
               :task="element"
               :key="element.id"
-              :style="{ 'background-color': generateColor() }"
+              :style="{ 'background-color': generateColorForBoard(props.board.id) }"
               class="list-group-item" />
 
           </template>
 
-        </vue-draggable> -->
+        </vue-draggable>
 
       </div>
 
@@ -242,3 +265,11 @@ const dragOptions = {
     </div>
   </div>
 </template>
+
+<style>
+
+  ul > li {
+    background-color: generateColor();
+  }
+
+</style>

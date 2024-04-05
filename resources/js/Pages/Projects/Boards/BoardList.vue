@@ -15,9 +15,10 @@ const props = defineProps({
     <div class="inline-flex items-start space-x-4">
 
       <BoardItem
-        v-for="board in project.boards"
+        v-for="(board, idx) in project.boards"
         :key="board.id"
         :board="board"
+        :position="idx"
         class="w-80 dark:text-gray-200 max-h-full flex flex-col rounded-md" />
 
         <div>
