@@ -1,82 +1,104 @@
 <script setup lang="ts">
-import { useForm } from '@inertiajs/vue3'
-import { nextTick, ref } from 'vue'
-import type { Project } from '@/types'
-import toast from '@/Stores/toast'
-import TextInput from "@/Components/TextInput.vue"
+import { nextTick, ref } from "vue";
+import { useForm } from "@inertiajs/vue3"
+import { useNotificationStore } from '@/Stores/notificationStore'
 
 const props = defineProps<{
-  project: Project
-}>()
+  project: App.Data.ProjectFullData
+}>();
 
-const form = useForm({
-  name: props.project.name,
-})
+const toastStore = useNotificationStore();
 
-const isEditing = ref(false)
-
-const input = ref()
+const { notify } = toastStore
 
 const emit = defineEmits(['saved'])
 
-// watch(() => form.name, async () => {
-//   await nextTick()
-// })
+const form = useForm({
+  name: props.project.name
+});
+
+const input = ref();
+
+const isEditing = ref(false);
 
 async function edit() {
-  isEditing.value = true
-  await nextTick()
-  input.value.select()
+
+  isEditing.value = true;
+
+  await nextTick();
+
+  input.value.select();
+
 }
 
 function onSubmit() {
-  isEditing.value = false
 
-  form.transform((data) => {
+  isEditing.value = false;
 
-    const { boards, contact, ...formData } = props.project;
+  if (props.project.name === form.name) return
 
-    formData.name = data.name
+  form.patch(
+    route('projects.update', {project: props.project.pid}),
+    {
+      preserveScroll: true,
 
-    return formData;
-  })
+      onError: (errors) => {
 
-  form.patch(route('projects.update', props.project.pid), {
-    onError: (err) => {
-      form.reset()
+        form.reset()
 
-      toast.add({
-        title: 'Missing project detail',
-        type: 'danger',
-        message: err.name,
-      })
-    },
+        for (const prop in errors) {
 
-    onSuccess: (resp) => {
-      form.name = resp.props.project.name
-      emit('saved', resp.props.project.name)
-    },
-  })
+          notify({
+            title:  'Resolve errors',
+            type: 'warning',
+            message: errors[prop]
+          })
+
+        }
+
+      },
+
+      onSuccess: (resp) => {
+
+        emit('saved', resp.props.project)
+
+        notify({
+          title:  true,
+          message: 'Project was renamed!'
+        })
+
+      },
+
+    }
+
+  );
+
 }
 </script>
 
 <template>
-  <div class="relative flex flex-col items-start">
-    <h3
-      class="text-xl border whitespace-pre w-full overflow-hidden text-ellipsis border-transparent font-thin leading-none tracking-tight text-gray-900 dark:text-white px-3 py-1.5 hover:bg-gray-400 hover:text-gray-900 cursor-pointer rounded-md transition duration-300"
-      :class="[isEditing ? 'invisible' : '']"
-      @click="edit()"
-    >
-      {{ form.name ?? ' ' }}
-    </h3>
+  <div class="relative flex flex-col items-start max-w-full">
 
-    <form v-show="isEditing" @submit.prevent="onSubmit()" @focusout="onSubmit()">
+    <h1
+      :class="[isEditing ? 'invisible': '']"
+      class="hover:bg-white/20 whitespace-pre w-full overflow-hidden text-ellipsis border border-transparent rounded-md cursor-pointer px-3 py-1.5 text-2xl text-white font-semibold"
+      @click="edit()">
+      {{ form.name ? form.name : ' ' }}
+    </h1>
+
+    <form
+      v-show="isEditing"
+      @focusout="onSubmit()"
+      @submit.prevent="onSubmit()"
+      class="w-full">
+
       <input
-          ref="input"
-          v-model="form.name"
-          type="text"
-          placeholder="Project name"
-          class="absolute inset-0 dark:bg-gray-800 px-3 text-xl font-thin placeholder-gray-500 py-1.5 rounded-md focus:ring-2 focus:ring-lime-600" />
+        ref="input"
+        v-model="form.name"
+        class="absolute inset-0 text-2xl max-w-full font-semibold placeholder-gray-400 px-3 py-1.5 rounded-md focus:ring-2 focus:ring-blue-900 dark:text-gray-800"
+        placeholder="Project name"
+        type="text">
+
     </form>
   </div>
 </template>

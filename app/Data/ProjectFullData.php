@@ -3,6 +3,7 @@
 namespace App\Data;
 
 use Illuminate\Support\Collection;
+use Illuminate\Validation\Rule;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Optional;
 
@@ -10,23 +11,23 @@ use Spatie\LaravelData\Optional;
 class ProjectFullData extends Data
 {
   public function __construct(
-    public string|null|Optional     $pid,
+    public string|null|Optional $pid,
 
-    public string                   $name,
+    public string $name,
 
-    public string|null|Optional     $created_at,
+    public string|null|Optional $created_at,
 
-    public string|null              $due_date,
+    public string|null $due_date,
 
-    public string|null|Optional     $deadline,
+    public string|null|Optional $deadline,
 
-    public string                   $status,
+    public string|Optional $status,
 
-    public string|null|Optional     $description,
+    public string|null|Optional $description,
 
     public string|int|null|Optional $contact_id,
 
-    public ContactData|Optional     $contact,
+    public ContactData|Optional $contact,
 
     /** @var Collection<BoardData> */
     public Collection|null|Optional $boards,
@@ -39,9 +40,15 @@ class ProjectFullData extends Data
 
       'description' => 'sometimes|min:50',
 
-      'contact_id' => 'required|exists:contacts,cid',
+      'contact_id' => [
+        Rule::requiredIf(request()->method() === 'POST'),
+        'exists:contacts,cid'
+      ],
 
-     'due_date' => 'required|date|after_or_equal:today',
+      'due_date' => [
+        Rule::requiredIf(request()->method() === 'POST'),
+        'date', 'after_or_equal:today'
+      ],
 
       'documents.*' => 'sometimes|mimes:jpg,jpeg,png,gif,pdf,doc,docx,xls,xlsx',
     ];

@@ -18,7 +18,9 @@ class Update extends Controller
 
     $validated['due_date'] = Carbon::parse($validated['due_date']);
 
-    $validated['created_at'] = Carbon::parse($validated['created_at']);
+    if(isset($validated['created_at'])) {
+      $validated['created_at'] = Carbon::parse($validated['created_at']);
+    }
 
     $project->update($validated);
 

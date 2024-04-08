@@ -2,6 +2,8 @@
 
 namespace App\Data;
 
+use App\Models\Board;
+use App\Rules\UniqueBoardName;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
 use Spatie\LaravelData\Data;
@@ -25,19 +27,13 @@ class BoardData extends Data
 
   public static function rules()
   {
-    $project_id = request()->route()->parameter('project')->id;
-    $board_id = request()->route()->parameter('board')->id ?? null;
+    $project_id = request()->route()->parameter('project')->id ?? null;
 
     return [
       'name' => [
         'required',
         'string',
-        Rule::unique('boards')->where(function ($query) use ($project_id, $board_id) {
-          return $query->where('project_id', $project_id)
-            ->when($board_id, function ($query) use ($board_id) {
-              return $query->where('id', '!=', $board_id);
-            });
-        })
+        new UniqueBoardName($project_id),
       ],
     ];
   }

@@ -7,6 +7,8 @@ import { computed, nextTick, onMounted, ref } from "vue"
 
 import { useFormStore } from "@/Stores/formStore"
 
+import { useNotificationStore } from "@/Stores/notificationStore"
+
 import { storeToRefs } from "pinia"
 
 import InputError from '@/Components/InputError.vue'
@@ -16,7 +18,9 @@ import TextInput from "@/Components/TextInput.vue"
 import TipTap from "@/Components/TipTap.vue"
 
 import SelectInput from "@/Components/SelectInput.vue"
+
 import axios from "axios"
+
 import { watch } from 'vue';
 
 const props = defineProps({
@@ -24,6 +28,8 @@ const props = defineProps({
 });
 
 const formStore = useFormStore()
+
+const toastStore = useNotificationStore();
 
 const {
   currentBoardId
@@ -33,6 +39,8 @@ const {
   setCurrentBoardId,
   unSetCurrentBoardId,
 } = formStore
+
+const { notify } = toastStore
 
 const emit = defineEmits(['created']);
 
@@ -73,11 +81,11 @@ const form = useForm({
 
 watch(() => currentBoardId.value, async (newBoardId, oldBoardId) => {
 
-  await nextTick();
-
   if (!! newBoardId) {
 
-    inputNameRef.value.focus();
+    await nextTick();
+
+    inputNameRef.value?.focus();
 
   }
 
@@ -85,7 +93,6 @@ watch(() => currentBoardId.value, async (newBoardId, oldBoardId) => {
 
 async function showForm() {
   setCurrentBoardId(props.board.id)
-
 }
 
 function onSubmit() {
@@ -111,24 +118,27 @@ function onSubmit() {
     preserveScroll: true,
 
     onError: (errors) => {
-      // form.reset()
 
-      console.log(errors)
+      for (const prop in errors) {
 
-      // for (const prop in errors) {
-      //   toast.add({
-      //     title: 'Resolve errors',
-      //     type: 'warning',
-      //     message: errors[prop],
-      //   })
-      // }
+        notify({
+          title:  'Resolve errors',
+          type: 'warning',
+          message: errors[prop]
+        })
+
+      }
 
     },
 
     onSuccess: () => {
+
       form.reset()
+
       inputNameRef.value.focus();
+
       unSetCurrentBoardId()
+
       emit('created')
     },
   })
@@ -148,12 +158,10 @@ onMounted(() => {
 
 <template>
   <form
-    class="grid grid-cols-2 gap-6 bg-gray-700 py-4 p-2 z-30 rounded-md fixed bottom-5 right-5 max-w-sm"
+    class="fixed z-50 grid max-w-sm grid-cols-2 gap-6 p-2 py-4 bg-gray-700 rounded-md bottom-5 right-5"
     @keydown.esc="unSetCurrentBoardId()"
     @submit.prevent="onSubmit()"
     v-if="isShowingForm">
-
-<!--    start-->
 
     <div class="col-span-2">
       <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
@@ -170,7 +178,7 @@ onMounted(() => {
       <InputError :message="form.errors.name" />
     </div>
 
-    <div class="col-span-2 grid grid-cols-2 gap-2">
+    <div class="grid grid-cols-2 col-span-2 gap-2">
       <div class="col-span-1">
         <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Assign task</label>
 
@@ -206,35 +214,15 @@ onMounted(() => {
       <InputError :message="form.errors.description" />
     </div>
 
-<!--    <div class="sticky bottom-0 z-50 flex justify-between col-span-2 gap-2 px-2 py-2 mt-2 bg-gray-500 rounded-full dark:bg-gray-700">-->
-<!--      <button-->
-<!--        type="submit"-->
-<!--        class="flex items-center gap-2 px-3 py-2 font-semibold text-white transition duration-300 rounded-full bg-white/10 hover:bg-white/20">-->
-<!--        <IconCheck class="w-5 h-5" />-->
-<!--        <span>-->
-<!--          Create task-->
-<!--        </span>-->
-<!--      </button>-->
-
-<!--      <button-->
-<!--        type="button"-->
-<!--        class="px-3 py-2 font-semibold text-white transition duration-300 rounded-md hover:text-white/60"-->
-<!--        @click="close">-->
-<!--        <span>Cancel</span>-->
-<!--      </button>-->
-<!--    </div>-->
-
-<!--    end-->
-
     <div class="flex justify-between col-span-2">
       <button
-        class="px-4 py-2 text-sm font-medium text-white bg-rose-600 hover:bg-rose-500 rounded-md shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 focus:outline-none"
+        class="px-4 py-2 text-sm font-medium text-white rounded-md shadow-sm bg-rose-600 hover:bg-rose-500 focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 focus:outline-none"
         type="submit">
         Add task
       </button>
 
       <button
-        class="px-4 py-2 text-sm dark:text-gray-300 font-medium text-gray-700 hover:text-black rounded-md focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 focus:outline-none"
+        class="px-4 py-2 text-sm font-medium text-gray-700 rounded-md dark:text-gray-300 hover:text-black focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 focus:outline-none"
         type="button"
         @click="unSetCurrentBoardId()">
         Cancel

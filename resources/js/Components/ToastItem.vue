@@ -32,7 +32,7 @@ onMounted(() => {
 })
 
 const containerClass = computed(() => {
-  return cva('w-full p-4 rounded-lg shadow flex items-center gap-4', {
+  return cva('w-80 p-4 rounded-lg shadow flex items-center gap-4', {
     variants: {
       intent: {
         info: 'bg-blue-100',

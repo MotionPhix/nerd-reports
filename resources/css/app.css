@@ -30,3 +30,9 @@
 .--is-selected {
   @apply dark:bg-lime-500 dark:text-gray-800 bg-gray-400 font-semibold !important;
 }
+
+.Vue-Toastification__toast {
+  padding: 0 !important;
+  margin-right: 10px;
+  @apply bg-gray-500
+}

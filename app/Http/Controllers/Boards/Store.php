@@ -8,16 +8,17 @@ use App\Models\Board;
 use App\Models\Project;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Str;
 
 class Store extends Controller
 {
-  /**
-   * Handle the incoming request.
-   */
+
   public function __invoke(BoardData $boardData, Project $project): RedirectResponse
   {
 
     $valid = $boardData->toArray();
+
+    $valid['name'] = Str::ucfirst($valid['name']);
 
     $valid['project_id'] = $project->id;
 

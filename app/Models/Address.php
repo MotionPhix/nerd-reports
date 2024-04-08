@@ -8,18 +8,18 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Address extends Model
 {
-    use HasFactory;
+  use HasFactory;
 
-    protected $fillable = [
-        'type',
-        'street',
-        'city',
-        'state',
-        'country',
-    ];
+  protected $fillable = [
+    'type',
+    'street',
+    'city',
+    'state',
+    'country',
+  ];
 
-    public function addressable(): MorphTo
-    {
-        return $this->morphTo();
-    }
+  public function addressable(): MorphTo
+  {
+    return $this->morphTo();
+  }
 }

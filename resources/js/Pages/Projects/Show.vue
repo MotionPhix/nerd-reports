@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head, Link } from '@inertiajs/vue3'
-import { IconArrowLeft, IconBuildingFortress, IconClockUp, IconClockDown } from '@tabler/icons-vue'
+import { IconArrowLeft, IconBuildingFortress, IconClockUp, IconClockDown, IconTrash } from '@tabler/icons-vue'
 import { computed, ref } from "vue"
-import ProjectNameForm from './ProjectNameForm.vue'
+import ProjectNameForm from '@/Pages/Projects/ProjectNameForm.vue'
 import useStickyTop from "@/Composables/useStickyTop"
 import BoardList from '@/Pages/Projects/Boards/BoardList.vue'
 
@@ -23,8 +23,10 @@ const title = computed(() => props.project.contact?.firm?.name ?? props.project.
 
 const { navClasses } = useStickyTop();
 
-function updateProjectName (project_name: string) {
-  projectName.value = project_name
+function updateProjectName (project: App.Data.ProjectFullData) {
+
+  projectName.value = project.name
+
 }
 </script>
 
@@ -44,10 +46,21 @@ function updateProjectName (project_name: string) {
     </Link>
 
     <ProjectNameForm
-        :project="project"
-        class="capitalize font-display"
-        @saved="updateProjectName"
+      :project="props.project"
+      @saved="updateProjectName"
     />
+
+    <span class="flex-1"></span>
+
+    <Link
+      method="delete"
+      :href="route('projects.destroy', { ids: props.project.pid })"
+      class="flex items-center gap-2 duration-200 hover:opacity-75"
+      preserve-scroll
+      as="button">
+      <IconTrash class="h-7" />
+      <span>Delete</span>
+    </Link>
 
   </nav>
 

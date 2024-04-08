@@ -2,16 +2,21 @@
 import { useForm } from '@inertiajs/vue3';
 import {IconPlus} from '@tabler/icons-vue';
 import {nextTick, ref} from "vue";
+import { useNotificationStore } from '@/Stores/notificationStore';
 
 const props = defineProps({
   project: Object
 });
+
+const notifyStore = useNotificationStore()
 
 const inputNameRef = ref();
 
 const formRef = ref();
 
 const isShowingForm = ref(false);
+
+const { notify } = notifyStore
 
 const form = useForm({
   name: ''
@@ -27,26 +32,32 @@ async function showForm() {
 
 function onSubmit() {
 
-  form.post(route('boards.store', props.project.pid), {
-    onError: (err) => {
-      // form.reset()
+  form.post(
+    route('boards.store', props.project.pid),
+    {
 
-      console.log(err)
+      preserveScroll: true,
 
-      // toast.add({
-      //   title: 'Resolve errors',
-      //   type: 'warning',
-      //   message: err.name,
-      // })
-    },
+      onError: (err) => {
+        form.reset()
 
-    onSuccess: () => {
-      form.reset()
-      inputNameRef.value.focus();
-      isShowingForm.value = false
-      // formRef.value.scrollIntoView();
-    },
-  })
+        inputNameRef.value.focus();
+
+        notify({
+          title: 'An error ocurred',
+          type: 'warning',
+          message: err.name,
+        })
+      },
+
+      onSuccess: () => {
+        form.reset()
+        isShowingForm.value = false
+        formRef.value.scrollIntoView();
+      },
+
+    }
+  )
 
 }
 </script>
@@ -83,7 +94,7 @@ function onSubmit() {
   <button
     v-if="!isShowingForm"
     @click="showForm()"
-    class="fixed z-50 flex items-center justify-center w-16 h-16 p-2 text-white bg-gray-700 bottom-5 right-5 hover:bg-gray-400 dark:hover:bg-white/20 rounded-xl">
+    class="fixed z-40 flex items-center justify-center w-16 h-16 p-2 text-white bg-gray-700 bottom-5 right-5 hover:bg-gray-400 dark:hover:bg-white/20 rounded-xl">
     <IconPlus class="w-10 h-10"/>
   </button>
 </template>

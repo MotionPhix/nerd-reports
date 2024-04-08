@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 use Stevebauman\Purify\Casts\PurifyHtmlOnGet;
+use Illuminate\Support\Facades\DB;
 
 class Project extends Model
 {
@@ -71,12 +72,12 @@ class Project extends Model
 
   public function files()
   {
-    return $this->hasMany(\App\Models\File::class);
+    return $this->morphMany(File::class, 'fileable');
   }
 
   public function getUsersAttribute()
   {
-    $users = \DB::table('users')
+    $users = DB::table('users')
       ->select(['users.id', 'users.first_name', 'users.last_name'])
       ->where('users.id', '!=', auth()->id())
       ->orderBy('users.first_name')

@@ -8,15 +8,15 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Email extends Model
 {
-    use HasFactory;
+  use HasFactory;
 
-    protected $fillable = [
-        'is_primary_email',
-        'email',
-    ];
+  protected $fillable = [
+    'is_primary_email',
+    'email',
+  ];
 
-    public function emailable(): MorphTo
-    {
-        return $this->morphTo();
-    }
+  public function emailable(): MorphTo
+  {
+    return $this->morphTo();
+  }
 }

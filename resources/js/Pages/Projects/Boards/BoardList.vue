@@ -1,25 +1,25 @@
 <script setup lang="ts">
 import { IconDots } from '@tabler/icons-vue';
-import BoardNameForm from '../Boards/BoardNameForm.vue';
-import BoardCreateForm from '../Boards/BoardCreateForm.vue';
-import BoardItem from "../Boards/BoardItem.vue";
+import BoardNameForm from '@/Pages/Projects/Boards/BoardNameForm.vue';
+import BoardCreateForm from '@/Pages/Projects/Boards/BoardCreateForm.vue';
+import BoardItem from "@/Pages/Projects/Boards/BoardItem.vue";
 
-const props = defineProps({
-  project: Object
-});
+const props = defineProps<{
+  project: App.Data.ProjectFullData;
+}>();
 </script>
 
 <template>
-  <div class="flex-1 overflow-x-auto scrollbar-thin scroll-smooth px-6">
+  <div class="flex-1 px-6 overflow-x-auto scrollbar-thin scroll-smooth">
 
     <div class="inline-flex items-start space-x-4">
 
       <BoardItem
-        v-for="(board, idx) in project.boards"
+        v-for="(board, idx) in props.project.boards"
         :key="board.id"
         :board="board"
-        :position="idx"
-        class="w-80 dark:text-gray-200 max-h-full flex flex-col rounded-md" />
+        :boardIndex="idx"
+        class="flex flex-col max-h-full rounded-md w-80 dark:text-gray-200" />
 
         <div>
 

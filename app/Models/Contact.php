@@ -66,13 +66,6 @@ class Contact extends Model
     );
   }
 
-  // public function primaryEmail(): Attribute
-  // {
-  //     return Attribute::make(
-  //         get: fn () => $this->emails()->map(function($email) { return $email->is_primary_email; })
-  //     );
-  // }
-
   public function primaryEmail(): Attribute
   {
     return Attribute::make(
