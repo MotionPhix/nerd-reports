@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
-import { Head, Link } from '@inertiajs/vue3'
+import { Head, Link, router } from '@inertiajs/vue3'
 import { IconArrowLeft, IconBuildingFortress, IconClockUp, IconClockDown, IconTrash } from '@tabler/icons-vue'
 import { computed, ref } from "vue"
 import ProjectNameForm from '@/Pages/Projects/ProjectNameForm.vue'
 import useStickyTop from "@/Composables/useStickyTop"
 import BoardList from '@/Pages/Projects/Boards/BoardList.vue'
+import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
+import { useProjectStatus } from '@/Composables/useProjectStatus'
 
 const props = defineProps<Props>()
 
@@ -17,15 +19,67 @@ defineOptions({
   layout: AuthenticatedLayout,
 })
 
+const { projectStatus } = useProjectStatus(props.project.status);
+
 const projectName = ref(props.project.name);
 
-const title = computed(() => props.project.contact?.firm?.name ?? props.project.contact.first_name + ' ' + props.project.contact.last_name)
+const title = computed(
+  () => props.project.contact?.firm?.name ?? `${props.project.contact.first_name} ${props.project.contact.last_name}`
+)
 
 const { navClasses } = useStickyTop();
 
-function updateProjectName (project: App.Data.ProjectFullData) {
+function updateProjectName (status: string) {
 
-  projectName.value = project.name
+  const { projectStatus } = useProjectStatus(status);
+
+  projectStatus.value = projectStatus
+
+}
+
+const setStatus = (status: string) => {
+
+  router
+    .patch(
+      route('projects.update', { project: props.project.pid }),
+      {
+        status: status,
+
+        preserveScroll: true,
+
+        onError: (errors) => {
+
+          for (const prop in errors) {
+
+            notify({
+
+              title:  'Resolve errors',
+
+              type: 'warning',
+
+              message: errors[prop]
+
+            })
+
+          }
+
+        },
+
+        onSuccess: () => {
+
+          notify({
+
+            title:  true,
+
+            message: 'Project was renamed!'
+
+          })
+
+        },
+
+      }
+
+  );
 
 }
 </script>
@@ -100,25 +154,84 @@ function updateProjectName (project: App.Data.ProjectFullData) {
               Upload files
             </button>
 
-            <button
-              class="h-10 px-6 font-semibold border rounded-full dark:border-gray-700 dark:text-slate-300 border-slate-200 text-slate-900"
-              type="button">
+            <Link
+              as="button"
+              method="delete"
+              :href="route('projects.destroy', { ids: props.project.pid })"
+              class="h-10 px-6 font-semibold border rounded-full dark:border-gray-700 dark:text-slate-300 border-slate-200 text-slate-900">
               Delete
-            </button>
+            </Link>
           </div>
 
-          <button
-            type="button"
-            class="flex items-center justify-center flex-none bg-gray-400 rounded-full text-lime-100 w-9 h-9 dark:text-lime-600 dark:bg-lime-50"
-            aria-label="Like">
-            <svg width="20" height="20" fill="currentColor" aria-hidden="true">
-              <path fill-rule="evenodd" clip-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" />
-            </svg>
-          </button>
+          <Menu
+            as="div"
+            class="relative z-10">
+
+            <MenuButton
+              class="h-10 font-semibold dark:border-gray-700 dark:text-slate-300 border-slate-200 text-slate-900">
+
+              {{ projectStatus }}
+
+            </MenuButton>
+
+            <transition
+              enter-active-class="transition duration-100 ease-out transform"
+              enter-from-class="scale-90 opacity-0"
+              enter-to-class="scale-100 opacity-100"
+              leave-active-class="transition duration-100 ease-in transform"
+              leave-from-class="scale-100 opacity-100"
+              leave-to-class="scale-90 opacity-0">
+
+              <MenuItems
+                class="absolute right-0 w-40 overflow-hidden origin-top-left bg-white border rounded-md shadow-lg top-10 dark:text-gray-300 dark:bg-gray-800 dark:border-gray-700 focus:outline-none">
+
+                <MenuItem>
+
+                  <button
+                    type="button"
+                    class="flex items-center w-full gap-2 px-4 py-2 text-sm dark:hover:bg-gray-600"
+                    @click="setStatus('in_progress')">
+                    <span>In progress</span>
+                  </button>
+
+                </MenuItem>
+
+                <MenuItem>
+
+                  <button
+                    type="button"
+                    class="flex items-center w-full gap-2 px-4 py-2 text-sm dark:hover:bg-gray-600"
+                    @click="setStatus('completed')">
+
+                    <span>Completed</span>
+
+                  </button>
+
+                </MenuItem>
+
+                <MenuItem>
+
+                  <button
+                    type="button"
+                    class="flex items-center w-full gap-2 px-4 py-2 text-sm dark:hover:bg-gray-600"
+                    @click="setStatus('cancelled')">
+
+                    <span>Cancelled</span>
+
+                  </button>
+
+                </MenuItem>
+
+              </MenuItems>
+
+            </transition>
+
+          </Menu>
+
         </div>
 
         <p class="text-sm text-slate-500">
-          This is the brief information about the company and the contact person
+          This is brief information about the company and the contact person
           handling the project. You can get in touch with them should need be.
         </p>
       </form>

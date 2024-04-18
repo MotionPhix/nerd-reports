@@ -43,7 +43,7 @@ import { debounce } from "lodash";
 
 import { storeToRefs } from "pinia";
 
-import { ref } from "vue";
+import { computed, ref } from "vue"
 
 interface FormData {
   first_name: string;
@@ -260,6 +260,12 @@ function onSubmit() {
 }
 
 const { navClasses } = useStickyTop();
+
+const placeholder = computed(
+  () => form.firm_name
+    ? `A few things to note about ${form.first_name}`
+    : 'Enter some notes'
+)
 </script>
 
 <template>
@@ -274,7 +280,7 @@ const { navClasses } = useStickyTop();
   <article>
 
     <nav
-      class="flex items-center w-full h-16 gap-6 px-2 mx-auto dark:text-white dark:border-gray-700"
+      class="flex items-center w-full max-w-4xl h-16 gap-6 px-2 mx-auto dark:text-white dark:border-gray-700"
       :class="navClasses">
       <SecondaryButton
         class="flex items-center gap-2 font-bold text-blue-300 transition duration-300 rounded-full dark:text-lime-300 hover:text-blue-500"
@@ -326,7 +332,7 @@ const { navClasses } = useStickyTop();
         </h2>
 
         <p class="text-sm text-gray-600 dark:text-gray-400">
-          Manage contact personal information, and company data settings.
+          Manage contact information, and company data settings.
         </p>
       </div>
 
@@ -640,7 +646,7 @@ const { navClasses } = useStickyTop();
         <section>
           <TipTap
             v-model="form.bio"
-            placeholder="Write down some notes"
+            v-model:placeholder="placeholder"
           />
         </section>
 

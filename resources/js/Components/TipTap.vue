@@ -36,16 +36,13 @@ const props = defineProps({
     default: "",
   },
 
-  placeholder: {
-    type: String,
-    default: "",
-  },
-
   height: {
     type: String,
     default: ''
   }
 })
+
+const placeholder = defineModel('placeholder', { default: 'Write some notes' })
 
 const emits = defineEmits(["update:modelValue"])
 
@@ -80,7 +77,7 @@ const editor = useEditor({
           return "Enter a title for the note"
         }
 
-        return props.placeholder ?? "Write some notes"
+        return placeholder.value ?? "Write some notes"
       },
     }),
 
