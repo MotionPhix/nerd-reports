@@ -13,8 +13,13 @@ class Store extends Controller
      */
     public function __invoke(Request $request)
     {
+      $request->dd();
+
+      if ($request->hasFile('file')) {
+
         $file = $request->file('file');
 
+        // $file->store('files/' . $request->user()->id . '/' . now()->format('Y') . '/' . now()->format('m'), 'public');
         $file->store('files/' . $request->user()->id . '/' . now()->format('Y') . '/' . now()->format('m'), 'public');
 
         $media = File::create([
@@ -32,5 +37,8 @@ class Store extends Controller
         return response()->json([
           'id' => $media->id
         ]);
+
+      }
+
     }
 }

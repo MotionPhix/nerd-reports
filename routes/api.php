@@ -76,7 +76,7 @@ Route::group(
     )->name('comments.move');
 
   }
-);
+)->middleware('auth');
 
 
 Route::group(

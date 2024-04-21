@@ -7,7 +7,7 @@ import { IconX } from '@tabler/icons-vue'
 
 import { ref } from "vue"
 
-import { useForm, usePage } from "@inertiajs/vue3"
+import { useForm } from "@inertiajs/vue3"
 
 import { useNotificationStore } from "@/Stores/notificationStore"
 
@@ -92,22 +92,35 @@ const uploadFiles = (files) => {
 
     reader.onload = (e) => {
 
-      media.value.push({
+      let item = {
 
-        url: e.target.result
+        url: e.target.result,
 
-      })
+        id: undefined,
+
+        loading: true
+
+      }
+
+      let formData = new FormData()
+
+      formData.append('file', file)
+
+      axios
+        .post(
+          `/api/comments/uploads/${props.task.id}`,
+          formData
+        )
+        .then(({ data }) => {
+
+          item.id = data.id
+
+        })
+        .finally(() => item.loading = false)
+
+      media.value.push(item)
 
     }
-
-    let formData = new FormData()
-
-    formData.append('file', file)
-
-    axios.post(`/api/comments/uploads/${props.task.id}`, formData)
-      .then((res) => {
-        console.log(res)
-      })
 
   })
 
