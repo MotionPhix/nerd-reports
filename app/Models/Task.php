@@ -46,9 +46,14 @@ class Task extends Model
     return $this->belongsTo(Board::class);
   }
 
-  public function assignedTo()
+  public function user()
   {
     return $this->belongsTo(User::class, 'assigned_to');
+  }
+
+  public function comments()
+  {
+    return $this->hasMany(Comment::class);
   }
 
   public static function booted()

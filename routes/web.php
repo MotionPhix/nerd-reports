@@ -150,6 +150,25 @@ Route::middleware('auth')->group(function () {
 
   });
 
+  Route::prefix('comments')->group(function () {
+
+    Route::post(
+      '/{task}',
+      \App\Http\Controllers\Comments\Store::class
+    )->name('comments.store');
+
+    Route::patch(
+      '/u/{comment}',
+      \App\Http\Controllers\Comments\Update::class
+    )->name('comments.update');
+
+    Route::delete(
+      '/d/{comment}',
+      \App\Http\Controllers\Comments\Destroy::class
+    )->name('comments.destroy');
+
+  });
+
   Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
 
   Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

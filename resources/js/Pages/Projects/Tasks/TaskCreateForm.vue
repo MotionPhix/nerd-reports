@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3';
 
-import { IconPlus } from "@tabler/icons-vue"
-
 import { computed, nextTick, onMounted, ref } from "vue"
 
 import { useFormStore } from "@/Stores/formStore"
@@ -23,9 +21,9 @@ import axios from "axios"
 
 import { watch } from 'vue';
 
-const props = defineProps({
-  board: Object
-});
+const props = defineProps<{
+  board: App.Data.BoardData
+}>();
 
 const formStore = useFormStore()
 
@@ -148,17 +146,19 @@ function onSubmit() {
 onMounted(() => {
 
   axios
-    .get(`/api/users/${props.board.project_id}`)
+    .get('/api/users')
     .then((response) => {
       users.value = response.data.users;
     })
 
 })
+
+const placeholder = ref('Describe the task')
 </script>
 
 <template>
   <form
-    class="fixed z-50 grid max-w-sm grid-cols-2 gap-6 p-2 py-4 bg-gray-700 rounded-md bottom-5 right-5"
+    class="fixed z-50 grid max-w-sm grid-cols-2 gap-6 p-2 py-4 shadow-lg border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 rounded-md bottom-5 right-5"
     @keydown.esc="unSetCurrentBoardId()"
     @submit.prevent="onSubmit()"
     v-if="isShowingForm">
@@ -209,7 +209,7 @@ onMounted(() => {
     <div class="sm:col-span-2">
       <label for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Description</label>
 
-      <TipTap v-model="form.description" height="h-54" />
+      <TipTap v-model="form.description" height="h-54" v-model:placeholder="placeholder" />
 
       <InputError :message="form.errors.description" />
     </div>

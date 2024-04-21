@@ -11,12 +11,9 @@ class File extends Model
 {
   use HasFactory;
 
-  protected $fillable = [
-    'name',
-    'path',
-  ];
+  protected $guarded = [];
 
-  public function fileable(): MorphTo
+  public function model(): MorphTo
   {
     return $this->morphTo();
   }

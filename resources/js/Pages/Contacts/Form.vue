@@ -273,7 +273,7 @@ const placeholder = computed(
     :title="
       contact.cid
         ? `Edit ${contact.first_name} ${contact.last_name}`
-        : 'Create new contact'
+        : 'Update new contact'
     "
   />
 
@@ -309,7 +309,7 @@ const placeholder = computed(
         <IconPlus stroke="2.5" class="w-6 h-6 fill-current" />
 
         <span>
-          {{ contact.id ? "Update" : "Create" }}
+          {{ contact.id ? "Update" : "Update" }}
         </span>
 
         <Spinner v-if="form.processing" />

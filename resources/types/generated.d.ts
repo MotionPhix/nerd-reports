@@ -13,6 +13,15 @@ name: string;
 project_id: any | number;
 tasks: Array<App.Data.TaskData> | Array<any> | null;
 };
+export type CommentData = {
+id: any | number;
+body: string;
+task_id: number;
+created_at: any | string;
+user_id: any | number;
+user: App.Data.UserData | any;
+files: Array<App.Data.FileData> | Array<any> | null;
+};
 export type ContactData = {
 cid: string;
 first_name: string;
@@ -40,6 +49,11 @@ export type EmailData = {
 id: any | number;
 email: string;
 is_primary_email: boolean;
+};
+export type FileData = {
+id: any | number;
+name: any | string;
+path: any | string;
 };
 export type FirmData = {
 id: any | number;
@@ -72,7 +86,7 @@ name: string;
 created_at: any | string | null;
 due_date: string | null;
 deadline: any | string | null;
-status: string;
+status: any | string;
 description: any | string | null;
 contact_id: any | string | number | null;
 contact: App.Data.ContactData | any;
@@ -91,13 +105,17 @@ name: string;
 priority: string;
 created_at: any | string | null;
 description: any | string | null;
+user: App.Data.UserData | any;
+comments_count: any | number;
 board_id: number;
+comments: Array<App.Data.CommentData> | Array<any> | null;
 position: any | number | null;
 assigned_to: number;
 };
 export type UserData = {
 first_name: string;
 last_name: string;
+profile_picture: any | string;
 email: any | string;
 name: any | string;
 };

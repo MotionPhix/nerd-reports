@@ -3,6 +3,7 @@
 namespace App\Data;
 
 use DateTime;
+use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Optional;
@@ -21,7 +22,14 @@ class TaskData extends Data
 
     public string|null|Optional $description,
 
+    public UserData|Optional $user,
+
+    public int|Optional $comments_count,
+
     public int $board_id,
+
+    /** @var Collection<CommentData> */
+    public Collection|null|Optional $comments,
 
     public int|null|Optional $position,
 

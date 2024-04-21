@@ -6,11 +6,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable
 {
@@ -24,6 +26,7 @@ class User extends Authenticatable
     protected $fillable = [
         'first_name',
         'last_name',
+        'role',
         'email',
         'password',
     ];
@@ -60,12 +63,17 @@ class User extends Authenticatable
 
     public function images(): MorphMany
     {
-      return $this->morphMany(File::class, 'fileable');
+      return $this->morphMany(File::class, 'model');
+    }
+
+    public function comments(): HasMany
+    {
+      return $this->hasMany(Comment::class);
     }
 
     public function latestImage(): MorphOne
     {
-      return $this->morphOne(File::class, 'fileable')->latestOfMany();
+      return $this->morphOne(File::class, 'model')->latestOfMany();
     }
 
     public function avatarUrl()
@@ -73,5 +81,34 @@ class User extends Authenticatable
       return count($this->images)
         ? Storage::disk('avatars')->url($this->latestImage->path)
         : 'https://www.gravatar.com/avatar/' . md5(strtolower(trim($this->email)));
+    }
+
+    public function profilePicture(): Attribute
+    {
+
+      return Attribute::make(
+        fn () => count($this->images)
+          ? Storage::disk('avatars')->url($this->latestImage->path)
+          : 'https://www.gravatar.com/avatar/' . md5(strtolower(trim($this->email)))
+      );
+
+    }
+
+    protected static function boot()
+    {
+      parent::boot();
+
+      static::created(function ($user) {
+
+        if (static::count() === 1) {
+
+          $user->role = 'admin';
+
+          $user->save();
+
+        }
+
+      });
+
     }
 }

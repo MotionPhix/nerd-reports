@@ -34,7 +34,7 @@ export const useContactStore = defineStore('contacts', () => {
       // Update existing contact
       state.baseGroup[group][existingContactIndex] = contact;
     } else {
-      // Create new contact
+      // Update new contact
       state.baseGroup[group].push(contact);
     }
 

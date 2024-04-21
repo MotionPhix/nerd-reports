@@ -13,12 +13,7 @@ class Update extends Controller
   {
     $validated = $taskData->toArray();
 
-    dd($validated);
-
     $task->update($validated);
-
-    // Dispatch the TaskUpdated event
-    // event(new TaskUpdated($task));
 
     $toastTitles = collect([
       'Well done!',

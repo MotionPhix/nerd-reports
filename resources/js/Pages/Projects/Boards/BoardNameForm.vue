@@ -49,7 +49,7 @@ function onSubmit() {
   <div class="relative flex flex-col items-start max-w-full">
     <h1
       :class="[isEditing ? 'invisible': '']"
-      class="hover:bg-white/20 whitespace-pre w-full overflow-hidden text-ellipsis border border-transparent rounded-md cursor-pointer px-3 py-1.5 text-xl text-white font-bold"
+      class="hover:bg-white/20 whitespace-pre w-full overflow-hidden text-ellipsis border border-transparent rounded-md cursor-pointer px-3 py-1.5 text-xl dark:text-white font-bold"
       @click="edit()">
       {{ form.name ? form.name : ' ' }}
     </h1>

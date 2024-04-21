@@ -6,13 +6,18 @@ const props = defineProps({
   priority: {
     type: String,
     default: 'normal'
+  },
+
+  fontSize: {
+    type: String,
+    default: ''
   }
 })
 
 const reason = props.priority
 
 const priorityClass = computed(() => {
-  return cva('flex items-center h-6 px-3 text-xs font-semibold rounded capitalize', {
+  return cva('flex items-center h-6 px-3 rounded capitalize', {
     variants: {
       intent: {
         normal: 'text-green-700 bg-green-100',
@@ -27,7 +32,7 @@ const priorityClass = computed(() => {
 </script>
 
 <template>
-  <span :class="priorityClass">
+  <span :class="[priorityClass, props.fontSize]">
     <slot />
   </span>
 </template>

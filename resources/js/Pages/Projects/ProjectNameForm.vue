@@ -81,7 +81,7 @@ function onSubmit() {
 
     <h1
       :class="[isEditing ? 'invisible': '']"
-      class="hover:bg-white/20 whitespace-pre w-full overflow-hidden text-ellipsis border border-transparent rounded-md cursor-pointer px-3 py-1.5 text-2xl text-white font-semibold"
+      class="hover:bg-white/20 whitespace-pre w-full overflow-hidden text-ellipsis border border-transparent rounded-md cursor-pointer px-3 py-1.5 text-2xl dark:text-white font-semibold"
       @click="edit()">
       {{ form.name ? form.name : ' ' }}
     </h1>

@@ -3,22 +3,28 @@
 use App\Models\Project;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/users/{project}', function (Project $project) {
+Route::get('/users', function () {
 
-  $users = [];
+  $users = \App\Models\User::select(['id', 'first_name', 'last_name'])->get();
 
-  foreach ($project->users as $key => $user) {
-    $users[$key] = [
+  $formattedUsers = $users->map(function ($user) {
+
+    return [
+
       'value' => $user->id,
+
       'label' => "{$user->first_name} {$user->last_name}"
+
     ];
-  }
+
+  });
 
   return response()->json([
 
-    'users' => $users
+    'users' => $formattedUsers
 
   ]);
+
 });
 
 Route::group(
@@ -59,6 +65,19 @@ Route::group(
 
   }
 );
+
+Route::group(
+  ['prefix' => 'comments'],
+  function () {
+
+    Route::post(
+      '/uploads/{task}',
+      \App\Http\Controllers\Files\Api\Store::class
+    )->name('comments.move');
+
+  }
+);
+
 
 Route::group(
   ['prefix' => 'tags'],

@@ -1,18 +1,64 @@
-<script setup>
-import { useForm } from "@inertiajs/vue3";
-import {IconDotsVertical, IconCalendar, IconMessage } from "@tabler/icons-vue";
-import { computed, nextTick, ref } from "vue"
+<script setup lang="ts">
+import { Link, useForm } from "@inertiajs/vue3"
+
+import { IconMenu, IconCalendar, IconMessage, IconMessages, IconX, IconFileDescription, IconPencil, IconTrash } from "@tabler/icons-vue"
+
+import InputError from '@/Components/InputError.vue'
+
+import TextInput from "@/Components/TextInput.vue"
+
+import TipTap from "@/Components/TipTap.vue"
+
+import SelectInput from "@/Components/SelectInput.vue"
+
+import axios from "axios"
+
+import { computed, nextTick, onMounted, ref } from "vue"
+
 import { useFormStore } from "@/Stores/formStore"
+
 import { storeToRefs } from "pinia"
+
 import Priority from "@/Components/Priority.vue"
+
 import { cva } from "class-variance-authority";
 
-const props = defineProps({
-  task: Object,
+import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/vue"
+
+import { useNotificationStore } from "@/Stores/notificationStore"
+
+import Modal from "@/Components/Modal.vue"
+
+import CommentShell from "@/Pages/Projects/Tasks/CommentShell.vue"
+
+import CommentItem from "@/Pages/Projects/Tasks/CommentItem.vue"
+
+import CommentForm from "@/Pages/Projects/Tasks/CommentForm.vue"
+
+const props = defineProps<{
+  task: App.Data.TaskData,
   boardId: Number
-});
+}>();
 
 const formStore = useFormStore()
+
+const toastStore = useNotificationStore();
+
+const { notify } = toastStore
+
+const showTaskDetail = ref(false);
+
+const inputTitleRef = ref();
+
+const isShowingForm = computed(() => props.task.id === currentTaskId.value);
+
+const boardId = computed(() => props.boardId)
+
+const isAddingComment = ref(false)
+
+const users = ref<App.Data.UserData[]>([])
+
+const placeholder = ref('Task description')
 
 const {
   currentTaskId
@@ -23,12 +69,18 @@ const {
   unSetCurrentTaskId,
 } = formStore
 
-const inputTitleRef = ref();
-
-const isShowingForm = computed(() => props.task.id === currentTaskId.value);
-
 const form = useForm({
+
   name: props.task.name,
+
+  description: props.task.description,
+
+  assigned_to: props.task.assigned_to,
+
+  priority: props.task.priority,
+
+  board_id: props.task.board_id,
+
 });
 
 async function showForm() {
@@ -38,8 +90,6 @@ async function showForm() {
 
   inputTitleRef.value.focus();
 }
-
-const boardId = computed(() => props.boardId)
 
 const taskBgClasses = computed(() => {
 
@@ -52,13 +102,13 @@ const taskBgClasses = computed(() => {
         1: 'bg-blue-100 dark:bg-blue-600',
         2: 'bg-green-100 dark:bg-green-600',
         3: 'bg-yellow-100 dark:bg-yellow-600',
-        4: 'bg-red-100',
+        4: 'bg-red-100 dark:bg-red-600',
         5: 'bg-orange-100',
         6: 'bg-pink-100',
         7: 'bg-indigo-100',
         8: 'bg-purple-100',
         9: 'bg-purple-100',
-        0: 'bg-indigo-100 dark:bg-indigo-400',
+        0: 'bg-pink-100 dark:bg-pink-400',
 
       },
 
@@ -66,6 +116,90 @@ const taskBgClasses = computed(() => {
 
   })({ intent: boardId.value });
 });
+
+const priorities = [
+  {
+    value: 'normal',
+    label: 'Normal'
+  },
+
+  {
+    value: 'medium',
+    label: 'Medium'
+  },
+
+  {
+    value: 'high',
+    label: 'High'
+  }
+]
+
+onMounted(() => {
+
+  axios
+    .get('/api/users')
+    .then((response) => {
+      users.value = response.data.users;
+    })
+
+})
+
+function onSubmit() {
+
+  form.transform((data) => {
+
+    let formData: Partial<App.Data.TaskData> = {
+      name: data.name,
+      priority: data.priority,
+      assigned_to: data.assigned_to,
+      board_id: data.board_id,
+    };
+
+    if (!! form.description) {
+      formData.description = form.description
+    }
+
+    return formData
+
+  })
+
+  form.patch(route('tasks.update', { task: props.task }), {
+    preserveScroll: true,
+
+    onError: (errors) => {
+
+      for (const prop in errors) {
+
+        notify({
+          title:  'Some error occurred!',
+          type: 'warning',
+          message: errors[prop]
+        })
+
+      }
+
+    },
+
+    onSuccess: () => {
+
+      form.reset()
+
+      unSetCurrentTaskId()
+
+    },
+  })
+
+}
+
+const closeModal = () => {
+
+  showTaskDetail.value = false;
+
+};
+
+const cancelComment = () => {
+  isAddingComment.value = false
+}
 </script>
 
 <template>
@@ -79,18 +213,59 @@ const taskBgClasses = computed(() => {
       <form
         v-if="isShowingForm"
         @keydown.esc="unSetCurrentTaskId()"
+        class="grid grid-cols-2 gap-6"
         @submit.prevent="onSubmit()">
 
-        <textarea
-          ref="inputTitleRef"
-          v-model="form.name"
-          class="block w-full text-sm border-gray-300 rounded-md shadow-sm focus:border-blue-400 focus:ring-blue-400"
-          placeholder="Enter task title..."
-          rows="3"
-          @keydown.enter.prevent="onSubmit()">
-        </textarea>
+        <div class="col-span-2">
+          <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+            Task
+          </label>
 
-        <div class="mt-2 space-x-2">
+          <TextInput
+            id="title"
+            ref="inputTitleRef"
+            v-model="form.name"
+            type="text"
+            placeholder="Enter a task" />
+
+          <InputError :message="form.errors.name" />
+        </div>
+
+        <div class="col-span-2">
+          <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Assign task</label>
+
+          <SelectInput
+            placeholder="Select a person"
+            v-model="form.assigned_to"
+            :options="users"
+          />
+
+          <InputError :message="form.errors.assigned_to" />
+        </div>
+
+        <div class="col-span-2">
+          <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+            Priority
+          </label>
+
+          <SelectInput
+            placeholder="Set task priority"
+            v-model="form.priority"
+            :options="priorities"
+          />
+
+          <InputError :message="form.errors.priority" />
+        </div>
+
+        <div class="col-span-2">
+          <label for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Description</label>
+
+          <TipTap v-model="form.description" height="h-54" v-model:placeholder="placeholder" />
+
+          <InputError :message="form.errors.description" />
+        </div>
+
+        <div class="col-span-2 flex items-center justify-between">
           <button
             class="px-4 py-2 text-sm font-medium text-white rounded-md shadow-sm bg-rose-600 hover:bg-rose-500 focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 focus:outline-none"
             type="submit">
@@ -100,7 +275,7 @@ const taskBgClasses = computed(() => {
           <button
             class="px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:text-black focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 focus:outline-none"
             type="button"
-            @click="unSetCurrentTaskId()">
+            @click="form.reset(); unSetCurrentTaskId()">
             Cancel
           </button>
         </div>
@@ -112,11 +287,75 @@ const taskBgClasses = computed(() => {
         <div class="flex flex-col p-2">
 
           <div class="relative flex flex-col items-start">
-            <button class="absolute top-0 right-0 items-center justify-center hidden w-5 h-5 text-gray-500 rounded hover:bg-gray-200 hover:text-gray-700 group-hover:flex">
-              <IconDotsVertical stroke="2.5" class="w-4 h-4" />
-            </button>
 
-            <Priority :priority="props.task.priority">
+            <Menu
+              as="div"
+              class="absolute top-0 right-0 z-10 hidden group-hover:flex">
+
+              <MenuButton
+                class="items-center flex justify-center w-5 h-5 text-gray-500 dark:text-gray-100">
+
+                <IconMenu stroke="3" class="w-5 h-5" />
+
+              </MenuButton>
+
+              <transition
+                enter-active-class="transition duration-100 ease-out transform"
+                enter-from-class="scale-90 opacity-0"
+                enter-to-class="scale-100 opacity-100"
+                leave-active-class="transition duration-100 ease-in transform"
+                leave-from-class="scale-100 opacity-100"
+                leave-to-class="scale-90 opacity-0">
+
+                <MenuItems
+                  class="absolute right-0 w-40 overflow-hidden origin-top-left bg-white border-gray-300 border rounded-md shadow-lg top-5 dark:text-gray-300 dark:bg-gray-800 dark:border-gray-700 focus:outline-none">
+
+                  <MenuItem>
+
+                    <button
+                      class="flex items-center w-full gap-2 px-4 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-600"
+                      @click="showTaskDetail = true">
+                      <IconFileDescription stroke="2.5" class="w-4 h-4" />
+                      <span>Task detail</span>
+                    </button>
+
+                  </MenuItem>
+
+                  <MenuItem>
+
+                    <button
+                      class="flex items-center w-full gap-2 px-4 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-600"
+                      @click="setCurrentTaskId(props.task.id)">
+                      <IconPencil stroke="2.5" class="w-4 h-4" />
+                      <span>Edit task</span>
+                    </button>
+
+                  </MenuItem>
+
+                  <MenuItem>
+
+                    <Link
+                      as="button"
+                      method="delete"
+                      preserve-scroll
+                      class="flex items-center w-full gap-2 px-4 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-600"
+                      :href="route('tasks.destroy', { task: props.task })">
+
+                      <IconTrash stroke="2.5" class="w-4 h-4" />
+
+                      <span>Delete task</span>
+
+                    </Link>
+
+                  </MenuItem>
+
+                </MenuItems>
+
+              </transition>
+
+            </Menu>
+
+            <Priority :priority="props.task.priority" font-size="text-sm font-semibold">
               {{ props.task.priority }}
             </Priority>
 
@@ -126,7 +365,7 @@ const taskBgClasses = computed(() => {
 
             <section v-html="props.task.description" class="mt-6 text-xs prose dark:prose-invert line-clamp-2" />
 
-            <div class="flex items-center w-full mt-3 text-xs font-medium text-gray-200">
+            <div class="flex items-center w-full mt-3 text-xs font-medium text-gray-700 dark:text-gray-200">
 
               <div class="flex items-center">
                 <IconCalendar class="w-4 h-4" />
@@ -139,18 +378,138 @@ const taskBgClasses = computed(() => {
               <div class="relative flex items-center ml-4">
                 <IconMessage class="w-4 h-4" />
 
-                <span class="ml-1 leading-none">4</span>
+                <span class="ml-1 leading-none">
+                  {{ props.task.comments_count }}
+                </span>
               </div>
 
               <img
                 class="w-6 h-6 ml-auto rounded-full"
-                src='https://randomuser.me/api/portraits/women/26.jpg'/>
+                :src='props.task.user.profile_picture'/>
             </div>
           </div>
         </div>
       </template>
 
     </div>
+
+    <Modal :show="showTaskDetail" @close="closeModal" max-width="lg">
+
+      <div class="relative bg-white rounded-lg shadow dark:bg-gray-800">
+
+        <div class="sticky px-5 top-0 pt-3 z-10 bg-white dark:bg-gray-800 flex gap-4 border-gray-300 items-center pb-4 mb-4 rounded-t border-b sm:mb-5 dark:border-gray-600">
+
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-white prose">
+            Task detail
+          </h2>
+
+          <span class="flex-1"></span>
+
+          <button
+            type="submit"
+            @click="isAddingComment = !isAddingComment"
+            class="text-white flex items-center gap-2 bg-primary-700 hover:bg-primary-800 font-medium rounded text-sm px-2 py-1.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700">
+            <IconMessages class="w-5" />
+            <span>Comment</span>
+<!--            <span>Comment</span>-->
+          </button>
+
+          <button
+            type="button"
+            @click="showTaskDetail = false"
+            class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white">
+            <IconX class="w-5 h-5" />
+            <span class="sr-only">Close modal</span>
+          </button>
+
+        </div>
+
+        <section class="px-5">
+
+          <article
+            v-if="!isAddingComment"
+            class="grid gap-6 mb-4 sm:grid-cols-2">
+
+            <div class="sm:col-span-2">
+
+              <p
+                class="text-gray-900 text-3xl font-thin block w-full py-2.5 dark:text-white">
+                {{ props.task.name }}
+              </p>
+
+            </div>
+
+            <section class="grid sm:grid-cols-2 gap-6 sm:col-span-2 border border-gray-300 rounded-lg dark:border-gray-700 p-5">
+
+              <div>
+                <label class="block mb-2 text-sm font-medium text-gray-400 dark:text-gray-500">
+                  Assigned to
+                </label>
+
+                <p
+                  class="text-gray-900 font-thin block w-full py-2.5 dark:text-white">
+                  {{ props.task?.user?.name }}
+                </p>
+              </div>
+
+              <div>
+                <label class="block mb-2 text-sm font-medium text-gray-400 dark:text-gray-500">
+                  Priority
+                </label>
+
+                <p
+                  class="capitalize py-2.5">
+
+                  <Priority :priority="props.task.priority" font-size="text-md font-thin">
+                    {{ props.task.priority }}
+                  </Priority>
+
+                </p>
+
+              </div>
+
+            </section>
+
+            <div class="sm:col-span-2" v-if="!! props.task.description">
+
+              <label class="block mb-2 text-sm font-medium text-gray-400 dark:text-gray-500">
+                Description
+              </label>
+
+              <article
+                v-html="props.task.description"
+                class="block py-2.5 w-full prose dark:prose-invert rounded-lg">
+              </article>
+
+            </div>
+
+            <div class="sm:col-span-2">
+
+              <label class="block mb-2 text-lg font-medium text-gray-400 dark:text-gray-500">
+                Comments
+              </label>
+
+              <CommentShell>
+
+                <CommentItem v-for="comment in props.task.comments" :comment="comment" :key="comment.id" />
+
+              </CommentShell>
+
+            </div>
+
+          </article>
+
+          <article v-else>
+
+            <CommentForm :task="props.task" :cancel="cancelComment" />
+
+          </article>
+
+        </section>
+
+      </div>
+
+    </Modal>
 
   </li>
 </template>

@@ -93,12 +93,12 @@ const dragOptions = {
 
       <Menu
         as="div"
-        class="relative z-10">
+        class="relative z-20">
 
         <MenuButton
           class="grid w-8 h-8 rounded-md hover:bg-gray-300 dark:hover:bg-gray-900 place-content-center">
 
-          <IconDots class="w-5 h-5" />
+          <IconDots stroke="3" class="w-5 h-5" />
 
         </MenuButton>
 
@@ -111,12 +111,12 @@ const dragOptions = {
           leave-to-class="scale-90 opacity-0">
 
           <MenuItems
-            class="absolute right-0 w-40 overflow-hidden origin-top-left bg-white border rounded-md shadow-lg top-5 dark:text-gray-300 dark:bg-gray-800 dark:border-gray-700 focus:outline-none">
+            class="absolute right-0 w-40 overflow-hidden origin-top-left bg-white border-gray-300 border rounded-md shadow-lg top-5 dark:text-gray-300 dark:bg-gray-800 dark:border-gray-700 focus:outline-none">
 
             <MenuItem>
 
               <button
-                class="flex items-center w-full gap-2 px-4 py-2 text-sm dark:hover:bg-gray-600"
+                class="flex items-center w-full gap-2 px-4 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-600"
                 @click="setCurrentBoardId(props.board.id)">
                 <IconPlus stroke="2.5" class="w-4 h-4" />
                 <span>Add task</span>
@@ -130,7 +130,7 @@ const dragOptions = {
                 as="button"
                 method="delete"
                 preserve-scroll
-                class="flex items-center w-full gap-2 px-4 py-2 text-sm dark:hover:bg-gray-600"
+                class="flex items-center w-full gap-2 px-4 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-600"
                 :href="route('boards.destroy', { project: props.board.project_id, board: props.board.id })">
 
                 <IconTrash stroke="2.5" class="w-4 h-4" />

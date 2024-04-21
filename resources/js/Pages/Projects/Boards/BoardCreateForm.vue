@@ -94,7 +94,7 @@ function onSubmit() {
   <button
     v-if="!isShowingForm"
     @click="showForm()"
-    class="fixed z-40 flex items-center justify-center w-16 h-16 p-2 text-white bg-gray-700 bottom-5 right-5 hover:bg-gray-400 dark:hover:bg-white/20 rounded-xl">
+    class="fixed z-40 flex items-center justify-center w-16 h-16 p-2 text-white bg-gray-700 bottom-5 right-5 hover:bg-gray-400 dark:hover:bg-white/20 rounded-3xl">
     <IconPlus class="w-10 h-10"/>
   </button>
 </template>

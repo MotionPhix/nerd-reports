@@ -11,19 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('files', function (Blueprint $table) {
+        Schema::create('comments', function (Blueprint $table) {
             $table->id();
-
-            $table->string('filename');
-
-            $table->string('mime_type');
-
-            $table->bigInteger('size');
-
-            $table->nullableMorphs('model');
-
-            $table->foreignId('user_id')->unsigned()->constrained('users');
-
+            $table->text('body');
+            $table->foreignId('task_id')->unsigned()->constrained('tasks');
             $table->timestamps();
         });
     }
@@ -33,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('files');
+        Schema::dropIfExists('comments');
     }
 };
