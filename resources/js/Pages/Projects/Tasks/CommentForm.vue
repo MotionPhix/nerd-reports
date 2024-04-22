@@ -13,7 +13,7 @@ import { useNotificationStore } from "@/Stores/notificationStore"
 
 import FileInput from "@/Pages/Projects/Tasks/FileInput.vue"
 
-import axios from "axios"
+import axios from "@/Lib/axios"
 
 const props = defineProps<{
   task: App.Data.TaskData,
@@ -84,6 +84,8 @@ const close = () => {
 }
 
 const uploadFiles = (files) => {
+
+  axios.get("/sanctum/csrf-cookie");
 
   Array.from(files).forEach((file) => {
 
@@ -163,14 +165,16 @@ const removeMedia = (idx, item) => {
       class="grid gap-2"
       :class="{ 'grid-cols-2': media.length > 1 }">
 
-      <div v-for="(file, idx) in media" class="relative flex flex-col items-center justify-center">
+      <div
+        v-for="(file, idx) in media"
+        class="relative flex flex-col items-center justify-center">
 
         <button
           type="button"
-          @click="removeMedia(idx)"
+          @click="removeMedia(idx, file)"
           class="m-1 absolute top-0 bg-black left-0 text-white bg-opacity-75 rounded-full cursor-pointer hover:bg-opacity-100">
 
-          <IconX class="h-5 w-5" />
+          <IconX stroke="3" class="h-5 w-5 p-0.5" />
 
         </button>
 
@@ -178,7 +182,7 @@ const removeMedia = (idx, item) => {
 
         <div
           v-if="file.loading"
-          class="bg-black bg-opacity-75 text-sm rounded px-2">
+          class="bg-black bg-opacity-75 text-sm rounded px-2 text-white">
           Uploading...
         </div>
 
