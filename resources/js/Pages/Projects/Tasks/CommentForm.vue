@@ -12,6 +12,7 @@ import { useForm } from "@inertiajs/vue3"
 import { useNotificationStore } from "@/Stores/notificationStore"
 
 import FileInput from "@/Pages/Projects/Tasks/FileInput.vue"
+
 import axios from "axios"
 
 const props = defineProps<{
@@ -41,8 +42,6 @@ function onSubmit() {
 
       onError: (errors) => {
 
-        form.reset()
-
         for (const prop in errors) {
 
           notify({
@@ -56,6 +55,8 @@ function onSubmit() {
       },
 
       onSuccess: (resp) => {
+
+        form.reset()
 
         props.cancel()
 
@@ -108,7 +109,7 @@ const uploadFiles = (files) => {
 
       axios
         .post(
-          `/api/comments/uploads/${props.task.id}`,
+          `/api/files/u/${props.task.id}`,
           formData
         )
         .then(({ data }) => {
@@ -126,8 +127,20 @@ const uploadFiles = (files) => {
 
 }
 
-const removeMedia = (idx) => {
+const removeMedia = (idx, item) => {
   media.value.splice(idx, 1)
+
+  if (item.id) {
+
+    axios
+      .delete(`/api/files/d/${item.id}`)
+      .catch((e) => {
+        console.log(e)
+        media.value.splice(idx, 0, item)
+      })
+
+  }
+
 }
 </script>
 
@@ -150,7 +163,7 @@ const removeMedia = (idx) => {
       class="grid gap-2"
       :class="{ 'grid-cols-2': media.length > 1 }">
 
-      <div v-for="(file, idx) in media" class="relative">
+      <div v-for="(file, idx) in media" class="relative flex flex-col items-center justify-center">
 
         <button
           type="button"
@@ -162,6 +175,12 @@ const removeMedia = (idx) => {
         </button>
 
         <img :src="file.url" alt="" class="rounded-xl object-cover h-48 w-full">
+
+        <div
+          v-if="file.loading"
+          class="bg-black bg-opacity-75 text-sm rounded px-2">
+          Uploading...
+        </div>
 
       </div>
 

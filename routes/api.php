@@ -67,16 +67,21 @@ Route::group(
 );
 
 Route::group(
-  ['prefix' => 'comments'],
+  ['prefix' => 'files'],
   function () {
 
     Route::post(
-      '/uploads/{task}',
+      '/u/{?task}',
       \App\Http\Controllers\Files\Api\Store::class
-    )->name('comments.move');
+    )->name('files.upload');
+
+    Route::delete(
+      '/d/{file}',
+      \App\Http\Controllers\Files\Api\Destroy::class
+    )->name('files.destroy');
 
   }
-)->middleware('auth');
+);
 
 
 Route::group(
