@@ -75,17 +75,13 @@ function onSubmit() {
 
 const close = () => {
 
-  console.log('We are here')
-
   form.reset()
 
   props.cancel()
 
 }
 
-const uploadFiles = (files) => {
-
-  axios.get("/sanctum/csrf-cookie");
+const uploadFiles = (files: File[]) => {
 
   Array.from(files).forEach((file) => {
 
@@ -109,7 +105,27 @@ const uploadFiles = (files) => {
 
       formData.append('file', file)
 
-      axios
+      const requestOptions = {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      };
+
+      fetch(`/api/files/u/${props.task.id}`, {requestOptions})
+        .then(res => {
+
+          console.log(res);
+
+        })
+        .then(data => {
+
+          console.log(data);
+
+        })
+        .finally(() => item.loading = false)
+
+      /*axios
         .post(
           `/api/files/u/${props.task.id}`,
           formData
@@ -119,7 +135,7 @@ const uploadFiles = (files) => {
           item.id = data.id
 
         })
-        .finally(() => item.loading = false)
+        .finally(() => item.loading = false)*/
 
       media.value.push(item)
 

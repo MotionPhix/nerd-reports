@@ -13,7 +13,7 @@ class Store extends Controller
      */
     public function __invoke(Request $request)
     {
-      $request->dd();
+      dd($request->all());
 
       if ($request->hasFile('file')) {
 
