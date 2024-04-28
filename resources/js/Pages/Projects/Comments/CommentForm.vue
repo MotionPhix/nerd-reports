@@ -11,9 +11,9 @@ import { useForm } from "@inertiajs/vue3"
 
 import { useNotificationStore } from "@/Stores/notificationStore"
 
-import FileInput from "@/Pages/Projects/Tasks/FileInput.vue"
+import FileInput from '@/Components/FileInput.vue'
 
-import axios from "@/Lib/axios"
+import axios from "axios"
 
 const props = defineProps<{
   task: App.Data.TaskData,
@@ -30,10 +30,25 @@ const commentPlaceholder = ref('Enter your comment')
 
 const form = useForm({
   body: null,
-  task_id: props.task.id
+  task_id: props.task.id,
+  files: [],
 })
 
 function onSubmit() {
+
+  form.transform((data) => {
+    let modifiedForm: Partial<App.Data.CommentData> = {}
+
+    modifiedForm.body = data.body
+
+    modifiedForm.task_id = data.task_id
+
+    if (media.value.length) {
+      modifiedForm.files = media.value.map(file => ({id: file.id }))
+    }
+
+    return modifiedForm
+  })
 
   form.post(
     route('comments.store', { task: props.task }),
@@ -105,27 +120,7 @@ const uploadFiles = (files: File[]) => {
 
       formData.append('file', file)
 
-      const requestOptions = {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      };
-
-      fetch(`/api/files/u/${props.task.id}`, {requestOptions})
-        .then(res => {
-
-          console.log(res);
-
-        })
-        .then(data => {
-
-          console.log(data);
-
-        })
-        .finally(() => item.loading = false)
-
-      /*axios
+      axios
         .post(
           `/api/files/u/${props.task.id}`,
           formData
@@ -135,7 +130,7 @@ const uploadFiles = (files: File[]) => {
           item.id = data.id
 
         })
-        .finally(() => item.loading = false)*/
+        .finally(() => item.loading = false)
 
       media.value.push(item)
 
@@ -153,7 +148,6 @@ const removeMedia = (idx, item) => {
     axios
       .delete(`/api/files/d/${item.id}`)
       .catch((e) => {
-        console.log(e)
         media.value.splice(idx, 0, item)
       })
 
@@ -182,24 +176,24 @@ const removeMedia = (idx, item) => {
       :class="{ 'grid-cols-2': media.length > 1 }">
 
       <div
-        v-for="(file, idx) in media"
+        v-for="(item, idx) in media"
         class="relative flex flex-col items-center justify-center">
 
         <button
           type="button"
-          @click="removeMedia(idx, file)"
-          class="m-1 absolute top-0 bg-black left-0 text-white bg-opacity-75 rounded-full cursor-pointer hover:bg-opacity-100">
+          @click="removeMedia(idx, item)"
+          class="absolute top-0 left-0 m-1 text-white bg-black bg-opacity-75 rounded-full cursor-pointer hover:bg-opacity-100">
 
           <IconX stroke="3" class="h-5 w-5 p-0.5" />
 
         </button>
 
-        <img :src="file.url" alt="" class="rounded-xl object-cover h-48 w-full">
+        <img :src="item.url" alt="" class="object-cover w-full h-48 rounded-xl">
 
         <div
-          v-if="file.loading"
-          class="bg-black bg-opacity-75 text-sm rounded px-2 text-white">
-          Uploading...
+          v-if="item.loading"
+          class="absolute px-2 text-sm text-white bg-black bg-opacity-75 rounded">
+          Uploading ...
         </div>
 
       </div>
@@ -210,7 +204,7 @@ const removeMedia = (idx, item) => {
 
       <button
         type="submit"
-        :disabled="form.prosessing"
+        :disabled="form.processing"
         class="text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
         Add comment
       </button>

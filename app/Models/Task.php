@@ -6,6 +6,9 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Stevebauman\Purify\Casts\PurifyHtmlOnGet;
 
 class Task extends Model
@@ -37,26 +40,38 @@ class Task extends Model
   protected function createdAt(): Attribute
   {
     return Attribute::make(
-      get: fn ($value) => Carbon::parse($value)->diffForHumans(),
+      get: fn($value) => Carbon::parse($value)->diffForHumans(),
     );
   }
 
-  public function board()
+  public function board(): BelongsTo
   {
     return $this->belongsTo(Board::class);
   }
 
-  public function user()
+  public function user(): BelongsTo
   {
     return $this->belongsTo(User::class, 'assigned_to');
   }
 
-  public function comments()
+  public function comments(): HasMany
   {
     return $this->hasMany(Comment::class);
   }
 
-  public static function booted()
+  public function files(): HasManyThrough
+  {
+    return $this->hasManyThrough(
+      File::class,
+      Comment::class,
+      'task_id',
+      'model_id',
+      'id',
+      'id'
+    )->where('model_type', Comment::class);
+  }
+
+  public static function booted(): void
   {
     static::creating(function ($task) {
       $task->position = self::query()->where('board_id', $task->board_id)->orderByDesc('position')->first()?->position + self::POSITION_GAP;

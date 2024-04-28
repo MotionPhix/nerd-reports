@@ -26,6 +26,8 @@ class TaskData extends Data
 
     public int|Optional $comments_count,
 
+    public int|Optional $files_count,
+
     public int $board_id,
 
     /** @var Collection<CommentData> */

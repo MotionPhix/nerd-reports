@@ -1,39 +1,39 @@
 <script setup lang="ts">
-import { Link, useForm } from "@inertiajs/vue3"
+import { Link, useForm } from '@inertiajs/vue3'
 
-import { IconMenu, IconCalendar, IconMessage, IconMessages, IconX, IconFileDescription, IconPencil, IconTrash } from "@tabler/icons-vue"
+import { IconMenu, IconCalendar, IconFile, IconMessage, IconMessageX, IconX, IconFileDescription, IconPencil, IconTrash } from '@tabler/icons-vue'
 
 import InputError from '@/Components/InputError.vue'
 
-import TextInput from "@/Components/TextInput.vue"
+import TextInput from '@/Components/TextInput.vue'
 
-import TipTap from "@/Components/TipTap.vue"
+import TipTap from '@/Components/TipTap.vue'
 
-import SelectInput from "@/Components/SelectInput.vue"
+import SelectInput from '@/Components/SelectInput.vue'
 
 import axios from "axios"
 
-import { computed, nextTick, onMounted, ref } from "vue"
+import { computed, nextTick, onMounted, ref } from 'vue'
 
-import { useFormStore } from "@/Stores/formStore"
+import { useFormStore } from '@/Stores/formStore'
 
-import { storeToRefs } from "pinia"
+import { storeToRefs } from 'pinia'
 
-import Priority from "@/Components/Priority.vue"
+import Priority from '@/Components/Priority.vue'
 
 import { cva } from "class-variance-authority";
 
-import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/vue"
+import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 
-import { useNotificationStore } from "@/Stores/notificationStore"
+import { useNotificationStore } from '@/Stores/notificationStore'
 
 import Modal from "@/Components/Modal.vue"
 
-import CommentShell from "@/Pages/Projects/Tasks/CommentShell.vue"
+import CommentShell from '@/Pages/Projects/Comments/CommentShell.vue'
 
-import CommentItem from "@/Pages/Projects/Tasks/CommentItem.vue"
+import CommentItem from '@/Pages/Projects/Comments/CommentItem.vue'
 
-import CommentForm from "@/Pages/Projects/Tasks/CommentForm.vue"
+import CommentForm from '@/Pages/Projects/Comments/CommentForm.vue'
 
 const props = defineProps<{
   task: App.Data.TaskData,
@@ -140,6 +140,12 @@ onMounted(() => {
     .get('/api/users')
     .then((response) => {
       users.value = response.data.users;
+    })
+
+  axios
+    .get('/api/get-files')
+    .then((response) => {
+      console.log(response.data)
     })
 
 })
@@ -368,7 +374,7 @@ const cancelComment = () => {
             <div class="flex items-center w-full mt-3 text-xs font-medium text-gray-700 dark:text-gray-200">
 
               <div class="flex items-center">
-                <IconCalendar class="w-4 h-4" />
+                <IconCalendar stroke="1.5" class="w-4 h-4" />
 
                 <span class="ml-1 leading-none">
                   {{ props.task.created_at }}
@@ -376,16 +382,24 @@ const cancelComment = () => {
               </div>
 
               <div class="relative flex items-center ml-4">
-                <IconMessage class="w-4 h-4" />
+                <IconMessage stroke="1.5" class="w-4 h-4" />
 
                 <span class="ml-1 leading-none">
                   {{ props.task.comments_count }}
                 </span>
               </div>
 
+              <div class="relative flex items-center ml-3">
+                <IconFile stroke="1.5" class="w-4 h-4" />
+
+                <span class="ml-1 leading-none">
+                  {{ props.task.files_count }}
+                </span>
+              </div>
+
               <img
                 class="w-6 h-6 ml-auto rounded-full"
-                :src='props.task.user.profile_picture'/>
+                :src='props.task.user.avatar_url'/>
             </div>
           </div>
         </div>
@@ -409,9 +423,8 @@ const cancelComment = () => {
             type="submit"
             @click="isAddingComment = !isAddingComment"
             class="text-white flex items-center gap-2 bg-primary-700 hover:bg-primary-800 font-medium rounded text-sm px-2 py-1.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700">
-            <IconMessages class="w-5" />
-            <span>Comment</span>
-<!--            <span>Comment</span>-->
+            <IconMessageX class="w-5" v-if="isAddingComment" />
+            <IconMessage class="w-5" v-else />
           </button>
 
           <button

@@ -169,6 +169,8 @@ Route::middleware('auth')->group(function () {
 
   });
 
+  Route::get('/download/{file:fid}', \App\Http\Controllers\Files\Download::class)->name('file.downloads');
+
   Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
 
   Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

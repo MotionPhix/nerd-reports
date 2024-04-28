@@ -3,7 +3,12 @@
 use App\Models\Project;
 use Illuminate\Support\Facades\Route;
 
-// Route::middleware(['auth:sanctum'])->group(function () {
+Route::middleware('auth:sanctum')->group(function () {
+
+  Route::get(
+    '/get-files',
+    \App\Http\Controllers\Comments\Api\Show::class
+  )->name('files.load');
 
   Route::get('/users', function () {
 
@@ -121,5 +126,5 @@ use Illuminate\Support\Facades\Route;
     }
   );
 
-// });
+});
 

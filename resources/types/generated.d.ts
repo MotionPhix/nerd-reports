@@ -52,8 +52,14 @@ is_primary_email: boolean;
 };
 export type FileData = {
 id: any | number;
-name: any | string;
-path: any | string;
+fid: any | string | null;
+filename: any | string;
+mime_type: any | string;
+full_url: any | string;
+file_path: any | string;
+user_id: any | number;
+user: App.Data.UserData | any;
+size: any | number;
 };
 export type FirmData = {
 id: any | number;
@@ -107,6 +113,7 @@ created_at: any | string | null;
 description: any | string | null;
 user: App.Data.UserData | any;
 comments_count: any | number;
+files_count: any | number;
 board_id: number;
 comments: Array<App.Data.CommentData> | Array<any> | null;
 position: any | number | null;
@@ -115,7 +122,7 @@ assigned_to: number;
 export type UserData = {
 first_name: string;
 last_name: string;
-profile_picture: any | string;
+avatar_url: any | string;
 email: any | string;
 name: any | string;
 };

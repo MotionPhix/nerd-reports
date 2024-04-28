@@ -13,7 +13,7 @@ class Destroy extends Controller
      */
     public function __invoke(File $file)
     {
-        Storage::disk('publib')
+        Storage::disk('public')
           ->delete('files/' . $file->user_id . '/' . now()->format('Y') . '/' . now()->format('m') . '/' . $file->filename);
 
         $file->delete();
