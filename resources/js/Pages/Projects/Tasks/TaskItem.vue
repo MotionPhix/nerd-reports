@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Link, useForm } from '@inertiajs/vue3'
 
-import { IconMenu, IconCalendar, IconFile, IconMessage, IconMessageX, IconX, IconFileDescription, IconPencil, IconTrash } from '@tabler/icons-vue'
+import { IconMenu, IconUser, IconClock, IconCalendar, IconFile, IconMessage, IconMessageX, IconX, IconFileDescription, IconPencil, IconTrash } from '@tabler/icons-vue'
 
 import InputError from '@/Components/InputError.vue'
 
@@ -409,7 +409,7 @@ const cancelComment = () => {
 
     <Modal :show="showTaskDetail" @close="closeModal" max-width="lg">
 
-      <div class="relative bg-white rounded-lg shadow dark:bg-gray-800">
+      <div class="relative bg-white dark:bg-gray-800">
 
         <div class="sticky px-5 top-0 pt-3 z-10 bg-white dark:bg-gray-800 flex gap-4 border-gray-300 items-center pb-4 mb-4 rounded-t border-b sm:mb-5 dark:border-gray-600">
 
@@ -452,26 +452,35 @@ const cancelComment = () => {
 
             </div>
 
-            <section class="grid sm:grid-cols-2 gap-6 sm:col-span-2 border border-gray-300 rounded-lg dark:border-gray-700 p-5">
+            <section class="grid sm:grid-cols-2 gap-6 sm:col-span-2">
 
-              <div>
+              <div class="relative overflow-hidden border border-gray-300 rounded-lg dark:border-gray-700 p-2">
+
                 <label class="block mb-2 text-sm font-medium text-gray-400 dark:text-gray-500">
-                  Assigned to
+
+                  <span>Assigned to</span>
+
+                  <IconUser stroke="2" class="h-36 w-36 absolute -top-8 -right-10 rotate-12 -z-0" />
+
                 </label>
 
                 <p
-                  class="text-gray-900 font-thin block w-full py-2.5 dark:text-white">
+                  class="relative text-gray-900 font-thin block w-full py-2.5 dark:text-white">
                   {{ props.task?.user?.name }}
                 </p>
               </div>
 
-              <div>
+              <div class="relative overflow-hidden border border-gray-300 rounded-lg dark:border-gray-700 p-2">
                 <label class="block mb-2 text-sm font-medium text-gray-400 dark:text-gray-500">
-                  Priority
+
+                  <span>Priority</span>
+
+                  <IconClock stroke="2" class="h-36 w-36 absolute -top-8 -right-10 rotate-12 -z-0" />
+
                 </label>
 
                 <p
-                  class="capitalize py-2.5">
+                  class="relative capitalize py-2.5 max-w-[20%]">
 
                   <Priority :priority="props.task.priority" font-size="text-md font-thin">
                     {{ props.task.priority }}
