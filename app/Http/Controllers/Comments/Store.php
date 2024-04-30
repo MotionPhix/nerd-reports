@@ -7,6 +7,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Comment;
 use App\Models\File;
 use App\Models\Task;
+use App\Notifications\AddedCommentNotification;
+use App\Notifications\CommentAdded;
 use Illuminate\Validation\Rule;
 
 class Store extends Controller
@@ -28,12 +30,16 @@ class Store extends Controller
 
       $comment->user_id = auth()->user()->id;
 
-      $task->comments()->save($comment);
+      $addedComment = $task->comments()->save($comment);
 
       File::find($validated)->each->update([
         'model_id' => $comment->id,
         'model_type' => Comment::class,
       ]);
+
+      if (!! $addedComment->id) {
+        $task->user->notify(new CommentAdded(auth()->user(), $addedComment));
+      }
 
       return redirect()->back();
     }
