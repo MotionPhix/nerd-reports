@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Contacts;
 use App\Data\ContactData;
 use App\Http\Controllers\Controller;
 use App\Models\Contact;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class Index extends Controller

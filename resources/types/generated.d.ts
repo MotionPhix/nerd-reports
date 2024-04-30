@@ -70,6 +70,14 @@ url: any | string | null;
 name: any | string | null;
 tags: Array<App.Data.TagData> | Array<any> | null;
 };
+export type NotificationData = {
+id: string;
+type: string;
+created_at: string;
+due_date: string;
+status: string;
+contact: App.Data.ContactData;
+};
 export type PhoneData = {
 id: any | number;
 country_code: any | string;

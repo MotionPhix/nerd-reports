@@ -2,19 +2,16 @@
 
 namespace App\Data;
 
-use DateTime;
-use Illuminate\Support\Collection;
 use Spatie\LaravelData\Data;
-use Spatie\LaravelData\Optional;
 
 /** @typescript **/
-class ProjectData extends Data
+class NotificationData extends Data
 {
     public function __construct(
 
-      public readonly string $pid,
+      public readonly string $id,
 
-      public readonly string $name,
+      public readonly string $type,
 
       public readonly string $created_at,
 

@@ -44,13 +44,15 @@ const showingNavigationDropdown = ref(false)
 
         <div class="hidden sm:flex sm:items-center sm:ms-6">
 
-          <button
+          <Link
+            as="button"
+           :href="route('notifications')"
             class="relative mr-6 text-gray-700 hover:opacity-70 dark:text-white">
-            <span class="absolute flex items-center justify-center w-4 h-4 text-xs text-white bg-blue-500 rounded-full -top-1 -right-1">
+            <span v-if="$page.props.auth.unreadNotifications" class="absolute flex items-center justify-center w-4 h-4 text-xs text-white bg-blue-500 rounded-full -top-1 -right-1">
               {{ $page.props.auth.unreadNotifications }}
             </span>
             <IconBell class="w-5 h-5" />
-          </button>
+          </Link>
 
           <UseDark v-slot="{ isDark, toggleDark }">
             <button class="text-gray-700 hover:opacity-70 dark:text-white" @click="toggleDark()">

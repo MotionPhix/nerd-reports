@@ -2,7 +2,6 @@
 
 namespace App\Notifications;
 
-use AllowDynamicProperties;
 use App\Models\Comment;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
