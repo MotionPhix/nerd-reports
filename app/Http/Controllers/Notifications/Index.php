@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Notifications;
 
 use App\Http\Controllers\Controller;
-use App\Data\UserData;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class Index extends Controller
@@ -12,7 +12,7 @@ class Index extends Controller
   /**
    * Handle the incoming request.
    */
-  public function __invoke()
+  public function __invoke(Request $request)
   {
     $notifications = auth()->user()->notifications()->latest()->paginate();
 
@@ -48,6 +48,8 @@ class Index extends Controller
       return $notification;
 
     });
+
+    if ($request->wantsJson()) return $notifications;
 
     return Inertia::render('Notifications/Index', [
 
