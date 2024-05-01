@@ -35,10 +35,24 @@ import CommentItem from '@/Pages/Projects/Comments/CommentItem.vue'
 
 import CommentForm from '@/Pages/Projects/Comments/CommentForm.vue'
 
+import { useProjectStore } from '@/Stores/projectStore'
+
 const props = defineProps<{
   task: App.Data.TaskData,
   boardId: Number
 }>();
+
+const projectStore = useProjectStore()
+
+const { getProjects } = projectStore
+
+const {
+
+  project
+
+} = storeToRefs(projectStore);
+
+const localTask = project.value.boards.tasks.find(props.task.id)
 
 const formStore = useFormStore()
 
@@ -71,20 +85,20 @@ const {
 
 const form = useForm({
 
-  name: props.task.name,
+  name: localTask.name,
 
-  description: props.task.description,
+  description: localTask.description,
 
-  assigned_to: props.task.assigned_to,
+  assigned_to: localTask.assigned_to,
 
-  priority: props.task.priority,
+  priority: localTask.priority,
 
-  board_id: props.task.board_id,
+  board_id: localTask.board_id,
 
 });
 
 async function showForm() {
-  setCurrentTaskId(props.task.id)
+  setCurrentTaskId(localTask.id)
 
   await nextTick();
 
@@ -135,6 +149,8 @@ const priorities = [
 ]
 
 onMounted(() => {
+
+  getProject(props.task.id)
 
   axios
     .get('/api/users')
@@ -271,7 +287,7 @@ const cancelComment = () => {
           <InputError :message="form.errors.description" />
         </div>
 
-        <div class="col-span-2 flex items-center justify-between">
+        <div class="flex items-center justify-between col-span-2">
           <button
             class="px-4 py-2 text-sm font-medium text-white rounded-md shadow-sm bg-rose-600 hover:bg-rose-500 focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 focus:outline-none"
             type="submit">
@@ -299,7 +315,7 @@ const cancelComment = () => {
               class="absolute top-0 right-0 z-10 hidden group-hover:flex">
 
               <MenuButton
-                class="items-center flex justify-center w-5 h-5 text-gray-500 dark:text-gray-100">
+                class="flex items-center justify-center w-5 h-5 text-gray-500 dark:text-gray-100">
 
                 <IconMenu stroke="3" class="w-5 h-5" />
 
@@ -314,7 +330,7 @@ const cancelComment = () => {
                 leave-to-class="scale-90 opacity-0">
 
                 <MenuItems
-                  class="absolute right-0 w-40 overflow-hidden origin-top-left bg-white border-gray-300 border rounded-md shadow-lg top-5 dark:text-gray-300 dark:bg-gray-800 dark:border-gray-700 focus:outline-none">
+                  class="absolute right-0 w-40 overflow-hidden origin-top-left bg-white border border-gray-300 rounded-md shadow-lg top-5 dark:text-gray-300 dark:bg-gray-800 dark:border-gray-700 focus:outline-none">
 
                   <MenuItem>
 
@@ -411,9 +427,9 @@ const cancelComment = () => {
 
       <div class="relative bg-white dark:bg-gray-800">
 
-        <div class="sticky px-5 top-0 pt-3 z-10 bg-white dark:bg-gray-800 flex gap-4 border-gray-300 items-center pb-4 mb-4 rounded-t border-b sm:mb-5 dark:border-gray-600">
+        <div class="sticky top-0 z-10 flex items-center gap-4 px-5 pt-3 pb-4 mb-4 bg-white border-b border-gray-300 rounded-t dark:bg-gray-800 sm:mb-5 dark:border-gray-600">
 
-          <h2 class="text-xl font-semibold text-gray-900 dark:text-white prose">
+          <h2 class="text-xl font-semibold prose text-gray-900 dark:text-white">
             Task detail
           </h2>
 
@@ -452,15 +468,15 @@ const cancelComment = () => {
 
             </div>
 
-            <section class="grid sm:grid-cols-2 gap-6 sm:col-span-2">
+            <section class="grid gap-6 sm:grid-cols-2 sm:col-span-2">
 
-              <div class="relative overflow-hidden border border-gray-300 rounded-lg dark:border-gray-700 p-2">
+              <div class="relative p-2 overflow-hidden border border-gray-300 rounded-lg dark:border-gray-700">
 
                 <label class="block mb-2 text-sm font-medium text-gray-400 dark:text-gray-500">
 
                   <span>Assigned to</span>
 
-                  <IconUser stroke="2" class="h-36 w-36 absolute -top-8 -right-10 rotate-12 -z-0" />
+                  <IconUser stroke="2" class="absolute h-36 w-36 -top-8 -right-10 rotate-12 -z-0" />
 
                 </label>
 
@@ -470,12 +486,12 @@ const cancelComment = () => {
                 </p>
               </div>
 
-              <div class="relative overflow-hidden border border-gray-300 rounded-lg dark:border-gray-700 p-2">
+              <div class="relative p-2 overflow-hidden border border-gray-300 rounded-lg dark:border-gray-700">
                 <label class="block mb-2 text-sm font-medium text-gray-400 dark:text-gray-500">
 
                   <span>Priority</span>
 
-                  <IconClock stroke="2" class="h-36 w-36 absolute -top-8 -right-10 rotate-12 -z-0" />
+                  <IconClock stroke="2" class="absolute h-36 w-36 -top-8 -right-10 rotate-12 -z-0" />
 
                 </label>
 
@@ -513,7 +529,7 @@ const cancelComment = () => {
 
               <CommentShell>
 
-                <CommentItem v-for="comment in props.task.comments" :comment="comment" :key="comment.id" />
+                <CommentItem v-for="comment in localTask.comments" :comment="comment" :key="comment.id" />
 
               </CommentShell>
 
@@ -523,7 +539,7 @@ const cancelComment = () => {
 
           <article v-else>
 
-            <CommentForm :task="props.task" :cancel="cancelComment" />
+            <CommentForm :task="localTask" :cancel="cancelComment" />
 
           </article>
 

@@ -2,8 +2,9 @@
 
 namespace App\Data;
 
-use DateTime;
-use Illuminate\Support\Collection;
+use App\Enums\ProjectStatus;
+use Spatie\LaravelData\Attributes\WithCast;
+use Spatie\LaravelData\Casts\EnumCast;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Optional;
 
@@ -16,11 +17,12 @@ class ProjectData extends Data
 
       public readonly string $name,
 
-      public readonly string $created_at,
+      public readonly string|Optional $created_at,
 
       public readonly string $due_date,
 
-      public readonly string $status,
+      #[WithCast(EnumCast::class)]
+      public readonly ProjectStatus $status,
 
       public readonly ContactData $contact,
 

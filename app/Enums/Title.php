@@ -4,15 +4,37 @@ namespace App\Enums;
 
 enum Title: string
 {
-    case Mr = 'mr';
+  case MR = 'mr';
 
-    case Mrs = 'mrs';
+  case MRS = 'mrs';
 
-    case Ms = 'ms';
+  case MS = 'ms';
 
-    case Sir = 'sr';
+  case SIR = 'sr';
 
-    case Professor = 'prof';
+  case PROFESSOR = 'prof';
 
-    case Dr = 'dr';
+  case DR = 'dr';
+
+  /**
+   * @return string
+   */
+  public function getLabel(): string
+  {
+    return [
+
+      self::MR => 'Mr',
+
+      self::MRS => 'Mrs',
+
+      self::MS => 'Ms',
+
+      self::SIR => 'Sir',
+
+      self::PROFESSOR => 'Professor',
+
+      self::DR => 'Dr',
+
+    ][$this->value];
+  }
 }

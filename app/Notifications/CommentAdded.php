@@ -6,6 +6,7 @@ use App\Models\Comment;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -13,16 +14,13 @@ class CommentAdded extends Notification
 {
   use Queueable;
 
-  private $user, $comment;
-
   /**
    * Create a new notification instance.
    */
-  public function __construct(User $user, Comment $comment)
-  {
-    $this->user = $user;
-    $this->comment = $comment;
-  }
+  public function __construct(
+    public User $user,
+    public Comment $comment
+  ) {}
 
   /**
    * Get the notification's delivery channels.
@@ -56,5 +54,13 @@ class CommentAdded extends Notification
       'user' => $this->user,
       'comment' => $this->comment,
     ];
+  }
+
+  /**
+   * Get the broadcastable representation of the notification.
+   */
+  public function toBroadcast(object $notifiable): BroadcastMessage
+  {
+    return new BroadcastMessage([]);
   }
 }

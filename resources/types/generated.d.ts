@@ -128,6 +128,7 @@ position: any | number | null;
 assigned_to: number;
 };
 export type UserData = {
+id: any | number;
 first_name: string;
 last_name: string;
 avatar_url: any | string;

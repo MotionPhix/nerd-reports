@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ProjectStatus;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,6 +13,12 @@ use Illuminate\Support\Str;
 use Stevebauman\Purify\Casts\PurifyHtmlOnGet;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * @property ProjectStatus $status
+ * @property PurifyHtmlOnGet $description
+ * @property PurifyHtmlOnGet $name
+ * @property Carbon $due_date
+ */
 class Project extends Model
 {
   use HasFactory;
@@ -33,6 +40,7 @@ class Project extends Model
       'due_date' => 'date:j F, Y',
       'description' => PurifyHtmlOnGet::class,
       'name' => PurifyHtmlOnGet::class,
+      'status' => ProjectStatus::class,
     ];
   }
 
@@ -46,7 +54,7 @@ class Project extends Model
   protected function deadline(): Attribute
   {
     return Attribute::make(
-      get: fn () => Carbon::parse($this->due_date)->diffForHumans()
+      get: fn () => $this->due_date->diffForHumans()
     );
   }
 
