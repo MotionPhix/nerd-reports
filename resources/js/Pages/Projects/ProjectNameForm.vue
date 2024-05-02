@@ -2,19 +2,21 @@
 import { nextTick, ref } from "vue";
 import { useForm } from "@inertiajs/vue3"
 import { useNotificationStore } from '@/Stores/notificationStore'
+import { useProjectStore } from "@/Stores/projectStore";
+import { storeToRefs } from "pinia";
 
-const props = defineProps<{
-  project: App.Data.ProjectFullData
-}>();
+const projectStore = useProjectStore()
 
 const toastStore = useNotificationStore();
 
+const { project } = storeToRefs(projectStore);
+
 const { notify } = toastStore
 
-const emit = defineEmits(['saved'])
+const { setProject } = projectStore
 
 const form = useForm({
-  name: props.project.name
+  name: project.value.name
 });
 
 const input = ref();
@@ -35,10 +37,10 @@ function onSubmit() {
 
   isEditing.value = false;
 
-  if (props.project.name === form.name) return
+  if (project.value.name === form.name) return
 
   form.patch(
-    route('projects.update', {project: props.project.pid}),
+    route('projects.update', {project: project.value.pid}),
     {
       preserveScroll: true,
 
@@ -58,9 +60,9 @@ function onSubmit() {
 
       },
 
-      onSuccess: (resp) => {
+      onSuccess: (data: any) => {
 
-        emit('saved', resp.props.project)
+        setProject(data.props.project)
 
         notify({
           title:  true,

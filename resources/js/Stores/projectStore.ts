@@ -25,15 +25,32 @@ export const useProjectStore = defineStore('projects', () => {
 
   }
 
-  async function getProject(projectId: string) {
+  async function reFetchProject() {
 
-    const resp = await axios.get(`/projects/s/${projectId}`)
+    const resp = await axios.get(`/projects/s/${state.project.pid}`)
     state.project = resp.data
-
-    console.log('it happening');
-
 
   }
 
-  return { ...reactiveState, fetchProjects, getProject }
+  async function getProject(projectPid: string) {
+
+    const resp = await axios.get(`/projects/s/${projectPid}`)
+    state.project = resp.data
+
+  }
+
+  async function setProject(project: App.Data.ProjectFullData) {
+
+    state.project = project
+
+  }
+
+  async function setProjects(projects: App.Data.ProjectData[]) {
+
+    state.projects = projects
+
+  }
+
+  return { ...reactiveState, fetchProjects, reFetchProject, setProject, setProjects, getProject }
+
 })

@@ -1,12 +1,39 @@
 <script setup lang="ts">
-import { Link } from "@inertiajs/vue3"
+import { useProjectStore } from "@/Stores/projectStore";
+import { router } from "@inertiajs/vue3";
 import { IconBuilding, IconBuildingBroadcastTower, IconTrash } from "@tabler/icons-vue"
+import axios from "axios";
 
-interface Props {
+const props = defineProps<{
   project: App.Data.ProjectData
-}
+}>()
 
-defineProps<Props>()
+const projectStore = useProjectStore()
+
+const { setProject } = projectStore
+
+const fetchProject = () => {
+
+  axios
+    .get(route('projects.show', { project: props.project.pid }))
+    .then((resp) => {
+
+      setProject(resp.data)
+
+      setTimeout(() => {
+
+        router.get(route('projects.show', { project: props.project.pid }))
+
+      }, 50)
+
+    })
+    .catch((err) => {
+
+      console.log(err);
+
+    })
+
+}
 </script>
 
 <template>
@@ -27,12 +54,11 @@ defineProps<Props>()
     </div>
 
     <div class="relative flex-auto min-w-0 dark:text-gray-300">
-      <Link
+      <button
         class="pr-20 text-2xl font-semibold capitalize truncate text-slate-900 dark:text-slate-300"
-        :href="route('projects.show', { project: project.pid })"
-        as="button">
+        @click="fetchProject">
         {{ project.name }}
-      </Link>
+      </button>
 
       <dl class="flex flex-wrap mt-2 text-sm font-medium leading-6">
         <div class="absolute top-0 right-0 flex items-center space-x-1">

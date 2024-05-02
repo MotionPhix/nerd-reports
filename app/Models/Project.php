@@ -80,7 +80,7 @@ class Project extends Model
 
   public function files()
   {
-    return $this->morphMany(File::class, 'fileable');
+    return $this->morphMany(File::class, 'model');
   }
 
   public function getUsersAttribute()

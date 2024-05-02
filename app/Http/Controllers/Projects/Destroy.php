@@ -17,7 +17,7 @@ class Destroy extends Controller
 
       foreach ($pidArray as $pid) {
 
-        $project = Project::with('files', 'boards.tasks')->where('pid', $pid)->firstOrFail();
+        $project = Project::with('files', 'boards.tasks.comments.files')->where('pid', $pid)->firstOrFail();
 
         // Delete project files
         if ($project->files->isNotEmpty()) {
@@ -29,6 +29,7 @@ class Destroy extends Controller
             $file->delete();
 
           }
+
         }
 
         if (isset($project->boards)) {
@@ -37,7 +38,33 @@ class Destroy extends Controller
 
             if (isset($board->tasks)) {
 
-              $board->tasks()->delete();
+              $board->tasks->each(function ($task) {
+
+                if (isset($task->comments)) {
+
+                  $task->comments->each(function ($comment) {
+
+                    if (isset($comment->files)) {
+
+                      foreach ($comment->files as $file) {
+
+                        Storage::delete($file->file_path);
+
+                        $file->delete();
+
+                      }
+
+                    }
+
+                    $comment->delete();
+
+                  });
+
+                }
+
+                $task->delete();
+
+              });
 
             }
 

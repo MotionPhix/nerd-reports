@@ -14,6 +14,7 @@ import { useNotificationStore } from "@/Stores/notificationStore"
 import FileInput from '@/Components/FileInput.vue'
 
 import axios from "axios"
+import { useProjectStore } from '@/Stores/projectStore'
 
 const props = defineProps<{
   task: App.Data.TaskData,
@@ -22,7 +23,11 @@ const props = defineProps<{
 
 const toastStore = useNotificationStore();
 
+const projectStore = useProjectStore();
+
 const { notify } = toastStore
+
+const { setProject } = projectStore
 
 const media = ref([])
 
@@ -69,7 +74,9 @@ function onSubmit() {
 
       },
 
-      onSuccess: (resp) => {
+      onSuccess: (data: any) => {
+
+        setProject(data.props.project)
 
         form.reset()
 
@@ -79,6 +86,8 @@ function onSubmit() {
           title:  true,
           message: 'Comment was added successfully!'
         })
+
+
 
       },
 

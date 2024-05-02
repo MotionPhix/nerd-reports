@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { IconDots } from '@tabler/icons-vue';
-import BoardNameForm from '@/Pages/Projects/Boards/BoardNameForm.vue';
 import BoardCreateForm from '@/Pages/Projects/Boards/BoardCreateForm.vue';
 import BoardItem from "@/Pages/Projects/Boards/BoardItem.vue";
+import { useProjectStore } from '@/Stores/projectStore';
+import { storeToRefs } from 'pinia';
 
-const props = defineProps<{
-  project: App.Data.ProjectFullData;
-}>();
+const projectStore = useProjectStore()
+const { project } = storeToRefs(projectStore)
+
 </script>
 
 <template>
@@ -15,7 +15,7 @@ const props = defineProps<{
     <div class="inline-flex items-start space-x-4">
 
       <BoardItem
-        v-for="(board, idx) in props.project.boards"
+        v-for="(board, idx) in project.boards"
         :key="board.id"
         :board="board"
         :boardIndex="idx"
@@ -23,7 +23,7 @@ const props = defineProps<{
 
         <div>
 
-          <BoardCreateForm :project="props.project" />
+          <BoardCreateForm />
 
         </div>
 

@@ -5,7 +5,7 @@ import DropdownLink from "@/Components/DropdownLink.vue"
 import NavLink from "@/Components/NavLink.vue"
 import ResponsiveNavLink from "@/Components/ResponsiveNavLink.vue"
 import { useProjectStore } from "@/Stores/projectStore"
-import { Link, router, usePage } from "@inertiajs/vue3"
+import { Link, usePage } from "@inertiajs/vue3"
 import { IconBell, IconMoon, IconSun } from "@tabler/icons-vue"
 import { UseDark } from "@vueuse/components"
 import { ref } from "vue"
@@ -13,8 +13,7 @@ import { ref } from "vue"
 const showingNavigationDropdown = ref(false)
 const { user } = usePage().props.auth
 const projectStore = useProjectStore()
-
-const { getProject } = projectStore()
+const { reFetchProject } = projectStore
 
 window.Echo
   .private(`App.Models.User.${user.id}`)
@@ -28,7 +27,7 @@ window.Echo
 
         if (usePage().url.startsWith('/projects/s')) {
 
-          getProject(usePage().props.project.pid)
+          reFetchProject()
 
         }
 

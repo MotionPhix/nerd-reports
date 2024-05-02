@@ -11,16 +11,28 @@ import {
 import Pagination from "@/Components/Project/Pagination.vue";
 
 import useStickyTop from "@/Composables/useStickyTop";
+
 import ProjectCard from "@/Components/Project/ProjectCard.vue";
+
 import CardList from "@/Components/CardList.vue";
 
-interface Props {
-  projects: App.Data.ProjectData;
-}
+import { useProjectStore } from "@/Stores/projectStore";
 
-defineProps<Props>();
+import { storeToRefs } from "pinia";
+
+import { onMounted } from "vue";
+
+const projectStore = useProjectStore()
+
+const { fetchProjects } = projectStore
+
+const { projects } = storeToRefs(projectStore)
 
 const { navClasses } = useStickyTop();
+
+onMounted(async () => {
+  await fetchProjects()
+})
 
 defineOptions({
   layout: AuthenticatedLayout,

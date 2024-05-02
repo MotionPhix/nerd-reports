@@ -6,6 +6,8 @@ import './bootstrap';
 
 import 'maz-ui/styles';
 
+import "@/Directives/tooltip.css";
+
 import { createInertiaApp } from '@inertiajs/vue3';
 
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
@@ -17,6 +19,8 @@ import { createApp, h } from 'vue';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 
 import Toast, { POSITION } from "vue-toastification";
+
+import tooltip from "@/Directives/tooltip";
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -47,6 +51,7 @@ createInertiaApp({
       .use(ZiggyVue)
       .use(pinia)
       .use(Toast, options)
+      .directive("tooltip", tooltip)
       .mount(el);
   },
   progress: {

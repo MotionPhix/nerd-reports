@@ -21,6 +21,8 @@ import axios from "axios"
 
 import { watch } from 'vue';
 
+import { useProjectStore } from '@/Stores/projectStore';
+
 const props = defineProps<{
   board: App.Data.BoardData
 }>();
@@ -28,6 +30,10 @@ const props = defineProps<{
 const formStore = useFormStore()
 
 const toastStore = useNotificationStore();
+
+const projectStore = useProjectStore();
+
+const { setProject } = projectStore;
 
 const {
   currentBoardId
@@ -90,7 +96,9 @@ watch(() => currentBoardId.value, async (newBoardId, oldBoardId) => {
 }, { immediate: true })
 
 async function showForm() {
+
   setCurrentBoardId(props.board.id)
+
 }
 
 function onSubmit() {
@@ -113,6 +121,7 @@ function onSubmit() {
   })
 
   form.post(route('tasks.store'), {
+
     preserveScroll: true,
 
     onError: (errors) => {
@@ -129,7 +138,9 @@ function onSubmit() {
 
     },
 
-    onSuccess: () => {
+    onSuccess: (data: any) => {
+
+      setProject(data.props.project)
 
       form.reset()
 

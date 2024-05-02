@@ -1,87 +1,27 @@
 <script setup lang="ts">
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
-import { Head, Link, router } from '@inertiajs/vue3'
+import { Head, Link } from '@inertiajs/vue3'
 import { IconArrowLeft, IconBuildingFortress, IconClockUp, IconClockDown, IconTrash } from '@tabler/icons-vue'
 import { computed, ref } from "vue"
 import ProjectNameForm from '@/Pages/Projects/ProjectNameForm.vue'
 import useStickyTop from "@/Composables/useStickyTop"
 import BoardList from '@/Pages/Projects/Boards/BoardList.vue'
-import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
-import { useProjectStatus } from '@/Composables/useProjectStatus'
+import { useProjectStore } from '@/Stores/projectStore'
+import { storeToRefs } from 'pinia'
 
-const props = defineProps<Props>()
+const projectStore = useProjectStore()
 
-interface Props {
-  project: App.Data.ProjectFullData,
-}
+const { project } = storeToRefs(projectStore)
 
 defineOptions({
   layout: AuthenticatedLayout,
 })
 
-const { projectStatus } = useProjectStatus(props.project.status);
-
-const projectName = ref(props.project.name);
-
 const title = computed(
-  () => props.project.contact?.firm?.name ?? `${props.project.contact.first_name} ${props.project.contact.last_name}`
+  () => project.value.contact?.firm?.name ?? `${project.value.contact.first_name} ${project.value.contact.last_name}`
 )
 
 const { navClasses } = useStickyTop();
-
-function updateProjectName (status: string) {
-
-  const { projectStatus } = useProjectStatus(status);
-
-  projectStatus.value = projectStatus
-
-}
-
-const setStatus = (status: string) => {
-
-  router
-    .patch(
-      route('projects.update', { project: props.project.pid }),
-      {
-        status: status,
-
-        preserveScroll: true,
-
-        onError: (errors) => {
-
-          for (const prop in errors) {
-
-            notify({
-
-              title:  'Resolve errors',
-
-              type: 'warning',
-
-              message: errors[prop]
-
-            })
-
-          }
-
-        },
-
-        onSuccess: () => {
-
-          notify({
-
-            title:  true,
-
-            message: 'Project was renamed!'
-
-          })
-
-        },
-
-      }
-
-  );
-
-}
 </script>
 
 <template>
@@ -99,16 +39,13 @@ const setStatus = (status: string) => {
       <IconArrowLeft class="h-7" stroke="2.5" />
     </Link>
 
-    <ProjectNameForm
-      :project="props.project"
-      @saved="updateProjectName"
-    />
+    <ProjectNameForm />
 
     <span class="flex-1"></span>
 
     <Link
       method="delete"
-      :href="route('projects.destroy', { ids: props.project.pid })"
+      :href="route('projects.destroy', { ids: project.pid })"
       class="flex items-center gap-2 duration-200 hover:opacity-75"
       preserve-scroll
       as="button">
@@ -120,7 +57,7 @@ const setStatus = (status: string) => {
 
   <section class="relative flex flex-col max-w-3xl gap-24 px-6 pt-12 mx-auto">
 
-    <article class="flex" v-if="!! props.project.contact.firm">
+    <article class="flex" v-if="!! project.contact.firm">
 
       <div class="flex-none bg-gray-300 dark:bg-gray-700 rounded-xl">
         <IconBuildingFortress
@@ -132,15 +69,15 @@ const setStatus = (status: string) => {
         <div class="flex flex-wrap">
 
           <h1 class="flex-auto font-medium text-slate-900 dark:text-slate-200">
-            {{ `${props.project.contact.first_name} ${props.project.contact.last_name}` }}
+            {{ `${project.contact.first_name} ${project.contact.last_name}` }}
           </h1>
 
           <div class="flex-none order-1 w-full mt-2 text-5xl font-bold text-lime-600">
-            {{ props.project.contact.firm.name }}
+            {{ project.contact.firm.name }}
           </div>
 
           <div class="text-sm font-medium text-slate-400">
-            {{ props.project.contact.emails[0].email }}
+            {{ project.contact.emails[0].email }}
           </div>
         </div>
 
@@ -157,20 +94,20 @@ const setStatus = (status: string) => {
             <Link
               as="button"
               method="delete"
-              :href="route('projects.destroy', { ids: props.project.pid })"
+              :href="route('projects.destroy', { ids: project.pid })"
               class="h-10 px-6 font-semibold border rounded-full dark:border-gray-700 dark:text-slate-300 border-slate-200 text-slate-900">
               Delete
             </Link>
           </div>
 
-          <Menu
+          <!-- <Menu
             as="div"
             class="relative z-10">
 
             <MenuButton
               class="h-10 font-semibold dark:border-gray-700 dark:text-slate-300 border-slate-200 text-slate-900">
 
-              {{ projectStatus }}
+              {{ project.status }}
 
             </MenuButton>
 
@@ -226,7 +163,7 @@ const setStatus = (status: string) => {
 
             </transition>
 
-          </Menu>
+          </Menu> -->
 
         </div>
 
@@ -238,21 +175,21 @@ const setStatus = (status: string) => {
     </article>
 
     <article v-else class="text-3xl dark:text-gray-400">
-      For {{ `${props.project.contact.first_name} ${props.project.contact.last_name}` }}
+      For {{ `${project.contact.first_name} ${project.contact.last_name}` }}
     </article>
 
     <div class="space-y-6">
 
       <h2 class="text-5xl font-display dark:text-gray-300">
-        {{ projectName }}
+        {{ project.name }}
       </h2>
 
       <hr class="dark:border-gray-600">
 
       <section
-        v-html="props.project.description"
+        v-html="project.description"
         class="pt-8 prose dark:prose-invert empty:hidden"
-        v-if="props.project.description" />
+        v-if="project.description" />
     </div>
 
     <section class="grid grid-cols-1 gap-4 dark:text-white md:grid-cols-2 font-display">
@@ -298,29 +235,20 @@ const setStatus = (status: string) => {
   <section>
 
     <!-- start -->
-  <div class="flex flex-col max-w-3xl gap-24 px-6 py-12 mx-auto">
+    <div class="flex flex-col max-w-3xl gap-24 px-6 py-12 mx-auto">
 
-    <h2
-      class="text-3xl dark:text-gray-400 font-display">
-      Tasks
-    </h2>
+      <h2
+        class="text-3xl dark:text-gray-400 font-display">
+        Tasks
+      </h2>
 
-  </div>
+    </div>
 
-    <!-- <div class="flex-1 overflow-x-auto scrollbar-thin">
-      <div class="grid items-start h-full grid-cols-1 gap-4 sm:grid-cols-2">
-        <ProjectBoardList
-          v-for="board in project.boards"
-          :key="board.id"
-          :board="board"
-          class="h-full rounded-md"
-        />
+    <template v-if="project.pid">
 
-        <ProjectBoardForm :project="project" />
-      </div>
-    </div> -->
+      <BoardList />
 
-    <BoardList :project="project" />
+    </template>
 
   </section>
 </template>

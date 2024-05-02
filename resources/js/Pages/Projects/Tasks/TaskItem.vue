@@ -44,15 +44,13 @@ const props = defineProps<{
 
 const projectStore = useProjectStore()
 
-const { getProjects } = projectStore
+const { reFetchProject } = projectStore
 
 const {
 
   project
 
 } = storeToRefs(projectStore);
-
-const localTask = project.value.boards.tasks.find(props.task.id)
 
 const formStore = useFormStore()
 
@@ -85,20 +83,20 @@ const {
 
 const form = useForm({
 
-  name: localTask.name,
+  name: props.task.name,
 
-  description: localTask.description,
+  description: props.task.description,
 
-  assigned_to: localTask.assigned_to,
+  assigned_to: props.task.assigned_to,
 
-  priority: localTask.priority,
+  priority: props.task.priority,
 
-  board_id: localTask.board_id,
+  board_id: props.task.board_id,
 
 });
 
 async function showForm() {
-  setCurrentTaskId(localTask.id)
+  setCurrentTaskId(props.task.id)
 
   await nextTick();
 
@@ -150,18 +148,10 @@ const priorities = [
 
 onMounted(() => {
 
-  getProject(props.task.id)
-
   axios
     .get('/api/users')
     .then((response) => {
       users.value = response.data.users;
-    })
-
-  axios
-    .get('/api/get-files')
-    .then((response) => {
-      console.log(response.data)
     })
 
 })
@@ -387,7 +377,15 @@ const cancelComment = () => {
 
             <section v-html="props.task.description" class="mt-6 text-xs prose dark:prose-invert line-clamp-2" />
 
-            <div class="flex items-center w-full mt-3 text-xs font-medium text-gray-700 dark:text-gray-200">
+            <div
+              class="flex items-center w-full mt-3 text-xs font-medium text-gray-700 dark:text-gray-200"
+              v-tooltip="{
+                theme: {
+                  placement: 'left',
+                  width: 'max-content',
+                  padding: '0.5rem',
+                },
+              }">
 
               <div class="flex items-center">
                 <IconCalendar stroke="1.5" class="w-4 h-4" />
@@ -413,9 +411,15 @@ const cancelComment = () => {
                 </span>
               </div>
 
-              <img
-                class="w-6 h-6 ml-auto rounded-full"
-                :src='props.task.user.avatar_url'/>
+              <div
+                v-tooltip="props.task.user.name"
+                class="ml-auto">
+
+                <img
+                  class="w-6 h-6 rounded-full"
+                  :src='props.task.user.avatar_url'/>
+
+              </div>
             </div>
           </div>
         </div>
@@ -529,7 +533,7 @@ const cancelComment = () => {
 
               <CommentShell>
 
-                <CommentItem v-for="comment in localTask.comments" :comment="comment" :key="comment.id" />
+                <CommentItem v-for="comment in props.task.comments" :comment="comment" :key="comment.id" />
 
               </CommentShell>
 
@@ -539,7 +543,7 @@ const cancelComment = () => {
 
           <article v-else>
 
-            <CommentForm :task="localTask" :cancel="cancelComment" />
+            <CommentForm :task="props.task" :cancel="cancelComment" />
 
           </article>
 

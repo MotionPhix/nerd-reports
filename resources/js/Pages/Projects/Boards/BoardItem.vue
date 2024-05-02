@@ -3,12 +3,12 @@ import { IconDots, IconPlus, IconTrash } from '@tabler/icons-vue';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue';
 import TaskCreateForm from "@/Pages/Projects/Tasks/TaskCreateForm.vue";
 import TaskItem from "@/Pages/Projects/Tasks/TaskItem.vue";
-import { Link, router } from "@inertiajs/vue3"
+import { router } from "@inertiajs/vue3"
 import { ref, watch } from "vue"
 import { useFormStore } from '@/Stores/formStore';
-import { storeToRefs } from 'pinia';
 import { VueDraggableNext } from "vue-draggable-next"
 import BoardNameForm from '@/Pages/Projects/Boards/BoardNameForm.vue';
+import { useProjectStore } from '@/Stores/projectStore';
 
 const props = defineProps({
   board: Object,
@@ -17,17 +17,16 @@ const props = defineProps({
 
 const boardRef = ref();
 
+const projectStore = useProjectStore()
+
+const { setProject } = projectStore
+
 const tasks = ref(props.board.tasks);
 
 const formStore = useFormStore()
 
 const {
-  currentBoardId
-} = storeToRefs(formStore);
-
-const {
   setCurrentBoardId,
-  unSetCurrentBoardId,
 } = formStore
 
 watch(() => props.board.tasks, (newTasks) => tasks.value = newTasks);
@@ -82,6 +81,23 @@ const dragOptions = {
   ghostClass: "ghost",
   dragClass: "drag"
 }
+
+function deleteBoard () {
+  router.
+    delete(route('boards.destroy', { project: props.board.project_id, board: props.board.id }), {
+
+      preserveScroll: true,
+
+      onError: (err) => {
+        console.log(err);
+      },
+
+      onSuccess: (data) => {
+        setProject(data.props.project)
+      }
+
+    })
+}
 </script>
 
 <template>
@@ -126,18 +142,16 @@ const dragOptions = {
 
             <MenuItem>
 
-              <Link
-                as="button"
-                method="delete"
-                preserve-scroll
-                class="flex items-center w-full gap-2 px-4 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-600"
-                :href="route('boards.destroy', { project: props.board.project_id, board: props.board.id })">
+              <button
+                type="button"
+                @click="deleteBoard(props.board)"
+                class="flex items-center w-full gap-2 px-4 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-600">
 
                 <IconTrash stroke="2.5" class="w-4 h-4" />
 
                 <span>Delete board</span>
 
-              </Link>
+              </button>
 
             </MenuItem>
 
@@ -150,10 +164,6 @@ const dragOptions = {
     </div>
 
     <div class="flex flex-col pb-3 overflow-hidden">
-
-      <div
-        ref="boardRef"
-        class="flex-1 px-3 overflow-y-auto text-rose-500">
 
       <div
         ref="boardRef"
@@ -179,32 +189,6 @@ const dragOptions = {
           </transition-group>
 
         </VueDraggableNext>
-
-        <!-- <vue-draggable
-          item-key="id"
-          group="tasks"
-          drag-class="drag"
-          ghost-class="ghost"
-          tag="transition-group"
-          class="mt-2 space-y-6 list-group"
-          :component-data="{ tag: 'ul', name: 'flip-list', type: 'transition' }"
-          v-model="tasks"
-          v-bind="dragOptions"
-          @change="onChange">
-
-          <template #item="{ element }">
-
-            <TaskItem
-              :task="element"
-              :board-id="props.boardIndex"
-              :key="element.id"
-              class="list-group-item" />
-
-          </template>
-
-        </vue-draggable> -->
-
-      </div>
 
       </div>
 

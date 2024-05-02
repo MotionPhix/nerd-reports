@@ -3,10 +3,12 @@ import { useForm } from '@inertiajs/vue3';
 import {IconPlus} from '@tabler/icons-vue';
 import {nextTick, ref} from "vue";
 import { useNotificationStore } from '@/Stores/notificationStore';
+import { useProjectStore } from '@/Stores/projectStore';
+import { storeToRefs } from 'pinia';
 
-const props = defineProps({
-  project: Object
-});
+const projectStore = useProjectStore();
+
+const { project } = storeToRefs(projectStore)
 
 const notifyStore = useNotificationStore()
 
@@ -17,11 +19,11 @@ const formRef = ref();
 const isShowingForm = ref(false);
 
 const { notify } = notifyStore
+const { setProject } = projectStore;
 
 const form = useForm({
   name: ''
 });
-
 async function showForm() {
   isShowingForm.value = true;
 
@@ -33,7 +35,7 @@ async function showForm() {
 function onSubmit() {
 
   form.post(
-    route('boards.store', props.project.pid),
+    route('boards.store', project.value.pid),
     {
 
       preserveScroll: true,
@@ -50,9 +52,13 @@ function onSubmit() {
         })
       },
 
-      onSuccess: () => {
+      onSuccess: (data) => {
         form.reset()
+
+        setProject(data.props.project)
+
         isShowingForm.value = false
+
         formRef.value.scrollIntoView();
       },
 
