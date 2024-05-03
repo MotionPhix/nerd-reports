@@ -89,7 +89,7 @@ number: string;
 export type ProjectData = {
 pid: string;
 name: string;
-created_at: string;
+created_at: any | string;
 due_date: string;
 status: string;
 contact: App.Data.ContactData;
@@ -139,5 +139,6 @@ name: any | string;
 declare namespace App.Enums {
 export type AddressType = 'home' | 'work';
 export type PhoneType = 'mobile' | 'work' | 'home' | 'fax';
+export type ProjectStatus = 'in_progress' | 'approved' | 'completed' | 'cancelled';
 export type Title = 'mr' | 'mrs' | 'ms' | 'sr' | 'prof' | 'dr';
 }

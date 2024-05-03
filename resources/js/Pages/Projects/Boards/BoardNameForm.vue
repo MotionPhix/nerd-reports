@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useForm } from "@inertiajs/vue3";
-import {nextTick, ref, watch} from "vue";
+import {nextTick, ref} from "vue";
 
 const props = defineProps<{
   board: App.Data.BoardData
@@ -29,6 +29,8 @@ async function edit() {
 function onSubmit() {
 
   isEditing.value = false;
+
+  if (props.board.name === form.name) return
 
   form.patch(
 

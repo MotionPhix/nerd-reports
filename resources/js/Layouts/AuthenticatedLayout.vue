@@ -8,7 +8,7 @@ import { useProjectStore } from "@/Stores/projectStore"
 import { Link, usePage } from "@inertiajs/vue3"
 import { IconBell, IconMoon, IconSun } from "@tabler/icons-vue"
 import { UseDark } from "@vueuse/components"
-import { ref } from "vue"
+import { ref, watch } from "vue"
 
 const showingNavigationDropdown = ref(false)
 const { user } = usePage().props.auth
@@ -36,6 +36,15 @@ window.Echo
     }
 
   })
+
+  watch(
+  pinia.state,
+  (state) => {
+    // persist the whole state to the local storage whenever it changes
+    localStorage.setItem('piniaState', JSON.stringify(state))
+  },
+  { deep: true }
+)
 </script>
 
 <template>

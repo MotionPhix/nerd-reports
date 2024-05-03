@@ -2,7 +2,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head, Link } from '@inertiajs/vue3'
 import { IconArrowLeft, IconBuildingFortress, IconClockUp, IconClockDown, IconTrash } from '@tabler/icons-vue'
-import { computed, ref } from "vue"
+import { computed } from "vue"
 import ProjectNameForm from '@/Pages/Projects/ProjectNameForm.vue'
 import useStickyTop from "@/Composables/useStickyTop"
 import BoardList from '@/Pages/Projects/Boards/BoardList.vue'
@@ -13,6 +13,8 @@ const projectStore = useProjectStore()
 
 const { project } = storeToRefs(projectStore)
 
+console.log(project.value);
+
 defineOptions({
   layout: AuthenticatedLayout,
 })
@@ -22,6 +24,7 @@ const title = computed(
 )
 
 const { navClasses } = useStickyTop();
+
 </script>
 
 <template>
@@ -49,7 +52,7 @@ const { navClasses } = useStickyTop();
       class="flex items-center gap-2 duration-200 hover:opacity-75"
       preserve-scroll
       as="button">
-      <IconTrash class="h-7" />
+      <IconTrash class="h-5" />
       <span>Delete</span>
     </Link>
 

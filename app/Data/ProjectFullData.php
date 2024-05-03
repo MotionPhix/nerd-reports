@@ -2,6 +2,7 @@
 
 namespace App\Data;
 
+use App\Enums\ProjectStatus;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
 use Spatie\LaravelData\Data;
@@ -31,7 +32,8 @@ class ProjectFullData extends Data
 
     /** @var Collection<BoardData> */
     public Collection|null|Optional $boards,
-  ) {}
+  ) {
+  }
 
   public static function rules(): array
   {
@@ -70,6 +72,22 @@ class ProjectFullData extends Data
       'contact_id.exists' => 'The contact couldn\'t be found',
 
       'documents.mimes' => 'The files must be of JPEG, PNG, GIF, PDF, DOC, DOCX, XLS, or XLSX type.',
+    ];
+  }
+
+  public function toArray(): array
+  {
+    return [
+      'pid' => $this->pid,
+      'name' => $this->name,
+      'created_at' => $this->created_at,
+      'due_date' => $this->due_date,
+      'deadline' => $this->deadline,
+      'status' => ProjectStatus::tryFrom($this->status)->getLabel(),
+      'description' => $this->description,
+      'contact_id' => $this->contact_id,
+      'contact' => $this->contact->toArray(),
+      'boards' => $this->boards ? $this->boards->toArray() : null,
     ];
   }
 }

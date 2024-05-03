@@ -4,7 +4,7 @@ import { reactive, ref, toRefs } from 'vue'
 
 interface ProjectState {
   projects: (App.Data.ProjectData|undefined)[]
-  project: App.Data.ProjectFullData
+  project: App.Data.ProjectFullData|null
 }
 
 export const useProjectStore = defineStore('projects', () => {
