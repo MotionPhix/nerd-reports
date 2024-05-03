@@ -271,7 +271,7 @@ const placeholder = computed(
 <template>
   <Head
     :title="
-      contact.cid
+      props.contact.cid
         ? `Edit ${contact.first_name} ${contact.last_name}`
         : 'Update new contact'
     "
@@ -286,7 +286,7 @@ const placeholder = computed(
         class="flex items-center gap-2 font-bold text-blue-300 transition duration-300 rounded-full dark:text-lime-300 hover:text-blue-500"
         v-if="!hasFirm && !form.firm_keys?.fid"
         @click="toggleField('hasFirm')">
-        <IconPlus class="w-6 h-6" /> <span>Add company</span>
+        <IconPlus class="w-6 h-6" /> <span>Add Company</span>
       </SecondaryButton>
 
       <h2
@@ -309,7 +309,7 @@ const placeholder = computed(
         <IconPlus stroke="2.5" class="w-6 h-6 fill-current" />
 
         <span>
-          {{ contact.id ? "Update" : "Update" }}
+          {{ props.contact.id ? "Update" : "Create" }}
         </span>
 
         <Spinner v-if="form.processing" />
@@ -318,8 +318,7 @@ const placeholder = computed(
       <Link
         as="button"
         :href="route('contacts.index')"
-        class="py-2.5 text-gray-800 font-semibold dark:text-white hover:text-opacity-40 transition duration-300 inline-flex items-center border-gray-700 hover:border-opacity-40 focus:ring-4 focus:outline-none focus:ring-gray-300 rounded-full px-5 text-center border dark:border-gray-600 dark:hover:border-gray-700 dark:focus:ring-gray-800"
-      >
+        class="py-2.5 text-gray-800 font-semibold dark:text-white hover:text-opacity-40 transition duration-300 inline-flex items-center border-gray-700 hover:border-opacity-40 focus:ring-4 focus:outline-none focus:ring-gray-300 rounded-full px-5 text-center border dark:border-gray-600 dark:hover:border-gray-700 dark:focus:ring-gray-800">
         Cancel
       </Link>
     </nav>

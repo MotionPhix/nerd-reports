@@ -6,11 +6,9 @@ import { IconPencil, IconTrash } from '@tabler/icons-vue';
 import { storeToRefs } from 'pinia';
 import useStickyTop from "@/Composables/useStickyTop"
 
-interface Props {
-  contacts: Object
-}
-
-const props = defineProps<Props>()
+const props = defineProps<{
+  contacts: App.Data.ContactData[]
+}>()
 
 const contactStore = useContactStore()
 
@@ -29,10 +27,15 @@ const {
 
     <Link
       as="button"
+      v-if="props.contacts.length"
       :href="route('contacts.create')"
       class="flex items-center gap-2 font-semibold transition duration-300 hover:opacity-70">
       <IconContactAdd class="w-5 h-5 stroke-current" /> <span>New contact</span>
     </Link>
+
+    <h2 v-else class="text-xl font-semibold">
+      Explore Contacts
+    </h2>
 
   </nav>
 

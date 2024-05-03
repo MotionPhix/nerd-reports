@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Projects;
 
+use App\Enums\ProjectStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Contact;
 use App\Models\Project;
@@ -22,13 +23,15 @@ class Form extends Controller
 
         } else {
 
-          $project = (new Project())->fill(['contact_id' => $contact->cid]);
+          $project = (new Project())->fill(['contact_id' => $contact->cid, 'status' => ProjectStatus::PENDING]);
 
         }
 
       } else {
 
-        $project = new Project();
+        $project = new Project([
+          'status' => ProjectStatus::PENDING
+        ]);
 
       }
 

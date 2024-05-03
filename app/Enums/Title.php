@@ -21,7 +21,7 @@ enum Title: string
    */
   public function getLabel(): string
   {
-    return [
+    return match($this) {
 
       self::MR => 'Mr',
 
@@ -35,6 +35,6 @@ enum Title: string
 
       self::DR => 'Dr',
 
-    ][$this->value];
+    };
   }
 }

@@ -34,7 +34,7 @@ class Store extends Controller
 
       foreach ($files as $file) {
         $originalFilename = $file->getClientOriginalName();
-        $generatedFilename = Str::random(20) . '.' . $file->getClientOriginalExtension();
+        $generatedFilename = $file->hashname . '.' . $file->getExtension();
 
         $path = $file->storeAs('public/uploads', $generatedFilename);
 

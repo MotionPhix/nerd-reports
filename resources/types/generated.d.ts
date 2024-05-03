@@ -43,7 +43,7 @@ bio: any | string | null;
 phones: Array<App.Data.PhoneData> | Array<any>;
 emails: Array<App.Data.EmailData> | Array<any>;
 firm: App.Data.FirmData | any | null;
-title: App.Enums.Title;
+title: string;
 };
 export type EmailData = {
 id: any | number;
@@ -100,7 +100,7 @@ name: string;
 created_at: any | string | null;
 due_date: string | null;
 deadline: any | string | null;
-status: any | string;
+status: string;
 description: any | string | null;
 contact_id: any | string | number | null;
 contact: App.Data.ContactData | any;

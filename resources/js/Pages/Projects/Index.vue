@@ -43,7 +43,7 @@ defineOptions({
   <Head title="Explore Projects" />
 
   <nav
-    class="flex items-center h-16 max-w-5xl gap-6 px-8 mx-auto dark:text-white dark:border-gray-700"
+    class="flex items-center h-16 max-w-3xl gap-6 px-8 mx-auto dark:text-white dark:border-gray-700"
     :class="navClasses">
     <h2
       class="flex items-center gap-2 text-xl font-semibold leading-tight text-gray-900 dark:text-white">

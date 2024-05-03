@@ -18,7 +18,7 @@ defineOptions({ layout: AuthenticatedLayout });
 <template>
   <Head title="Explore Contacts" />
 
-  <div class="max-w-5xl mx-auto">
+  <div class="max-w-3xl mx-auto">
     <ContactActionMenu :contacts="props.contacts" />
   </div>
 

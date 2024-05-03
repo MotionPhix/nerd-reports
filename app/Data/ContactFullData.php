@@ -16,95 +16,96 @@ use Spatie\LaravelData\Optional;
  */
 class ContactFullData extends Data
 {
-    public function __construct(
-        public int|Optional $id,
+  public function __construct(
 
-        public string|Optional $cid,
+    public int|Optional $id,
 
-        public string $first_name,
+    public string|Optional $cid,
 
-        public string $last_name,
+    public string $first_name,
 
-        public string|null|Optional $nickname,
+    public string $last_name,
 
-        public string|null|Optional $middle_name,
+    public string|null|Optional $nickname,
 
-        public string|null|Optional $job_title,
+    public string|null|Optional $middle_name,
 
-        public string|null|Optional $bio,
+    public string|null|Optional $job_title,
 
-        /** @var Collection<PhoneData> */
-        public Collection $phones,
+    public string|null|Optional $bio,
 
-        /** @var Collection<EmailData> */
-        public Collection $emails,
+    /** @var Collection<PhoneData> */
+    public Collection $phones,
 
-        public FirmData|null|Optional $firm,
+    /** @var Collection<EmailData> */
+    public Collection $emails,
 
-        public Title $title  = Title::Mr,
-    ) {
-    }
+    public FirmData|null|Optional $firm,
 
-    public static function rules(): array
-    {
-        $contactId = (request()->route()->parameters())['contact']->id ?? null;
+    public string $title = Title::DR->value,
 
-        return [
-            'first_name' => 'required',
-            'last_name' => 'required',
-            'title' => ['sometimes', Rule::enum(Title::class)],
-            'middle_name' => 'sometimes|filled',
-            'nickname' => 'sometimes|filled',
-            'job_title' => 'sometimes|filled',
-            'bio' => 'sometimes|filled',
+  ) {}
 
-            'firm.fid' => 'sometimes|exists:firms,fid',
-            'firm.name' => 'required_if:firm.fid,null',
-            'firm.url' => 'sometimes|filled|url:http,https',
-            'firm.slogan' => 'sometimes|filled',
-            'firm.address.type' => ['required_unless:firm.id,null', Rule::enum(AddressType::class)],
-            'firm.address.street' => 'sometimes|required_unless:firm.id,null',
-            'firm.address.city' => 'sometimes|required_unless:firm.street,null',
-            'firm.address.state' => 'sometimes|filled',
-            'firm.address.country' => 'sometimes|filled',
+  public static function rules(): array
+  {
+    $contactId = (request()->route()->parameters())['contact']->id ?? null;
 
-            'phones' => 'sometimes|array',
-            'phones.*.type' => ['required', Rule::enum(PhoneType::class)],
-            'phones.*.is_primary_phone' => 'required|boolean',
-            'phones.*.number' => 'required|filled|phone:AUTO',
-            'phones.*.country_code' => ['sometimes', 'filled', Rule::in(['MW', 'ZA', 'ZM', 'ZW'])],
+    return [
+      'first_name' => 'required',
+      'last_name' => 'required',
+      'title' => ['sometimes', Rule::enum(Title::class)],
+      'middle_name' => 'sometimes|filled',
+      'nickname' => 'sometimes|filled',
+      'job_title' => 'sometimes|filled',
+      'bio' => 'sometimes|filled',
 
-            'emails' => 'sometimes|array',
-            'emails.*.email' => ['required', 'email:rfc,dns', Rule::unique('emails', 'email')->ignore($contactId, 'emailable_id')],
-        ];
-    }
+      'firm.fid' => 'sometimes|exists:firms,fid',
+      'firm.name' => 'required_if:firm.fid,null',
+      'firm.url' => 'sometimes|filled|url:http,https',
+      'firm.slogan' => 'sometimes|filled',
+      'firm.address.type' => ['required_unless:firm.id,null', Rule::enum(AddressType::class)],
+      'firm.address.street' => 'sometimes|required_unless:firm.id,null',
+      'firm.address.city' => 'sometimes|required_unless:firm.street,null',
+      'firm.address.state' => 'sometimes|filled',
+      'firm.address.country' => 'sometimes|filled',
 
-    public static function messages(): array
-    {
-        return [
+      'phones' => 'sometimes|array',
+      'phones.*.type' => ['required', Rule::enum(PhoneType::class)],
+      'phones.*.is_primary_phone' => 'required|boolean',
+      'phones.*.number' => 'required|filled|phone:AUTO',
+      'phones.*.country_code' => ['sometimes', 'filled', Rule::in(['MW', 'ZA', 'ZM', 'ZW'])],
 
-            'first_name.required' => 'Enter first name',
-            'last_name.required' => 'Enter surname',
+      'emails' => 'sometimes|array',
+      'emails.*.email' => ['required', 'email:rfc,dns', Rule::unique('emails', 'email')->ignore($contactId, 'emailable_id')],
+    ];
+  }
 
-            'firm.fid.exists' => 'Oops! We don\'t have that company yet!',
-            'firm.url.filled' => 'You should fill out the company website',
-            'firm.name.required_if' => 'Fill out the company\'s name',
-            'firm.url.url' => 'You entered an invalid web URL.',
-            'firm.address.type.required' => 'Address type is missing',
-            'firm.address.type.enum' => 'Address type can only be "office" or "home"',
-            'firm.address.street.required' => 'Provide a street name',
-            'firm.address.city.required' => 'Provide city name',
-            // 'firm.address.state.required' => 'Provide state/province name',
-            // 'firm.address.country.required' => 'Provide country name',
+  public static function messages(): array
+  {
+    return [
 
-            'emails.*.email.required' => 'Provide an email address',
-            'emails.*.email.email' => 'You entered an invalid email',
-            'emails.*.email.unique' => 'This email is already taken',
+      'first_name.required' => 'Enter first name',
+      'last_name.required' => 'Enter surname',
 
-            'phones.*.type.in' => 'Invalid phone type',
-            'phones.*.country_code.filled' => 'The country code is not set',
-            'phones.*.country_code.in' => 'Oops! No support for this country yet',
-            'phones.*.number.required' => 'Fill out a phone number',
-        ];
-    }
+      'firm.fid.exists' => 'Oops! We don\'t have that company yet!',
+      'firm.url.filled' => 'You should fill out the company website',
+      'firm.name.required_if' => 'Fill out the company\'s name',
+      'firm.url.url' => 'You entered an invalid web URL.',
+      'firm.address.type.required' => 'Address type is missing',
+      'firm.address.type.enum' => 'Address type can only be "office" or "home"',
+      'firm.address.street.required' => 'Provide a street name',
+      'firm.address.city.required' => 'Provide city name',
+      // 'firm.address.state.required' => 'Provide state/province name',
+      // 'firm.address.country.required' => 'Provide country name',
+
+      'emails.*.email.required' => 'Provide an email address',
+      'emails.*.email.email' => 'You entered an invalid email',
+      'emails.*.email.unique' => 'This email is already taken',
+
+      'phones.*.type.in' => 'Invalid phone type',
+      'phones.*.country_code.filled' => 'The country code is not set',
+      'phones.*.country_code.in' => 'Oops! No support for this country yet',
+      'phones.*.number.required' => 'Fill out a phone number',
+    ];
+  }
 }

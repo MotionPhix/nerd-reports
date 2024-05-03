@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useContactStore } from '@/Stores/contactStore';
 import { Link, router } from '@inertiajs/vue3';
-import { IconMail, IconMailForward, IconPencil, IconPencilBolt, IconPencilCode, IconPencilPin, IconSquareRoundedPlus } from '@tabler/icons-vue';
+import { IconFileExport, IconPencil } from '@tabler/icons-vue';
 import MazCheckbox from 'maz-ui/components/MazCheckbox';
 import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
@@ -115,8 +115,11 @@ router.on('navigate', (e) => {
     <div class="relative top-0 right-0 z-20 flex items-center justify-end gap-2 cursor-pointer">
 
         <p class="text-sm text-gray-500 dark:text-gray-400">
-            <Link as="button" :href="route('projects.create', props.contact.cid)">
-              <IconSquareRoundedPlus stroke="2.5" class="w-6 h-6" />
+            <Link
+              as="button"
+              :href="route('projects.create', props.contact.cid)"
+              v-tooltip="`Add project for ${props.contact?.firm?.name ?? props.contact.first_name + ' ' + props.contact.last_name}`">
+              <IconFileExport stroke="2.5" class="w-6 h-6" />
             </Link>
         </p>
 

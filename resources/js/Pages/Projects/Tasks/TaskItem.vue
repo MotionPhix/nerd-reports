@@ -270,9 +270,14 @@ const cancelComment = () => {
         </div>
 
         <div class="col-span-2">
-          <label for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Description</label>
+          <label
+            for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+            Description
+          </label>
 
-          <TipTap v-model="form.description" height="h-54" v-model:placeholder="placeholder" />
+          <TipTap
+            v-model="form.description" height="h-54"
+            v-model:placeholder="placeholder" />
 
           <InputError :message="form.errors.description" />
         </div>
@@ -380,6 +385,7 @@ const cancelComment = () => {
             <div
               class="flex items-center w-full mt-3 text-xs font-medium text-gray-700 dark:text-gray-200"
               v-tooltip="{
+                global: true,
                 theme: {
                   placement: 'left',
                   width: 'max-content',

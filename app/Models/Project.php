@@ -54,7 +54,7 @@ class Project extends Model
   protected function deadline(): Attribute
   {
     return Attribute::make(
-      get: fn () => $this->due_date->diffForHumans()
+      get: fn () => $this->due_date?->diffForHumans()
     );
   }
 
