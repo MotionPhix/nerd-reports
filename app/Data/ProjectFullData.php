@@ -4,6 +4,7 @@ namespace App\Data;
 
 use App\Enums\ProjectStatus;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Optional;
@@ -22,7 +23,7 @@ class ProjectFullData extends Data
 
     public string|null|Optional $deadline,
 
-    public string $status,
+    public string|Optional $status,
 
     public string|null|Optional $description,
 
@@ -32,15 +33,31 @@ class ProjectFullData extends Data
 
     /** @var Collection<BoardData> */
     public Collection|null|Optional $boards,
-  ) {
-  }
+  ) {}
 
   public static function rules(): array
   {
     return [
       'name' => 'required|min:5',
 
-      'status' => ['required', Rule::in(ProjectStatus::cases())],
+      'status' => [
+        Rule::requiredIf(function () {
+
+          $url = request()->getPathInfo();
+          $lastPart = Str::afterLast($url, '/');
+
+          if (is_null($lastPart)) {
+
+            return true;
+
+          }
+
+          return false;
+
+        }),
+
+        Rule::in(ProjectStatus::cases())
+      ],
 
       'description' => 'sometimes|min:50',
 

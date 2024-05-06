@@ -2,24 +2,42 @@
 
 namespace App\Data;
 
+use Illuminate\Support\Collection;
 use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Optional;
 
 /** @typescript **/
 class NotificationData extends Data
 {
-    public function __construct(
+  public function __construct(
 
-      public readonly string $id,
+    public string|Optional $id,
 
-      public readonly string $type,
+    public string|Optional $type,
 
-      public readonly string $created_at,
+    public string|Optional $notifiable_type,
 
-      public readonly string $due_date,
+    public int|Optional $notifiable_id,
 
-      public readonly string $status,
+    /** @var Collection<UserData|CommentData|TaskData|ProjectData> */
+    public Collection $data,
 
-      public readonly ContactData $contact,
+    public string|Optional $read_at,
 
-    ) {}
+    public string|Optional $created_at,
+
+    public string|Optional $updated_at
+
+  ) {
+
+    $this->data = $data->mapWithKeys(function ($item) {
+
+      return [$item->getKey() => $item];
+
+    })->groupBy(function ($item) {
+
+      return get_class($item);
+
+    });
+  }
 }

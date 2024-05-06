@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Comment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use phpseclib3\Crypt\EC\BaseCurves\KoblitzPrime;
 
 class Destroy extends Controller
 {
@@ -14,17 +15,27 @@ class Destroy extends Controller
    */
   public function __invoke(Comment $comment)
   {
-    if ($comment->has('files')) {
+    if (auth()->user()->id === $comment->user_id) {
 
-      foreach ($comment->files as $file) {
+      if ($comment->has('files')) {
 
-        Storage::disk('files')->delete($file->file_path);
+        foreach ($comment->files as $file) {
 
-        $file->delete();
+          Storage::disk('files')->delete($file->file_path);
+
+          $file->delete();
+        }
+
       }
+
+      $comment->delete();
+
+      return redirect()->back();
 
     }
 
-    $comment->delete();
+    return redirect()->back()->withErrors([
+      'unathorised' => 'You are not the owner of the comment!'
+    ]);
   }
 }

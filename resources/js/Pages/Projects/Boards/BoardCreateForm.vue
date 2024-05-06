@@ -2,7 +2,7 @@
 import { useForm } from '@inertiajs/vue3';
 import {IconPlus} from '@tabler/icons-vue';
 import {nextTick, ref} from "vue";
-import { useNotificationStore } from '@/Stores/notificationStore';
+import { useToastStore } from '@/Stores/toastStore';
 import { useProjectStore } from '@/Stores/projectStore';
 import { storeToRefs } from 'pinia';
 
@@ -10,7 +10,7 @@ const projectStore = useProjectStore();
 
 const { project } = storeToRefs(projectStore)
 
-const notifyStore = useNotificationStore()
+const toastStore = useToastStore()
 
 const inputNameRef = ref();
 
@@ -18,8 +18,8 @@ const formRef = ref();
 
 const isShowingForm = ref(false);
 
-const { notify } = notifyStore
-const { setProject } = projectStore;
+const { notify } = toastStore
+const { reFetchProject } = projectStore;
 
 const form = useForm({
   name: ''
@@ -52,10 +52,10 @@ function onSubmit() {
         })
       },
 
-      onSuccess: (data) => {
+      onSuccess: () => {
         form.reset()
 
-        setProject(data.props.project)
+        reFetchProject()
 
         isShowingForm.value = false
 

@@ -67,8 +67,12 @@ function onChange(e) {
     },
 
     {
-      preserveScroll: true
-    }
+      preserveScroll: true,
+
+      onError: (error) => console.log(error),
+
+      onSuccess: (data) => setProject(data.props.project)
+    },
 
   )
 
@@ -92,8 +96,8 @@ function deleteBoard () {
         console.log(err);
       },
 
-      onSuccess: (data) => {
-        setProject(data.props.project)
+      onSuccess: () => {
+        reFetchProject()
       }
 
     })
@@ -127,7 +131,7 @@ function deleteBoard () {
           leave-to-class="scale-90 opacity-0">
 
           <MenuItems
-            class="absolute right-0 w-40 overflow-hidden origin-top-left bg-white border-gray-300 border rounded-md shadow-lg top-5 dark:text-gray-300 dark:bg-gray-800 dark:border-gray-700 focus:outline-none">
+            class="absolute right-0 w-40 overflow-hidden origin-top-left bg-white border border-gray-300 rounded-md shadow-lg top-5 dark:text-gray-300 dark:bg-gray-800 dark:border-gray-700 focus:outline-none">
 
             <MenuItem>
 

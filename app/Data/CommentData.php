@@ -24,6 +24,8 @@ class CommentData extends Data
 
       public UserData|Optional $user,
 
+      public TaskData|Optional $task,
+
       /** @var Collection<FileData> */
       public Collection|null|Optional $files,
     ) {

@@ -50,7 +50,7 @@ defineOptions({ layout: AuthenticatedLayout })
       class="w-full mx-2 mt-12 mb-4 space-y-4 text-sm text-gray-900 dark:text-gray-100">
 
       <div class="p-2 sm:p-6 empty:hidden">
-        <section class="sticky z-50 flex items-center gap-6 bg-gray-100 top-10 dark:bg-gray-900">
+        <section class="sticky z-40 flex items-center gap-6 bg-gray-100 top-10 dark:bg-gray-900">
           <div
             class="items-center justify-center hidden text-5xl font-bold rounded-full w-36 h-36 sm:flex shrink-0 bg-lime-500 text-lime-900">
             <span>

@@ -3,17 +3,35 @@ import ApplicationLogo from "@/Components/ApplicationLogo.vue"
 import Dropdown from "@/Components/Dropdown.vue"
 import DropdownLink from "@/Components/DropdownLink.vue"
 import NavLink from "@/Components/NavLink.vue"
+import NotificationList from "@/Components/NotificationList.vue"
 import ResponsiveNavLink from "@/Components/ResponsiveNavLink.vue"
 import { useProjectStore } from "@/Stores/projectStore"
 import { Link, usePage } from "@inertiajs/vue3"
 import { IconBell, IconMoon, IconSun } from "@tabler/icons-vue"
 import { UseDark } from "@vueuse/components"
-import { ref, watch } from "vue"
+import { ref } from "vue"
+import { useTaskStore } from "@/Stores/taskStore"
+import { useNotificationStore } from "@/Stores/notificationStore"
+import { storeToRefs } from "pinia"
+import { twi } from "tw-to-css"
 
 const showingNavigationDropdown = ref(false)
+
 const { user } = usePage().props.auth
+
 const projectStore = useProjectStore()
+
 const { reFetchProject } = projectStore
+
+const taskStore = useTaskStore()
+
+const { reFetchTask } = taskStore
+
+const notificationStore = useNotificationStore()
+
+const { fetchNotifications } = notificationStore
+
+const { unreadNotifications } = storeToRefs(notificationStore)
 
 window.Echo
   .private(`App.Models.User.${user.id}`)
@@ -23,11 +41,17 @@ window.Echo
 
       case 'App\\Notifications\\CommentAdded':
 
-        usePage().props.auth.unreadNotifications++
+        fetchNotifications()
 
         if (usePage().url.startsWith('/projects/s')) {
 
           reFetchProject()
+
+        }
+
+        if (usePage().url.startsWith('/tasks/s')) {
+
+          reFetchTask()
 
         }
 
@@ -36,15 +60,22 @@ window.Echo
     }
 
   })
+
+const styleInline = twi(`bg-white mx-auto`);
+
+console.log(styleInline)
 </script>
 
 <template>
-  <nav class="bg-white border-b border-gray-100 dark:bg-gray-800 dark:border-gray-700">
-    <!-- Primary Navigation Menu -->
+  <nav
+    class="bg-white border-b border-gray-100 dark:bg-gray-800 dark:border-gray-700">
+
     <div class="max-w-5xl px-4 mx-auto sm:px-6 lg:px-8">
+
       <div class="flex justify-between h-16">
+
         <div class="flex">
-          <!-- Logo -->
+
           <div class="flex items-center shrink-0">
             <Link :href="route('dashboard')">
               <ApplicationLogo
@@ -52,8 +83,10 @@ window.Echo
             </Link>
           </div>
 
-          <!-- Navigation Links -->
+          <!-- Navigation starts -->
+
           <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+
             <NavLink :href="route('dashboard')" :active="route().current('dashboard')">
               Dashboard
             </NavLink>
@@ -65,20 +98,56 @@ window.Echo
             <NavLink :href="route('projects.index')" :active="route().current('projects.*')">
               Projects
             </NavLink>
+
+            <NavLink :href="route('reports.index')" :active="route().current('reports.*')">
+              Reports
+            </NavLink>
+
           </div>
+
+          <!-- Navigation ends -->
+
         </div>
 
         <div class="hidden sm:flex sm:items-center sm:ms-6">
 
-          <Link
-            as="button"
-           :href="route('notifications')"
-            class="relative mr-6 text-gray-700 hover:opacity-70 dark:text-white">
-            <span v-if="$page.props.auth.unreadNotifications" class="absolute flex items-center justify-center w-4 h-4 text-xs text-white bg-blue-500 rounded-full -top-1 -right-1">
-              {{ $page.props.auth.unreadNotifications }}
-            </span>
-            <IconBell class="w-5 h-5" />
-          </Link>
+          <Dropdown align="right" width="96" :can-close="false">
+
+            <template #trigger>
+
+              <button
+                type="button"
+                class="relative mr-6 text-gray-700 w-7 h-7 hover:opacity-70 dark:text-white">
+
+                <IconBell class="w-5 h-5" />
+
+                <span
+                  class="flex absolute top-0 end-0 h-5 w-5 -mt-1.5 -me-1.5"
+                  v-if="unreadNotifications.length">
+
+                  <span
+                    class="absolute inline-flex w-5 h-5 rounded-full opacity-75 bg-rose-400 animate-ping dark:bg-yellow-500"></span>
+
+                  <span
+                    class="relative inline-flex items-center justify-center w-5 h-5 text-sm text-white bg-blue-500 rounded-full dark:bg-red-500">
+
+                    {{ unreadNotifications.length }}
+
+                  </span>
+
+                </span>
+
+              </button>
+
+            </template>
+
+            <template #content>
+
+              <NotificationList />
+
+            </template>
+
+          </Dropdown>
 
           <UseDark v-slot="{ isDark, toggleDark }">
             <button class="text-gray-700 hover:opacity-70 dark:text-white" @click="toggleDark()">

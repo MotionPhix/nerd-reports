@@ -11,10 +11,6 @@ Route::get('/', function () {
   ]);
 });
 
-Route::get('/dashboard', function () {
-  return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
 Route::middleware('auth')->group(function () {
 
   Route::prefix('contacts')->group(function () {
@@ -129,7 +125,7 @@ Route::middleware('auth')->group(function () {
     )->name('tasks.store');
 
     Route::get(
-      '/s/{task}',
+      '/s/{task:tid}/{notification?}',
       \App\Http\Controllers\Tasks\Show::class
     )->name('tasks.show');
 
@@ -169,6 +165,25 @@ Route::middleware('auth')->group(function () {
 
   });
 
+  Route::prefix('reports')->group(function () {
+
+    Route::get(
+      '/{user?}',
+      \App\Http\Controllers\Reports\Index::class
+    )->name('reports.index');
+
+    Route::post(
+      '/w',
+      \App\Http\Controllers\Reports\Report::class
+    )->name('reports.compile');
+
+    Route::delete(
+      '/d/{report}',
+      \App\Http\Controllers\Reports\Destroy::class
+    )->name('reports.destroy');
+
+  });
+
   Route::get('/download/{file:fid}', \App\Http\Controllers\Files\Download::class)->name('file.downloads');
 
   Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -177,7 +192,8 @@ Route::middleware('auth')->group(function () {
 
   Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-  Route::get('/notifications', \App\Http\Controllers\Notifications\Index::class)->name('notifications');
+  Route::get('/dashboard', \App\Http\Controllers\Dashboard\Index::class)->name('dashboard');
+
 });
 
 require __DIR__ . '/auth.php';

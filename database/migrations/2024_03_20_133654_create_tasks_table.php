@@ -18,7 +18,7 @@ return new class extends Migration
 
             $table->longText('description')->nullable();
 
-            $table->boolean('is_completed')->default(false);
+            $table->enum('status', ['done', 'cancelled', 'in_progress'])->default(false);
 
             $table->double('position')->nullable();
 

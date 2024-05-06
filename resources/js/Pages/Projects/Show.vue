@@ -13,8 +13,6 @@ const projectStore = useProjectStore()
 
 const { project } = storeToRefs(projectStore)
 
-console.log(project.value);
-
 defineOptions({
   layout: AuthenticatedLayout,
 })
@@ -42,7 +40,9 @@ const { navClasses } = useStickyTop();
       <IconArrowLeft class="h-7" stroke="2.5" />
     </Link>
 
-    <ProjectNameForm />
+    <h3 class="text-2xl font-display">
+      Projects
+    </h3>
 
     <span class="flex-1"></span>
 
@@ -183,9 +183,7 @@ const { navClasses } = useStickyTop();
 
     <div class="space-y-6">
 
-      <h2 class="text-5xl font-display dark:text-gray-300">
-        {{ project.name }}
-      </h2>
+      <ProjectNameForm />
 
       <hr class="dark:border-gray-600">
 

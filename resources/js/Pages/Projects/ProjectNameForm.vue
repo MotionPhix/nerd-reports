@@ -1,19 +1,23 @@
 <script setup lang="ts">
 import { nextTick, ref } from "vue";
 import { useForm } from "@inertiajs/vue3"
-import { useNotificationStore } from '@/Stores/notificationStore'
 import { useProjectStore } from "@/Stores/projectStore";
 import { storeToRefs } from "pinia";
+import { useToastStore } from "@/Stores/toastStore"
+
+const props = withDefaults(defineProps<{
+  shouldBeShort?: boolean
+}>(), {
+  shouldBeShort: false
+})
 
 const projectStore = useProjectStore()
 
-const toastStore = useNotificationStore();
+const toastStore = useToastStore();
 
 const { project } = storeToRefs(projectStore);
 
 const { notify } = toastStore
-
-const { setProject } = projectStore
 
 const form = useForm({
   name: project.value.name
@@ -62,8 +66,6 @@ function onSubmit() {
 
       onSuccess: (data: any) => {
 
-        setProject(data.props.project)
-
         notify({
           title:  true,
           message: 'Project was renamed!'
@@ -81,12 +83,13 @@ function onSubmit() {
 <template>
   <div class="relative flex flex-col items-start max-w-full">
 
-    <h1
-      :class="[isEditing ? 'invisible': '']"
-      class="hover:bg-white/20 whitespace-pre w-full overflow-hidden text-ellipsis border border-transparent rounded-md cursor-pointer px-3 py-1.5 text-2xl dark:text-white font-semibold"
+    <h3
+      class="hover:bg-white/20 w-full overflow-hidden border border-transparent rounded-md cursor-pointer px-3 py-1.5 text-5xl dark:text-white font-semibold"
+      :class="{ 'text-ellipsis': props.shouldBeShort, 'invisible': isEditing }"
       @click="edit()">
       {{ form.name ? form.name : ' ' }}
-    </h1>
+      <!-- whitespace-pre -->
+    </h3>
 
     <form
       v-show="isEditing"
@@ -94,12 +97,13 @@ function onSubmit() {
       @submit.prevent="onSubmit()"
       class="w-full">
 
-      <input
+      <textarea
         ref="input"
         v-model="form.name"
-        class="absolute inset-0 text-2xl max-w-full font-semibold placeholder-gray-400 px-3 py-1.5 rounded-md focus:ring-2 focus:ring-blue-900 dark:text-gray-800"
+        class="absolute inset-0 text-5xl max-w-full font-semibold placeholder-gray-400 px-3 py-1.5 rounded-md focus:ring-2 focus:ring-blue-900 dark:text-gray-800"
         placeholder="Project name"
         type="text">
+      </textarea>
 
     </form>
   </div>

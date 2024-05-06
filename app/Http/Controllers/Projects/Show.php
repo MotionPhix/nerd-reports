@@ -28,9 +28,9 @@ class Show extends Controller
       return $project;
     }
 
-    return Inertia::render('Projects/Show'/*, [
+    return Inertia::render('Projects/Show', [
       'project' => $project
-    ]*/);
+    ]);
 
   }
 }

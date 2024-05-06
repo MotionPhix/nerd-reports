@@ -20,6 +20,7 @@ task_id: number;
 created_at: any | string;
 user_id: any | number;
 user: App.Data.UserData | any;
+task: App.Data.TaskData | any;
 files: Array<App.Data.FileData> | Array<any> | null;
 };
 export type ContactData = {
@@ -71,12 +72,14 @@ name: any | string | null;
 tags: Array<App.Data.TagData> | Array<any> | null;
 };
 export type NotificationData = {
-id: string;
-type: string;
-created_at: string;
-due_date: string;
-status: string;
-contact: App.Data.ContactData;
+id: any | string;
+type: any | string;
+notifiable_type: any | string;
+notifiable_id: any | number;
+data: Array<App.Data.UserData | App.Data.CommentData | App.Data.TaskData | App.Data.ProjectData> | Array<any>;
+read_at: any | string;
+created_at: any | string;
+updated_at: any | string;
 };
 export type PhoneData = {
 id: any | number;
@@ -93,6 +96,7 @@ created_at: any | string;
 due_date: string;
 status: string;
 contact: App.Data.ContactData;
+author: App.Data.UserData;
 };
 export type ProjectFullData = {
 pid: any | string | null;
@@ -100,7 +104,7 @@ name: string;
 created_at: any | string | null;
 due_date: string | null;
 deadline: any | string | null;
-status: string;
+status: any | string;
 description: any | string | null;
 contact_id: any | string | number | null;
 contact: App.Data.ContactData | any;
@@ -114,18 +118,22 @@ type: any | string;
 order_column: any | number;
 };
 export type TaskData = {
+tid: any | string | null;
 id: any | string | null;
 name: string;
 priority: string;
 created_at: any | string | null;
 description: any | string | null;
+status: any | string | null;
 user: App.Data.UserData | any;
+assignee: App.Data.UserData | any;
 comments_count: any | number;
 files_count: any | number;
 board_id: number;
 comments: Array<App.Data.CommentData> | Array<any> | null;
 position: any | number | null;
 assigned_to: number;
+assigned_by: any | number | null;
 };
 export type UserData = {
 id: any | number;

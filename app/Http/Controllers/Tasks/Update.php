@@ -13,6 +13,11 @@ class Update extends Controller
   {
     $validated = $taskData->toArray();
 
+    if ($task->assigned_to !== $validated['assigned_to']) {
+      # the task has been re assigned
+      $validated['assigned_by'] = auth()->user()->id;
+    }
+
     $task->update($validated);
 
     $toastTitles = collect([

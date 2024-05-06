@@ -21,10 +21,11 @@ class ProjectData extends Data
 
     public readonly string $status,
 
-    public readonly ContactData $contact,
+    public ContactData $contact,
 
-  ) {
-  }
+    public UserData $author,
+
+  ) {}
 
   public function toArray(): array
   {
@@ -35,6 +36,7 @@ class ProjectData extends Data
       'due_date' => $this->due_date,
       'status' => ProjectStatus::tryFrom($this->status)->getLabel(),
       'contact' => $this->contact->toArray(),
+      'author' => $this->author->toArray(),
     ];
   }
 }

@@ -13,6 +13,10 @@ class Store extends Controller
   {
     $validated = $taskData->toArray();
 
+    $validated['status'] = 'in_progress';
+
+    $validated['assigned_by'] = auth()->user()->id;
+
     Task::create($validated);
 
     $toastTitles = collect([

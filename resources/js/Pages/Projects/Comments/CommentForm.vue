@@ -7,21 +7,22 @@ import { IconX } from '@tabler/icons-vue'
 
 import { ref } from "vue"
 
-import { useForm } from "@inertiajs/vue3"
+import { useForm, usePage } from "@inertiajs/vue3"
 
-import { useNotificationStore } from "@/Stores/notificationStore"
+import { useToastStore } from "@/Stores/toastStore"
 
 import FileInput from '@/Components/FileInput.vue'
 
 import axios from "axios"
 import { useProjectStore } from '@/Stores/projectStore'
+import { useTaskStore } from "@/Stores/taskStore"
 
 const props = defineProps<{
   task: App.Data.TaskData,
   cancel: Function
 }>()
 
-const toastStore = useNotificationStore();
+const toastStore = useToastStore();
 
 const projectStore = useProjectStore();
 
@@ -32,6 +33,9 @@ const { setProject } = projectStore
 const media = ref([])
 
 const commentPlaceholder = ref('Enter your comment')
+
+const taskStore = useTaskStore()
+const { reFetchTask } = taskStore
 
 const form = useForm({
   body: null,
@@ -77,6 +81,12 @@ function onSubmit() {
       onSuccess: (data: any) => {
 
         setProject(data.props.project)
+
+        if (usePage().url.startsWith('/tasks/s')) {
+
+          reFetchTask()
+
+        }
 
         form.reset()
 

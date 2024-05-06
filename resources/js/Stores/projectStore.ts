@@ -1,56 +1,46 @@
-import axios from 'axios'
+import { useLocalStorage } from '@/Composables/useLocalStorage'
+import axios, { AxiosResponse } from "axios"
 import { defineStore } from 'pinia'
-import { reactive, ref, toRefs } from 'vue'
-
-interface ProjectState {
-  projects: (App.Data.ProjectData|undefined)[]
-  project: App.Data.ProjectFullData|null
-}
+import { ref } from 'vue'
 
 export const useProjectStore = defineStore('projects', () => {
 
-  const state: ProjectState = reactive({
-
-    projects: ref<(App.Data.ProjectData|undefined)[]>([]),
-    project: ref(),
-
-  })
-
-  const { ...reactiveState } = toRefs(state)
+  const projects = ref<(App.Data.ProjectData)[]>([])
+  const project = useLocalStorage<App.Data.ProjectFullData | null>('active_project')
 
   async function fetchProjects(): Promise<void> {
 
     const response = await axios.get('/projects');
-    state.projects = response.data;
+    projects.value = response.data;
 
   }
 
-  async function reFetchProject() {
+  async function reFetchProject(): Promise<void> {
 
-    const resp = await axios.get(`/projects/s/${state.project.pid}`)
-    state.project = resp.data
-
-  }
-
-  async function getProject(projectPid: string) {
-
-    const resp = await axios.get(`/projects/s/${projectPid}`)
-    state.project = resp.data
+    const resp = await axios.get(`/projects/s/${project.value.pid}`)
+    project.value = resp.data
 
   }
 
-  async function setProject(project: App.Data.ProjectFullData) {
+  async function getProject(projectPid: string): Promise<void> {
 
-    state.project = project
+    const resp: AxiosResponse = await axios.get(`/projects/s/${projectPid}`)
+    project.value = resp.data
+
+  }
+
+  async function setProject(updatedProject: App.Data.ProjectFullData) {
+
+    project.value = updatedProject
 
   }
 
   async function setProjects(projects: App.Data.ProjectData[]) {
 
-    state.projects = projects
+    projects = projects
 
   }
 
-  return { ...reactiveState, fetchProjects, reFetchProject, setProject, setProjects, getProject }
+  return { project, projects, fetchProjects, reFetchProject, setProject, setProjects, getProject }
 
 })

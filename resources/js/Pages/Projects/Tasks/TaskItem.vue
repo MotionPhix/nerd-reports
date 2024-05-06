@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Link, useForm } from '@inertiajs/vue3'
+import { router, useForm } from '@inertiajs/vue3'
 
 import { IconMenu, IconUser, IconClock, IconCalendar, IconFile, IconMessage, IconMessageX, IconX, IconFileDescription, IconPencil, IconTrash } from '@tabler/icons-vue'
 
@@ -25,7 +25,7 @@ import { cva } from "class-variance-authority";
 
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 
-import { useNotificationStore } from '@/Stores/notificationStore'
+import { useToastStore } from '@/Stores/toastStore'
 
 import Modal from "@/Components/Modal.vue"
 
@@ -44,17 +44,11 @@ const props = defineProps<{
 
 const projectStore = useProjectStore()
 
-const { reFetchProject } = projectStore
-
-const {
-
-  project
-
-} = storeToRefs(projectStore);
+const { setProject } = projectStore
 
 const formStore = useFormStore()
 
-const toastStore = useNotificationStore();
+const toastStore = useToastStore();
 
 const { notify } = toastStore
 
@@ -90,6 +84,8 @@ const form = useForm({
   assigned_to: props.task.assigned_to,
 
   priority: props.task.priority,
+
+  status: props.task.status,
 
   board_id: props.task.board_id,
 
@@ -146,6 +142,23 @@ const priorities = [
   }
 ]
 
+const statuses = [
+  {
+    value: 'in_progress',
+    label: 'Being worked on'
+  },
+
+  {
+    value: 'done',
+    label: 'Completed'
+  },
+
+  {
+    value: 'cancelled',
+    label: 'Cancelled'
+  }
+]
+
 onMounted(() => {
 
   axios
@@ -192,7 +205,9 @@ function onSubmit() {
 
     },
 
-    onSuccess: () => {
+    onSuccess: (data) => {
+
+      setProject(data.props.project)
 
       form.reset()
 
@@ -211,6 +226,20 @@ const closeModal = () => {
 
 const cancelComment = () => {
   isAddingComment.value = false
+}
+
+const deleteTask = (task: App.Data.TaskData) => {
+
+  router
+    .delete(route('tasks.destroy', { task: task }), {
+
+      preserveScroll: true,
+
+      onError: (error) => console.log(error),
+
+      onSuccess: () => reFetchProject()
+
+    })
 }
 </script>
 
@@ -267,6 +296,20 @@ const cancelComment = () => {
           />
 
           <InputError :message="form.errors.priority" />
+        </div>
+
+        <div class="col-span-2">
+          <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+            Status
+          </label>
+
+          <SelectInput
+            placeholder="Current state of the task"
+            v-model="form.status"
+            :options="statuses"
+          />
+
+          <InputError :message="form.errors.status" />
         </div>
 
         <div class="col-span-2">
@@ -351,18 +394,16 @@ const cancelComment = () => {
 
                   <MenuItem>
 
-                    <Link
-                      as="button"
-                      method="delete"
-                      preserve-scroll
-                      class="flex items-center w-full gap-2 px-4 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-600"
-                      :href="route('tasks.destroy', { task: props.task })">
+                    <button
+                      type="button"
+                      @click="deleteTask(props.task)"
+                      class="flex items-center w-full gap-2 px-4 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-600">
 
                       <IconTrash stroke="2.5" class="w-4 h-4" />
 
                       <span>Delete task</span>
 
-                    </Link>
+                    </button>
 
                   </MenuItem>
 
@@ -534,7 +575,7 @@ const cancelComment = () => {
             <div class="sm:col-span-2">
 
               <label class="block mb-2 text-lg font-medium text-gray-400 dark:text-gray-500">
-                Comments
+                Discussions
               </label>
 
               <CommentShell>

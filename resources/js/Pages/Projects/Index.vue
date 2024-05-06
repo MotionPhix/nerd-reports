@@ -14,6 +14,10 @@ import useStickyTop from "@/Composables/useStickyTop";
 
 import ProjectCard from "@/Components/Project/ProjectCard.vue";
 
+import ProjectGrid from "@/Components/Project/ProjectGrid.vue";
+
+import ProjectGridCard from "@/Components/Project/ProjectGridCard.vue";
+
 import CardList from "@/Components/CardList.vue";
 
 import { useProjectStore } from "@/Stores/projectStore";
@@ -67,7 +71,7 @@ defineOptions({
 
   <section class="max-w-3xl px-6 py-12 mx-auto">
 
-    <CardList
+    <!-- <CardList
       v-if="projects.total">
 
       <ProjectCard
@@ -75,7 +79,17 @@ defineOptions({
         v-for="project in projects.data"
         :key="project.id" />
 
-    </CardList>
+    </CardList> -->
+
+    <ProjectGrid
+      v-if="projects.total">
+
+      <ProjectGridCard
+        :project="project"
+        v-for="project in projects.data"
+        :key="project.id" />
+
+    </ProjectGrid>
 
     <div
       v-else

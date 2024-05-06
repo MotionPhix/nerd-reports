@@ -5,7 +5,7 @@ import { computed, nextTick, onMounted, ref } from "vue"
 
 import { useFormStore } from "@/Stores/formStore"
 
-import { useNotificationStore } from "@/Stores/notificationStore"
+import { useToastStore } from "@/Stores/toastStore"
 
 import { storeToRefs } from "pinia"
 
@@ -29,7 +29,7 @@ const props = defineProps<{
 
 const formStore = useFormStore()
 
-const toastStore = useNotificationStore();
+const toastStore = useToastStore();
 
 const projectStore = useProjectStore();
 
@@ -169,7 +169,7 @@ const placeholder = ref('Describe the task')
 
 <template>
   <form
-    class="fixed z-50 grid max-w-sm grid-cols-2 gap-6 p-2 py-4 shadow-lg border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 rounded-md bottom-5 right-5"
+    class="fixed z-50 grid max-w-sm grid-cols-2 gap-6 p-2 py-4 bg-gray-100 border border-gray-300 rounded-md shadow-lg dark:border-gray-600 dark:bg-gray-700 bottom-5 right-5"
     @keydown.esc="unSetCurrentBoardId()"
     @submit.prevent="onSubmit()"
     v-if="isShowingForm">

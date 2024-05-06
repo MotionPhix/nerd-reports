@@ -12,6 +12,9 @@ use Spatie\LaravelData\Optional;
 class TaskData extends Data
 {
   public function __construct(
+
+    public string|null|Optional $tid,
+
     public string|null|Optional $id,
 
     public string $name,
@@ -22,7 +25,11 @@ class TaskData extends Data
 
     public string|null|Optional $description,
 
+    public string|null|Optional $status,
+
     public UserData|Optional $user,
+
+    public UserData|Optional $assignee,
 
     public int|Optional $comments_count,
 
@@ -35,7 +42,10 @@ class TaskData extends Data
 
     public int|null|Optional $position,
 
-    public int $assigned_to
+    public int $assigned_to,
+
+    public int|null|Optional $assigned_by
+
   ) {}
 
   public static function rules(): array
@@ -48,7 +58,7 @@ class TaskData extends Data
 
       'description' => 'sometimes|min:20',
 
-      'assigned_to' => 'required|exists:users,id',
+      'assigned_to' => ['required', 'exists:users,id'],
 
       'priority' => [
         'sometimes',

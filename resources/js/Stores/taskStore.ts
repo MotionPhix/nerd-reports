@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia'
 import { reactive, ref, toRefs } from 'vue'
 import axios from "axios"
+import { useToastStore } from "./toastStore"
+import { useLocalStorage } from "../Composables/useLocalStorage"
 
 interface TaskState {
   task: App.Data.TaskData
@@ -8,7 +10,7 @@ interface TaskState {
 }
 export const useTaskStore = defineStore('task', () => {
   const state: TaskState = reactive({
-    task: ref<App.Data.TaskData>(),
+    task: useLocalStorage<App.Data.TaskData>('active_task'),
     isEditing: ref<boolean>(false),
   })
 
@@ -26,5 +28,13 @@ export const useTaskStore = defineStore('task', () => {
     state.isEditing = false
   }
 
-  return { ...reactiveState, setTask, setIsEditing, unSet }
+  async function reFetchTask() {
+    await axios.get(route('tasks.show', { task: state.task.tid }))
+      .catch((err) => console.log(err))
+      .then((resp) => {
+        state.task = resp.data
+      })
+  }
+
+  return { ...reactiveState, setTask, setIsEditing, unSet, reFetchTask }
 })

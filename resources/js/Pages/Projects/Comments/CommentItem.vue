@@ -1,13 +1,33 @@
 <script setup lang="ts">
 import { IconDownload, IconTrash, IconDots, IconFileCheck } from "@tabler/icons-vue"
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/vue"
-import { Link, usePage } from "@inertiajs/vue3"
+import { Link, router, usePage } from "@inertiajs/vue3"
+import { useTaskStore } from "@/Stores/taskStore"
 
 const props = defineProps<{
   comment: App.Data.CommentData
 }>()
 
 const { user } = usePage().props.auth
+
+const taskStore = useTaskStore()
+const { reFetchTask } = taskStore
+
+const deleteComment = () => {
+
+  router.delete(route('comments.destroy', { 'comment': props.comment.id }), {
+
+    preserveScroll: true,
+
+    onSuccess: () => {
+
+      reFetchTask()
+
+    }
+
+  })
+
+}
 
 </script>
 
@@ -53,16 +73,18 @@ const { user } = usePage().props.auth
                  :href="route('file.downloads', file.fid)"
                  class="inline-flex items-center justify-center rounded-full h-8 w-8 bg-white/30 hover:bg-white/50 focus:ring-4 focus:outline-none dark:text-white focus:ring-gray-50">
 
-                <IconDownload class="w-5 h-5 text-white"
-                              stroke="2.5" />
+                <IconDownload
+                  class="w-5 h-5 text-white"
+                  stroke="2.5" />
 
               </a>
 
             </div>
 
-            <img :src="`${file.full_url}`"
-                 class="rounded-lg object-cover h-full w-full"
-                 :alt="file.full_url">
+            <img
+              :src="`${file.full_url}`"
+              class="rounded-lg object-cover h-full w-full"
+              :alt="file.full_url">
 
           </div>
 
@@ -70,50 +92,65 @@ const { user } = usePage().props.auth
 
       </div>
 
-      <Menu as="div"
-            class="invisible group-hover:visible">
+      <Menu
+        as="div"
+        class="invisible group-hover:visible"
+        v-if="props.comment.user_id === $page.props.auth.user.id">
 
-        <MenuButton class="items-center flex justify-center w-5 h-5 text-gray-500 dark:text-gray-100">
+        <MenuButton
+          class="items-center flex justify-center w-5 h-5 text-gray-500 dark:text-gray-100">
 
-          <button class="absolute right-2 top-8 inline-flex self-center items-center p-1.5 text-sm font-medium text-center text-gray-900 bg-white rounded-lg hover:bg-gray-100 focus:ring-4 focus:outline-none dark:text-white focus:ring-gray-50 dark:bg-gray-900 dark:hover:bg-gray-800 dark:focus:ring-gray-600"
-                  type="button">
-            <IconDots class="w-4 h-4 text-gray-500 dark:text-gray-400"
-                      stroke="2.5" />
+          <button
+            class="absolute right-2 top-8 inline-flex self-center items-center p-1.5 text-sm font-medium text-center text-gray-900 bg-white rounded-lg hover:bg-gray-100 focus:ring-4 focus:outline-none dark:text-white focus:ring-gray-50 dark:bg-gray-900 dark:hover:bg-gray-800 dark:focus:ring-gray-600"
+            type="button">
+
+            <IconDots
+              class="w-4 h-4 text-gray-500 dark:text-gray-400"
+              stroke="2.5" />
+
           </button>
 
         </MenuButton>
 
-        <transition enter-active-class="transition duration-100 ease-out transform"
-                    enter-from-class="scale-90 opacity-0"
-                    enter-to-class="scale-100 opacity-100"
-                    leave-active-class="transition duration-100 ease-in transform"
-                    leave-from-class="scale-100 opacity-100"
-                    leave-to-class="scale-90 opacity-0">
+        <transition
+          enter-active-class="transition duration-100 ease-out transform"
+          enter-from-class="scale-90 opacity-0"
+          enter-to-class="scale-100 opacity-100"
+          leave-active-class="transition duration-100 ease-in transform"
+          leave-from-class="scale-100 opacity-100"
+          leave-to-class="scale-90 opacity-0">
 
           <MenuItems
-                     class="absolute right-0 w-40 overflow-hidden origin-top-left bg-white border-gray-300 border rounded-md shadow-lg top-5 dark:text-gray-300 dark:bg-gray-800 dark:border-gray-700 focus:outline-none">
+            class="absolute right-0 w-40 overflow-hidden origin-top-left bg-white border-gray-300 border rounded-md shadow-lg top-5 dark:text-gray-300 dark:bg-gray-800 dark:border-gray-700 focus:outline-none">
 
             <MenuItem>
 
-            <button class="flex items-center w-full gap-2 px-4 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-600">
-              <IconFileCheck stroke="2.5"
-                             class="w-4 h-4" />
-              <span>Add file</span>
-            </button>
+              <button
+                class="flex items-center w-full gap-2 px-4 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-600">
+
+                <IconFileCheck
+                  stroke="2.5"
+                  class="w-4 h-4" />
+
+                <span>Add file</span>
+
+              </button>
 
             </MenuItem>
 
             <MenuItem>
 
-            <Link as="button"
-                  preserve-scroll
-                  :href="route('comments.destroy', props.comment)"
-                  class="flex items-center w-full gap-2 px-4 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-600"
-                  method="delete">
-            <IconTrash stroke="2.5"
-                       class="w-4 h-4" />
-            <span>Delete</span>
-            </Link>
+              <button
+                @click.prevent="deleteComment"
+                class="flex items-center w-full gap-2 px-4 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-600">
+
+                <IconTrash
+                  stroke="2.5"
+                  class="w-4 h-4" />
+
+                <span>Delete</span>
+
+              </button>
 
             </MenuItem>
 
@@ -182,8 +219,10 @@ const { user } = usePage().props.auth
 
       </div>
 
-      <Menu as="div"
-            class="invisible group-hover:visible">
+      <Menu
+        as="div"
+        class="invisible group-hover:visible"
+        v-if="props.comment.user_id === $page.props.auth.user.id">
 
         <MenuButton class="items-center flex justify-center w-5 h-5 text-gray-500 dark:text-gray-100">
 

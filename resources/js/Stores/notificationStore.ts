@@ -1,50 +1,89 @@
-import ToastItem from '@/Components/ToastItem.vue'
-import { random } from 'lodash'
-import { defineStore } from 'pinia'
-import { useToast } from 'vue-toastification'
+import { useLocalStorage } from "@/Composables/useLocalStorage"
+import axios from "axios"
+import { defineStore } from "pinia"
+import { computed, reactive, ref } from "vue"
 
-interface NotificationState {
-  type?: string
-  title?: string|boolean
-  message: string
-}
+export const useNotificationStore = defineStore("notifications", () => {
 
-const toast = useToast()
+  const notifications = ref<App.Data.NotificationData[]>([])
+  const notification = useLocalStorage<App.Data.NotificationData | null>("active_notification")
 
-export const useNotificationStore = defineStore('notification', () => {
+  async function fetchNotifications(): Promise<void> {
 
-  function notify({
-    type = 'success',
-    title = false as string | boolean,
-    message = 'Contact was created'
-  } = {}) {
+    try {
 
-    const _title = [
-      'Great!',
-      'Awesome',
-      'That\'s about right!'
-    ][random(0, 2)];
+      const response = await axios.get(route("notifications.index"));
+      notifications.value = response.data;
 
-    const props: NotificationState = {
-      message: message,
-      type: type
+    } catch (error) {
+
+      console.error("Error fetching notifications:", error);
+
     }
 
-    if (title && typeof title === 'string') {
-      props.title = title
-    }
-
-    if (title && typeof title === 'boolean') {
-      props.title = _title
-    }
-
-    const toastContent = {
-      component: ToastItem,
-      props,
-    };
-
-    toast(toastContent);
   }
 
-  return { notify }
+  async function markNotificationAsRead(notification: App.Data.NotificationData): Promise<void> {
+
+    try {
+
+      await axios.patch(route("notifications.read", { id: notification.id }));
+      await fetchNotifications();
+
+    } catch (error) {
+
+      console.error("Error marking notification as read:", error);
+
+    }
+
+  }
+
+  async function deleteNotification(notification: App.Data.NotificationData) {
+
+    try {
+
+      await axios.delete(route("notifications.destroy", { id: notification.id }));
+      await fetchNotifications();
+
+    } catch (error) {
+
+      console.error("Error deleting notification:", error);
+
+    }
+
+  }
+
+  const readNotifications = computed(() => notifications.value.filter(notification => notification.read_at !== null));
+  const unreadNotifications = computed(() => notifications.value.filter(notification => notification.read_at === null));
+
+  function setActiveNotification(activeNotification: App.Data.NotificationData) {
+
+    notification.value = activeNotification
+
+  }
+
+  function setNotifications(newNotifications: App.Data.NotificationData[]) {
+
+    notifications.value = newNotifications
+
+  }
+
+  function resetActiveNotification() {
+
+    notification.value = null
+
+  }
+
+  return {
+    notification,
+    notifications,
+    fetchNotifications,
+    readNotifications,
+    unreadNotifications,
+    markNotificationAsRead,
+    setActiveNotification,
+    deleteNotification,
+    resetActiveNotification,
+    setNotifications
+  }
 })

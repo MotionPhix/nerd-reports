@@ -126,5 +126,23 @@ Route::middleware('auth:sanctum')->group(function () {
     }
   );
 
+  Route::prefix('notifications')->group(function () {
+
+    Route::get(
+      '/',
+      \App\Http\Controllers\Notifications\Index::class
+    )->name('notifications.index');
+
+    Route::patch(
+      '/r/{id}', \App\Http\Controllers\Notifications\MarkRead::class
+    )->name('notifications.read');
+
+    Route::delete(
+      '/d/{id}',
+      \App\Http\Controllers\Notifications\Destroy::class
+    )->name('notifications.destroy');
+
+  });
+
 });
 

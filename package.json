@@ -46,5 +46,8 @@
     "vue": "^3.4.0",
     "vue-draggable-next": "^2.2.1",
     "vue-toastification": "^2.0.0-rc.5"
+  },
+  "dependencies": {
+    "tw-to-css": "0.0.12"
   }
 }
