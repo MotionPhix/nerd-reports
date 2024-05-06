@@ -1,31 +1,31 @@
-import { Tag } from '@/types'
 import { defineStore } from 'pinia'
-import { reactive, ref, toRefs } from 'vue'
-
-interface TagState {
-  tags: Tag[]
-  tag: Tag
-}
+import { ref } from 'vue'
 
 interface SlickTag {
   label: string
   value: number
 }
 
+interface Tag {
+  id?: number;
+  name?: string;
+  slug?: string;
+}
+
 export const useTagStore = defineStore('tag', () => {
-  const state: TagState = reactive({
-    tags: ref<Tag[]>([]),
-    tag: ref<Tag>({}),
-  })
+  const tags = ref<Tag[]>([])
+  const tag = ref<Tag | null>()
 
-  const { ...reactiveState } = toRefs(state)
+  function setTags(newTags: SlickTag[]) {
 
-  function setTags(tags: SlickTag[]) {
-    state.tags = tags.map((tag) => ({
+    tags.value = newTags.map((tag) => ({
+
       name: tag.label,
       id: tag.value
+
     }));
+
   }
 
-  return { ...reactiveState, setTags }
+  return { tag, tags, setTags }
 })

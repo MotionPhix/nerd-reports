@@ -1,50 +1,63 @@
 import { defineStore } from 'pinia'
-import { computed, reactive, ref, toRefs } from 'vue'
-
-interface FiedState {
-  hasMiddleName: boolean
-  hasTitle: boolean
-  hasNickname: boolean
-  hasJobTitle: boolean
-  hasFirm: Boolean
-  hasAddress: Boolean
-  hasSlogan: Boolean
-  hasUrl: boolean
-}
+import { computed, ref } from 'vue'
 
 export const useFieldStore = defineStore('field', () => {
-  const state: FiedState = reactive({
-    hasMiddleName: ref(false),
-    hasTitle: ref(false),
-    hasNickname: ref(false),
-    hasJobTitle: ref(false),
-    hasFirm: ref(false),
-    hasAddress: ref(false),
-    hasSlogan: ref(false),
-    hasUrl: ref(false),
-  })
 
-  const { ...reactiveState } = toRefs(state)
+  const hasMiddleName = ref<boolean>(false)
+  const hasTitle = ref<boolean>(false)
+  const hasNickname = ref<boolean>(false)
+  const hasJobTitle = ref<boolean>(false)
+  const hasFirm = ref<boolean>(false)
+  const hasAddress = ref<boolean>(false)
+  const hasSlogan = ref<boolean>(false)
+  const hasUrl = ref<boolean>(false)
 
-  const showTag = computed(() => !state.hasMiddleName || !state.hasTitle || !state.hasNickname)
+  const showTag = computed(() => !hasMiddleName.value || !hasTitle.value || !hasNickname.value)
 
-  function toggleField(fieldKey: keyof FiedState) {
-    const field = reactiveState[fieldKey]
+  function toggleField(fieldKey: string) {
+
+    const field = {
+      'hasMiddleName': hasMiddleName,
+      'hasAddress': hasAddress,
+      'hasFirm': hasFirm,
+      'hasJobTitle': hasJobTitle,
+      'hasNickname': hasNickname,
+      'hasTitle': hasTitle,
+      'hasUrl': hasUrl,
+      'hasSlogan': hasSlogan,
+    }[fieldKey]
 
     if (field !== undefined && field !== null)
       field.value = !field.value
+
   }
 
   const unSet = () => {
-    state.hasMiddleName = false
-    state.hasTitle = false
-    state.hasNickname = false
-    state.hasJobTitle = false
-    state.hasFirm = false
-    state.hasAddress = false
-    state.hasSlogan = false
-    state.hasUrl = false
+    [
+      hasMiddleName,
+      hasTitle,
+      hasNickname,
+      hasJobTitle,
+      hasFirm,
+      hasAddress,
+      hasSlogan,
+      hasUrl
+    ].forEach(field => {
+      field.value = false
+    })
   }
 
-  return { showTag, ...reactiveState, toggleField, unSet }
+  return {
+    hasMiddleName,
+    hasTitle,
+    hasNickname,
+    hasJobTitle,
+    hasFirm,
+    hasAddress,
+    hasSlogan,
+    hasUrl,
+    showTag,
+    toggleField,
+    unSet
+  }
 })

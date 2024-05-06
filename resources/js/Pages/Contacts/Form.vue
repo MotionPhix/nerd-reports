@@ -27,8 +27,6 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 
 import { useFieldStore } from "@/Stores/fieldStore";
 
-import { useNotificationStore } from "@/Stores/notificationStore";
-
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/vue";
 
 import { Head, Link, useForm } from "@inertiajs/vue3";
@@ -44,6 +42,8 @@ import { debounce } from "lodash";
 import { storeToRefs } from "pinia";
 
 import { computed, ref } from "vue"
+
+import { useToastStore } from "@/Stores/toastStore";
 
 interface FormData {
   first_name: string;
@@ -72,16 +72,20 @@ interface FormData {
 }
 
 const props = defineProps<{
+
   contact: App.Data.ContactFullData;
+
 }>();
 
 defineOptions({
+
   layout: AuthenticatedLayout,
+
 });
 
 const error = ref();
 
-const toastStore = useNotificationStore();
+const toastStore = useToastStore();
 
 const fieldStore = useFieldStore();
 
@@ -154,17 +158,21 @@ const form = useForm({
 });
 
 const loadFirms = debounce((query: string, setOptions: Function) => {
+
   axios
-    .get(query ? `/api/companies/${query}` : "/api/companies")
+    .get(query ? route('api.firms.index', { q: query }) : route('api.firms.index'))
     .then((resp) => {
+
       setOptions(resp.data.map((company: App.Data.FirmData) => company));
+
     });
+
 }, 500);
 
 function createFirm(option: Partial<{ name: string }>, setSelected: Function) {
   axios
     .post(
-      "/api/companies",
+      route('api.firms.index'),
       {
         name: option.name,
       },

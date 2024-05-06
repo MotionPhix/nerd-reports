@@ -71,7 +71,7 @@ defineOptions({ layout: AuthenticatedLayout })
           v-for="project in props.reportData" :key="project.project_id">
 
           <tbody
-            style="margin-bottom: 5em;"
+            style="margin-bottom: 5em; width: 100%;"
             v-if="project.tasks.length">
 
             <tr>
@@ -114,9 +114,11 @@ defineOptions({ layout: AuthenticatedLayout })
                   border-right: none rgb(0, 0, 0);
                   border-bottom: none rgb(0, 0, 0);
                 ">
-                <span>
+                <strong>
                   {{ task.task_name }}
-                </span>
+                </strong>
+
+                <div v-html="task.task_info" v-if="task.task_info" class="text-gray-500"></div>
               </td>
 
               <td
@@ -142,6 +144,12 @@ defineOptions({ layout: AuthenticatedLayout })
                   border-bottom: none rgb(0, 0, 0);
                 ">
                 <span>{{ task.status }}</span>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <div style="margin-top: 5em; margin-bottom: 5em;"></div>
               </td>
             </tr>
           </tbody>

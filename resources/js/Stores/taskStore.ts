@@ -1,40 +1,50 @@
 import { defineStore } from 'pinia'
-import { reactive, ref, toRefs } from 'vue'
+import { ref } from 'vue'
 import axios from "axios"
-import { useToastStore } from "./toastStore"
-import { useLocalStorage } from "../Composables/useLocalStorage"
+import { useLocalStorage } from "@/Composables/useLocalStorage"
 
-interface TaskState {
-  task: App.Data.TaskData
-  isEditing: boolean
-}
 export const useTaskStore = defineStore('task', () => {
-  const state: TaskState = reactive({
-    task: useLocalStorage<App.Data.TaskData>('active_task'),
-    isEditing: ref<boolean>(false),
-  })
+  const task = useLocalStorage<App.Data.TaskData>('active_task')
+  const isEditing = ref<boolean>(false)
 
-  const { ...reactiveState } = toRefs(state)
+  function setTask(newTask: App.Data.TaskData) {
 
-  function setTask(task: App.Data.TaskData) {
-    state.task = task
+    task.value = newTask
+
   }
 
   function setIsEditing() {
-    state.isEditing = true
+
+    isEditing.value = true
+
   }
+
   const unSet = () => {
-    state.task = null
-    state.isEditing = false
+
+    task.value = null
+
+    isEditing.value = false
+
   }
 
   async function reFetchTask() {
-    await axios.get(route('tasks.show', { task: state.task.tid }))
+
+    await axios.get(route('tasks.show', { task: task.value.tid }))
       .catch((err) => console.log(err))
-      .then((resp) => {
-        state.task = resp.data
+      .then(({ data }) => {
+
+        task.value = data
+
       })
+
   }
 
-  return { ...reactiveState, setTask, setIsEditing, unSet, reFetchTask }
+  return {
+    task,
+    isEditing,
+    setTask,
+    setIsEditing,
+    unSet,
+    reFetchTask
+  }
 })

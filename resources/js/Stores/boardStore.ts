@@ -1,23 +1,21 @@
 import { defineStore } from 'pinia'
-import { reactive, ref, toRefs } from 'vue'
+import { ref } from 'vue'
 
-interface BoardState {
-  board: App.Data.BoardData
-}
 export const useBoardStore = defineStore('board', () => {
-  const state: BoardState = reactive({
-    board: ref<App.Data.BoardData>(),
-  })
 
-  const { ...reactiveState } = toRefs(state)
+  const board = ref<App.Data.BoardData | null>()
 
-  function setBoard(board: App.Data.BoardData) {
-    state.board = board
+  function setBoard(newBoard: App.Data.BoardData) {
+
+    board.value = newBoard
+
   }
 
   const unSetBoard = () => {
-    state.board = null
+
+    board.value = null
+
   }
 
-  return { ...reactiveState, setBoard, unSetBoard }
+  return { board, setBoard, unSetBoard }
 })

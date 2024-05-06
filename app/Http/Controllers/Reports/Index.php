@@ -51,6 +51,7 @@ class Index extends Controller
             $projectData['tasks'][] = [
               'task_id' => $task->tid,
               'task_name' => $task->name,
+              'task_info' => $task->description,
               'assigned_by' => $task?->assignee?->name,
               'assigned_at' => $task->created_at,
               'status' => ProjectStatus::tryFrom($task->status)->getLabel(),

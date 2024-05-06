@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import ContactActionMenu from "@/Components/Contact/ContactActionMenu.vue";
 import ContactCard from "@/Components/Contact/ContactCard.vue";
+import ContactGridCard from "@/Components/Contact/ContactGridCard.vue";
 import NoContactFound from "@/Components/Contact/NoContactFound.vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, Link } from "@inertiajs/vue3";
@@ -26,12 +27,14 @@ defineOptions({ layout: AuthenticatedLayout });
 
     <section v-if="props.contacts.length">
 
-      <ul role="list" class="w-full space-y-6">
-        <ContactCard
+      <ul role="list" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+        <ContactGridCard
           v-for="contact in props.contacts"
           :key="contact.cid"
           :contact="contact"
         />
+
       </ul>
 
     </section>

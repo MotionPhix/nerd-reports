@@ -41,15 +41,18 @@ let filteredPeople = computed(() =>
 )
 
 async function onFetchContacts() {
-  await axios.get(`/api/contacts`).then((resp) => {
+  await axios.get(route('api.contacts.index')).then((resp) => {
 
     resp.data.contacts.forEach((contact, idx) => {
 
       const firm = contact.firm ? ` | ${contact.firm.name}` : '';
 
       people.value[idx] = {
+
         id: contact.cid,
+
         name: `${contact.first_name} ${contact.last_name}${firm}`,
+
       };
 
     });
@@ -64,8 +67,11 @@ onMounted(() => {
 })
 
 const onFetchSelectedPersonName = (id) => {
+
   const person = people.value.find(person => person.id === id);
+
   return person ? person.name : '';
+
 };
 </script>
 

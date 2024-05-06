@@ -6,7 +6,7 @@ import { ref } from 'vue'
 export const useProjectStore = defineStore('projects', () => {
 
   const projects = ref<(App.Data.ProjectData)[]>([])
-  const project = useLocalStorage<App.Data.ProjectFullData | null>('active_project')
+  const project = useLocalStorage<App.Data.ProjectFullData | 'null'>('active_project')
 
   async function fetchProjects(): Promise<void> {
 

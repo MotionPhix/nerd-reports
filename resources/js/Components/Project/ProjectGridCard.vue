@@ -40,7 +40,7 @@ const fetchProject = () => {
 
 <template>
 <div
-  class="relative overflow-hidden flex flex-col gap-y-3 lg:gap-y-5 p-4 md:p-5 bg-white shadow rounded-lg dark:bg-neutral-900 group">
+  class="relative overflow-hidden flex flex-col gap-y-3 lg:gap-y-5 p-4 md:p-5 bg-white shadow rounded-lg dark:bg-gray-800 group">
 
   <div class="inline-flex items-center gap-2">
 
@@ -66,7 +66,7 @@ const fetchProject = () => {
     </div>
   </button>
 
-  <div class="flex-1 justify-end flex flex-col gap-2 divide-y divide-gray-200 dark:divide-neutral-800">
+  <div class="flex-1 justify-end flex flex-col gap-2 divide-y divide-gray-200 dark:divide-gray-700">
 
     <div>
       <span class="block text-xs dark:text-gray-600">
@@ -90,7 +90,8 @@ const fetchProject = () => {
 
   </div>
 
-  <div class="absolute hidden -bottom-2 -right-2 dark:bg-gray-600 bg-gray-300 h-12 w-12 rounded-md items-center justify-center group-hover:flex transition duration-300">
+  <div
+    class="absolute hidden -bottom-2 -right-2 dark:bg-gray-600 bg-gray-300 h-12 w-12 rounded-md items-center justify-center group-hover:flex transition duration-300">
 
     <Link
       :href="route('projects.destroy', { ids: project.pid })"

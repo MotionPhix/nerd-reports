@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import { usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
-
 import IconContacts from '@/Components/Icon/IconContacts.vue';
 import IconContactList from '@/Components/Icon/IconContactList.vue';
 

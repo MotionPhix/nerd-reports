@@ -1,7 +1,19 @@
 <script setup lang="ts">
 import { router, useForm } from '@inertiajs/vue3'
 
-import { IconMenu, IconUser, IconClock, IconCalendar, IconFile, IconMessage, IconMessageX, IconX, IconFileDescription, IconPencil, IconTrash } from '@tabler/icons-vue'
+import {
+  IconMenu,
+  IconUser,
+  IconClock,
+  IconCalendar,
+  IconFile,
+  IconMessage,
+  IconMessageX,
+  IconX,
+  IconFileDescription,
+  IconPencil,
+  IconTrash
+} from '@tabler/icons-vue'
 
 import InputError from '@/Components/InputError.vue'
 
@@ -44,7 +56,7 @@ const props = defineProps<{
 
 const projectStore = useProjectStore()
 
-const { setProject } = projectStore
+const { setProject, reFetchProject } = projectStore
 
 const formStore = useFormStore()
 
@@ -175,6 +187,7 @@ function onSubmit() {
 
     let formData: Partial<App.Data.TaskData> = {
       name: data.name,
+      status: data.status,
       priority: data.priority,
       assigned_to: data.assigned_to,
       board_id: data.board_id,
@@ -205,7 +218,7 @@ function onSubmit() {
 
     },
 
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
 
       setProject(data.props.project)
 

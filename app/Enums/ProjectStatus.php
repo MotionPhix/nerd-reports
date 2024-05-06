@@ -12,6 +12,8 @@ enum ProjectStatus: string
 
   case CANCELLED = 'cancelled';
 
+  case FINISHED = 'done';
+
   /**
    * @return string
    */
@@ -26,6 +28,8 @@ enum ProjectStatus: string
       self::COMPLETED => 'Ready for production',
 
       self::CANCELLED => 'Project cancelled',
+
+      self::FINISHED => 'Task done',
 
     };
   }

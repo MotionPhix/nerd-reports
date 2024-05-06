@@ -1,34 +1,41 @@
 import { defineStore } from 'pinia'
-import { reactive, ref, toRefs } from 'vue'
-
-interface FormState {
-  currentTaskId: number
-  currentBoardId: number
-}
+import { ref } from 'vue'
 
 export const useFormStore = defineStore('forms', () => {
-  const state: FormState = reactive({
-    currentTaskId: ref(null),
-    currentBoardId: ref(null),
-  })
 
-  const { ...reactiveState } = toRefs(state)
+  const currentTaskId = ref<number | null>(null)
+  const currentBoardId = ref<number | null>(null)
 
   function setCurrentTaskId(taskId: number) {
-    state.currentTaskId = taskId
+
+    currentTaskId.value = taskId
+
   }
 
   function setCurrentBoardId(boardId: number) {
-    state.currentBoardId = boardId
+
+    currentBoardId.value = boardId
+
   }
 
   function unSetCurrentTaskId() {
-    state.currentTaskId = null
+
+    currentTaskId.value = null
+
   }
 
   function unSetCurrentBoardId() {
-    state.currentBoardId = null
+
+    currentBoardId.value = null
+
   }
 
-  return { ...reactiveState, setCurrentTaskId, setCurrentBoardId, unSetCurrentTaskId, unSetCurrentBoardId }
+  return {
+    currentTaskId,
+    currentBoardId,
+    setCurrentTaskId,
+    setCurrentBoardId,
+    unSetCurrentTaskId,
+    unSetCurrentBoardId
+  }
 })

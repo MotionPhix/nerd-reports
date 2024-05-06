@@ -2,7 +2,7 @@
 
 namespace App\Data;
 
-use DateTime;
+use App\Enums\ProjectStatus;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
 use Spatie\LaravelData\Data;
@@ -55,6 +55,8 @@ class TaskData extends Data
         'required',
         'min:5'
       ],
+
+      'status' => ['sometimes', Rule::in(ProjectStatus::cases())],
 
       'description' => 'sometimes|min:20',
 

@@ -1,81 +1,93 @@
+import { useLocalStorage } from '@/Composables/useLocalStorage'
 import axios from 'axios'
 import { defineStore } from 'pinia'
-import { reactive, ref, toRefs } from 'vue'
-
-interface ContactState {
-  selectedContacts: (string|undefined)[]
-  contacts: Object[]
-}
+import { ref } from 'vue'
+import { useToastStore } from '@/Stores/toastStore'
 
 export const useContactStore = defineStore('contacts', () => {
-  const state: ContactState = reactive({
-    selectedContacts: ref<(string|undefined)[]>([]),
-    contacts: ref([]),
-  })
 
-  const { ...reactiveState } = toRefs(state)
+  const toastStore = useToastStore()
+  const { notify } = toastStore
+
+  const selectedContacts = ref<(string|null)[]>([])
+  const contacts = useLocalStorage<App.Data.ContactData[] | []>('active_contact')
 
   async function fetchContacts(filter: string = ''): Promise<void> {
-    // Fetch the latest contacts from the database
-    const response = await axios.get(filter.length ? `/${filter}` : '/');
-    state.contacts = response.data;
+
+    const resp = await axios.get(filter.length ? `/${filter}` : '/');
+    contacts.value = resp.data;
+
   }
 
-  async function createOrUpdateContact(contact: Object): Promise<void> {
-    const group = generateGroup(contact);
+  async function storeContact(contact: App.Data.ContactFullData): Promise<void> {
 
-    if (!state.baseGroup[group]) {
-      state.baseGroup[group] = [];
+    await axios.post(route('contacts.store'), contact)
+      .catch(err => {
+
+        console.log(err);
+
+      })
+      .then(async (resp) => {
+
+        console.log(resp.data);
+
+        // await fetchContacts();
+
+      });
+
+  }
+
+  async function updateContact(contact: App.Data.ContactFullData): Promise<void> {
+
+    await axios.put(route('contacts.update', { contact: contact.cid }))
+    .catch(err => console.log(err))
+    .then(async (resp) => {
+
+      console.log(resp.data);
+
+      // await fetchContacts();
+
+    });
+
+  }
+
+  function selectContact(contactId: string) {
+
+    if ( ! contactId.length ) {
+
+      return notify({
+        title:  'Impractical',
+        type: 'warning',
+        message: 'You haven\'t selected a contact'
+      })
+
     }
 
-    const existingContactIndex = state.baseGroup[group].findIndex((c) => c.id === contact.id);
+    selectedContacts.value.push(contactId)
 
-    if (existingContactIndex !== -1) {
-      // Update existing contact
-      state.baseGroup[group][existingContactIndex] = contact;
-    } else {
-      // Update new contact
-      state.baseGroup[group].push(contact);
-    }
-
-    // Save to the database
-    await axios.post('/store', contact);
-
-    // Fetch the latest data from the database and update the store
-    await fetchContacts();
   }
 
-  async function updateContact(contact: Contact): Promise<void> {
-    const group = generateGroup(contact);
+  function unselectContact(contact: string) {
 
-    const existingContactIndex = state.baseGroup[group]?.findIndex((c) => c.id === contact.id);
+    selectedContacts.value = (selectedContacts.value.filter(activeId => activeId !== contact))
 
-    if (existingContactIndex !== undefined && existingContactIndex !== -1) {
-      state.baseGroup[group][existingContactIndex] = contact;
-    }
-
-    // Update in the database
-    await axios.put(`/update/${contact.cid}`, contact);
-
-    // Fetch the latest data from the database and update the store
-    await fetchContacts();
   }
 
-  function setBaseGroup(base: ContactsData) {
-    state.baseGroup = base
+  function resetSelectedContacts() {
+
+    selectedContacts.value = []
+
   }
 
-  function setSelectedContacts(contact: string | undefined) {
-    state.selectedContacts.push(contact)
+  return {
+    contacts,
+    selectedContacts,
+    selectContact,
+    unselectContact,
+    updateContact,
+    storeContact,
+    fetchContacts,
+    resetSelectedContacts
   }
 
-  function unsetSelectedContacts(contact: string | undefined) {
-    state.selectedContacts = (state.selectedContacts.filter(activeId => activeId !== contact))
-  }
-
-  function expungeSelectedContacts() {
-    state.selectedContacts = []
-  }
-
-  return { ...reactiveState, setSelectedContacts, unsetSelectedContacts, expungeSelectedContacts, setBaseGroup }
 })
