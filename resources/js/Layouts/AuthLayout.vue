@@ -11,6 +11,7 @@ import { IconBell, IconMoon, IconSun } from "@tabler/icons-vue"
 import { UseDark } from "@vueuse/components"
 import { ref } from "vue"
 import { useTaskStore } from "@/Stores/taskStore"
+import SearchInput from "@/Components/SearchInput.vue"
 
 const showingNavigationDropdown = ref(false)
 const { user } = usePage().props.auth
@@ -59,7 +60,7 @@ window.Echo
 
       <div class="flex justify-between h-16">
 
-        <div class="flex">
+        <div class="flex flex-1">
 
           <div class="flex items-center shrink-0">
             <Link :href="route('dashboard')">
@@ -70,19 +71,9 @@ window.Echo
 
           <!-- Navigation starts -->
 
-          <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+          <div class="hidden py-3 sm:-my-px sm:ms-10 sm:flex w-full">
 
-            <NavLink :href="route('dashboard')" :active="route().current('dashboard')">
-              Dashboard
-            </NavLink>
-
-            <NavLink :href="route('contacts.index')" :active="route().current('contacts.*')">
-              Contacts
-            </NavLink>
-
-            <NavLink :href="route('projects.index')" :active="route().current('projects.*')">
-              Projects
-            </NavLink>
+            <SearchInput />
 
           </div>
 
@@ -100,7 +91,7 @@ window.Echo
                 type="button"
                 class="relative mr-6 text-gray-700 w-7 h-7 hover:opacity-70 dark:text-white">
 
-                <IconBell class="w-5 h-5" />
+                <IconBell class="w-6 h-6" />
 
                 <span
                   class="flex absolute top-0 end-0 h-5 w-5 -mt-1.5 -me-1.5"
@@ -131,7 +122,9 @@ window.Echo
           </Dropdown>
 
           <UseDark v-slot="{ isDark, toggleDark }">
-            <button class="text-gray-700 hover:opacity-70 dark:text-white" @click="toggleDark()">
+            <button
+              class="text-gray-700 hover:opacity-70 dark:text-white"
+              @click="toggleDark()">
               <IconSun class="w-5 h-5" stroke="2" v-if="isDark" />
               <IconMoon class="w-5 h-5" v-else />
             </button>
