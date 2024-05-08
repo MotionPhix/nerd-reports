@@ -70,7 +70,7 @@ defineOptions({
   <article class="flex items-start gap-10 max-w-5xl mx-auto px-8 py-12">
 
     <nav
-      class="w-80 gap-4 dark:text-white dark:border-gray-700 bg-white rounded-md pt-4 sticky top-28">
+      class="w-80 gap-4 dark:text-white dark:border-gray-700 bg-white dark:bg-gray-800 rounded-md pt-4 sticky top-28">
 
       <h2
         class="px-4 text-2xl font-semibold text-gray-900 dark:text-white">
