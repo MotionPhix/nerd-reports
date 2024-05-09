@@ -41,7 +41,7 @@ import { debounce } from "lodash";
 
 import { storeToRefs } from "pinia";
 
-import { computed, ref } from "vue"
+import { computed, h, ref } from "vue"
 
 import { useToastStore } from "@/Stores/toastStore";
 
@@ -76,12 +76,6 @@ const props = defineProps<{
   contact: App.Data.ContactFullData;
 
 }>();
-
-defineOptions({
-
-  layout: AuthenticatedLayout,
-
-});
 
 const error = ref();
 
@@ -274,6 +268,12 @@ const placeholder = computed(
     ? `A few things to note about ${form.first_name}`
     : 'Enter some notes'
 )
+
+defineOptions({
+
+  layout: AuthenticatedLayout,
+
+});
 </script>
 
 <template>

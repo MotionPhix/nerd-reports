@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Comments;
 
 use App\Data\CommentData;
+use App\Events\TaskCommentAdded;
 use App\Http\Controllers\Controller;
 use App\Models\Comment;
 use App\Models\File;
@@ -49,9 +50,15 @@ class Store extends Controller
 
     }
 
-    Notification::send($users, new CommentAdded(auth()->user(), $comment));
+    // Notification::send($users, new CommentAdded(auth()->user(), $comment));
 
     // $task->user->notify(new CommentAdded(auth()->user(), $comment));
+
+    foreach ($users as $user) {
+
+      event(new TaskCommentAdded($user, $comment));
+
+    }
 
     return redirect()->back();
   }

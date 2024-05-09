@@ -3,7 +3,7 @@ import InputError from '@/Components/InputError.vue'
 
 import TipTap from "@/Components/TipTap.vue"
 
-import { IconX } from '@tabler/icons-vue'
+import { IconSend, IconX } from '@tabler/icons-vue'
 
 import { ref } from "vue"
 
@@ -14,7 +14,9 @@ import { useToastStore } from "@/Stores/toastStore"
 import FileInput from '@/Components/FileInput.vue'
 
 import axios from "axios"
+
 import { useProjectStore } from '@/Stores/projectStore'
+
 import { useTaskStore } from "@/Stores/taskStore"
 
 const props = defineProps<{
@@ -31,10 +33,12 @@ const { notify } = toastStore
 const { setProject } = projectStore
 
 const media = ref([])
+const hidePreview = ref(false)
 
 const commentPlaceholder = ref('Enter your comment')
 
 const taskStore = useTaskStore()
+
 const { reFetchTask } = taskStore
 
 const form = useForm({
@@ -117,6 +121,8 @@ const close = () => {
 
 const uploadFiles = (files: File[]) => {
 
+  hidePreview.value = false
+
   Array.from(files).forEach((file) => {
 
     let reader = new FileReader()
@@ -147,9 +153,13 @@ const uploadFiles = (files: File[]) => {
         .then(({ data }) => {
 
           item.id = data.id
+          item.loading = false
+
+          form.reset()
+          form.body = null
+          hidePreview.value = true
 
         })
-        .finally(() => item.loading = false)
 
       media.value.push(item)
 
@@ -177,20 +187,27 @@ const removeMedia = (idx, item) => {
 
 <template>
 
-  <form class="pb-6 space-y-6" @submit.prevent="onSubmit">
+  <form
+    class="pb-6 space-y-6 relative"
+    @submit.prevent="onSubmit">
 
     <div>
-      <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+      <label
+        class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
         Comment
       </label>
 
-      <TipTap v-model="form.body" height="h-54" v-model:placeholder="commentPlaceholder" />
+      <TipTap
+        height="h-54"
+        v-model="form.body"
+        v-model:placeholder="commentPlaceholder"
+        :has-controls="false" />
 
       <InputError :message="form.errors.body" />
     </div>
 
     <article
-      v-if="media.length"
+      v-if="media.length && ! hidePreview"
       class="grid gap-2"
       :class="{ 'grid-cols-2': media.length > 1 }">
 
@@ -219,24 +236,23 @@ const removeMedia = (idx, item) => {
 
     </article>
 
-    <div class="flex items-center space-x-4">
+    <div class="flex items-center space-x-2 absolute top-3 right-3">
+
+      <!-- <button
+        @click="close"
+        type="button"
+        class="text-red-600 inline-flex items-center hover:text-white border border-red-600 hover:bg-red-600 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:border-red-500 dark:text-red-500 dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-900">
+        Cancel
+      </button> -->
+
+      <FileInput @input="uploadFiles" />
 
       <button
         type="submit"
         :disabled="form.processing"
-        class="text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
-        Add comment
+        class="text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-2.5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
+        <IconSend class="w-5 h-5" />
       </button>
-
-      <button
-        @click="close"
-        type="button" class="text-red-600 inline-flex items-center hover:text-white border border-red-600 hover:bg-red-600 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:border-red-500 dark:text-red-500 dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-900">
-        Cancel
-      </button>
-
-      <span class="flex-1" />
-
-      <FileInput @input="uploadFiles" />
 
     </div>
 

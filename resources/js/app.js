@@ -22,6 +22,8 @@ import Toast, { POSITION } from "vue-toastification";
 
 import tooltip from "@/Directives/tooltip";
 
+import VueApexCharts from "vue3-apexcharts";
+
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 const pinia = createPinia()
@@ -50,6 +52,7 @@ createInertiaApp({
       .use(plugin)
       .use(ZiggyVue)
       .use(pinia)
+      .use(VueApexCharts)
       .use(Toast, options)
       .directive("tooltip", tooltip)
       .mount(el);

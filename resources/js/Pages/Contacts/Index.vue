@@ -7,13 +7,17 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, Link } from "@inertiajs/vue3";
 import { IconPlus } from "@tabler/icons-vue";
 
-interface Props {
+const props = defineProps<{
+
   contacts: App.Data.ContactData[];
-}
 
-const props = defineProps<Props>();
+}>();
 
-defineOptions({ layout: AuthenticatedLayout });
+defineOptions({
+
+  layout: AuthenticatedLayout
+
+});
 </script>
 
 <template>

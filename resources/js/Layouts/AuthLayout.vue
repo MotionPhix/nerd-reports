@@ -2,25 +2,45 @@
 import ApplicationLogo from "@/Components/ApplicationLogo.vue"
 import Dropdown from "@/Components/Dropdown.vue"
 import DropdownLink from "@/Components/DropdownLink.vue"
-import NavLink from "@/Components/NavLink.vue"
 import NotificationList from "@/Components/NotificationList.vue"
 import ResponsiveNavLink from "@/Components/ResponsiveNavLink.vue"
 import { useProjectStore } from "@/Stores/projectStore"
 import { Link, usePage } from "@inertiajs/vue3"
-import { IconBell, IconMoon, IconSun } from "@tabler/icons-vue"
+import { IconAddressBook, IconBell, IconFileStack, IconMoon, IconSmartHome, IconSun, IconTags } from "@tabler/icons-vue"
 import { UseDark } from "@vueuse/components"
-import { ref } from "vue"
+import { computed, ref } from "vue"
 import { useTaskStore } from "@/Stores/taskStore"
 import SearchInput from "@/Components/SearchInput.vue"
 
+const props = defineProps({
+
+  header: String,
+
+  errors: {
+    type: Object,
+    default: () => {}
+  },
+
+  auth: {
+    type: Object,
+    default: () => {}
+  },
+
+})
+
 const showingNavigationDropdown = ref(false)
+
 const { user } = usePage().props.auth
 
 const projectStore = useProjectStore()
+
 const { reFetchProject } = projectStore
 
 const taskStore = useTaskStore()
+
 const { reFetchTask } = taskStore
+
+console.log(props.header);
 
 window.Echo
   .private(`App.Models.User.${user.id}`)
@@ -30,7 +50,25 @@ window.Echo
 
       case 'App\\Notifications\\CommentAdded':
 
-        usePage().props.auth.unreadNotifications++
+        console.log('here we have the notification of a comment addition');
+
+        if (usePage().url.startsWith('/projects/s')) {
+
+          reFetchProject()
+
+        }
+
+        if (usePage().url.startsWith('/tasks/s')) {
+
+          reFetchTask()
+
+        }
+
+        break;
+
+      case 'App\\Notifications\\CommentRemoved':
+
+        console.log('here we have the notification of a comment addition');
 
         if (usePage().url.startsWith('/projects/s')) {
 
@@ -49,6 +87,12 @@ window.Echo
     }
 
   })
+
+  const active = (path) => {
+    return usePage().url.startsWith(path)
+    ? 'border-l-2 border-blue-500 bg-gray-200 dark:bg-gray-900 dark:text-gray-300 text-gray-900'
+    : 'border-l-2 border-transparent'
+  }
 </script>
 
 <template>
@@ -63,10 +107,14 @@ window.Echo
         <div class="flex flex-1">
 
           <div class="flex items-center shrink-0">
+
             <Link :href="route('dashboard')">
+
               <ApplicationLogo
                 class="block w-auto text-gray-800 fill-current h-9 dark:text-gray-200" />
+
             </Link>
+
           </div>
 
           <!-- Navigation starts -->
@@ -161,38 +209,62 @@ window.Echo
 
         <!-- Hamburger -->
         <div class="flex items-center -me-2 sm:hidden">
-          <button @click="showingNavigationDropdown = !showingNavigationDropdown"
-                  class="inline-flex items-center justify-center p-2 text-gray-400 transition duration-150 ease-in-out rounded-md dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-900 focus:text-gray-500 dark:focus:text-gray-400">
-            <svg class="w-6 h-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-              <path :class="{
-                            hidden: showingNavigationDropdown,
-                            'inline-flex': !showingNavigationDropdown,
-                        }" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M4 6h16M4 12h16M4 18h16" />
-              <path :class="{
-                            hidden: !showingNavigationDropdown,
-                            'inline-flex': showingNavigationDropdown,
-                        }" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M6 18L18 6M6 6l12 12" />
+          <button
+            @click="showingNavigationDropdown = !showingNavigationDropdown"
+            class="inline-flex items-center justify-center p-2 text-gray-400 transition duration-150 ease-in-out rounded-md dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-900 focus:text-gray-500 dark:focus:text-gray-400">
+            <svg
+              class="w-6 h-6"
+              stroke="currentColor"
+              fill="none"
+              viewBox="0 0 24 24">
+              <path
+                :class="{
+                  hidden: showingNavigationDropdown,
+                  'inline-flex': !showingNavigationDropdown,
+                }"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 6h16M4 12h16M4 18h16" />
+              <path
+                :class="{
+                  hidden: !showingNavigationDropdown,
+                  'inline-flex': showingNavigationDropdown,
+                }"
+                stroke-linecap="round"
+                stroke-linejoin="round" stroke-width="2"
+                d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
+
       </div>
+
     </div>
 
     <!-- Responsive Navigation Menu -->
-    <div :class="{ block: showingNavigationDropdown, hidden: !showingNavigationDropdown }"
-         class="sm:hidden">
+    <div
+      :class="{
+        block: showingNavigationDropdown,
+        hidden: !showingNavigationDropdown
+      }"
+      class="sm:hidden">
       <div class="pt-2 pb-3 space-y-1">
-        <ResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')">
+        <ResponsiveNavLink
+          :href="route('dashboard')"
+          :active="route().current('dashboard')">
           Dashboard
         </ResponsiveNavLink>
 
-        <ResponsiveNavLink :href="route('contacts.index')" :active="route().current('contacts.*')">
+        <ResponsiveNavLink
+          :href="route('contacts.index')"
+          :active="route().current('contacts.*')">
           Contacts
         </ResponsiveNavLink>
 
-        <ResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')">
+        <ResponsiveNavLink
+          :href="route('dashboard')"
+          :active="route().current('dashboard')">
           Projects
         </ResponsiveNavLink>
       </div>
@@ -222,15 +294,62 @@ window.Echo
     </div>
   </nav>
 
-  <!-- Page Heading -->
-  <header class="sticky top-0 bg-white shadow dark:bg-gray-800" v-if="$slots.header">
-    <div class="max-w-5xl px-4 py-6 mx-auto sm:px-6 lg:px-8">
-      <slot name="header" />
-    </div>
-  </header>
 
-  <!-- Page Content -->
-  <main>
-    <slot />
-  </main>
+  <section class="flex h-[92vh]">
+
+<!-- Menu Section -->
+<aside class="w-72 py-12 sticky top-0 overflow-y-auto max-w-5xl">
+
+  <nav class="flex flex-col gap-4 dark:text-white dark:border-gray-700 bg-white dark:bg-gray-800 rounded-md">
+
+    <h2 class="text-xl font-semibold leading-tight text-gray-900 dark:text-white px-4 mb-4 mt-4">
+      {{ header }}
+    </h2>
+
+    <ul class="block py-2 text-gray-700 dark:text-gray-200 space-y-2">
+
+      <li>
+        <Link preserve-scroll :href="route('dashboard')" :class="active('/dashboard')" class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+          <IconSmartHome class="w-5 h-5" stroke="2" />
+          <span>Dashboard</span>
+        </Link>
+      </li>
+
+      <li>
+        <Link preserve-scroll :class="active('/contacts')" :href="route('contacts.index')" class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+          <IconAddressBook class="w-5 h-5" stroke="2" />
+          <span>Contacts</span>
+        </Link>
+      </li>
+
+      <li>
+        <Link preserve-scroll :class="active('/projects')" :href="route('projects.index')" class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+          <IconFileStack class="w-5 h-5" stroke="2" />
+          <span>Projects</span>
+        </Link>
+      </li>
+
+      <li>
+        <Link preserve-scroll :class="active('/tasks')" :href="route('projects.index')" class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+          <IconTags class="w-5 h-5" stroke="2" />
+          <span>Tasks</span>
+        </Link>
+      </li>
+
+    </ul>
+
+  </nav>
+
+</aside>
+
+<!-- Main Content Section -->
+<main class="flex-1 overflow-y-auto max-w-full mx-auto col-span-2">
+
+  <slot />
+
+</main>
+
+</section>
+
+
 </template>

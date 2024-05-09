@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Comments;
 
 use App\Http\Controllers\Controller;
 use App\Models\Comment;
+use App\Notifications\CommentRemoved;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use phpseclib3\Crypt\EC\BaseCurves\KoblitzPrime;
 
@@ -27,6 +29,22 @@ class Destroy extends Controller
         }
 
       }
+
+      $task = $comment->task;
+
+      $users = $task->comments()
+        ->with('user')
+        ->where('user_id', '!=', auth()->user()->id)
+        ->get()
+        ->pluck('user')->unique('id');
+
+      if (! $users->contains($task->user) && $task->user->id !== auth()->user()->id) {
+
+        $users->push($task->user);
+
+      }
+
+      Notification::send($users, new CommentRemoved(auth()->user()));
 
       $comment->delete();
 

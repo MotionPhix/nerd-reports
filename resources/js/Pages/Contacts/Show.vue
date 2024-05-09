@@ -21,11 +21,11 @@ const {
   selectedContacts
 } = storeToRefs(contactStore)
 
-const { setSelectedContacts } = contactStore
+const { selectContact } = contactStore
 
 function onCheckSelection() {
 
-  if (!selectedContacts.value.length) setSelectedContacts(props.contact.cid)
+  if (!selectedContacts.value.length) selectContact(props.contact.cid)
 
 }
 
@@ -38,7 +38,11 @@ const onSendMail = () => {
 //   return sample(validPhones)?.number || ''; // Ensure there's a fallback in case the array is empty
 // }
 
-defineOptions({ layout: AuthenticatedLayout })
+defineOptions({
+
+  layout: AuthenticatedLayout
+
+})
 </script>
 
 <template>

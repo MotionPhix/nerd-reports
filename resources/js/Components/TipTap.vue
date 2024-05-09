@@ -39,6 +39,11 @@ const props = defineProps({
   height: {
     type: String,
     default: ''
+  },
+
+  hasControls: {
+    type: Boolean,
+    default: true
   }
 })
 
@@ -56,7 +61,7 @@ const editor = useEditor({
   editorProps: {
     attributes: {
       class:
-        `border max-w-full border-gray-300 rounded-md dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 prose dark:prose-headings:text-gray-300 prose-headings:text-gray-800 mx-auto focus:outline-none p-4 shadow-sm scrollbar-none text-gray-900 overflow-y-auto scroll-smooth scrollbar-none h-48`,
+        `border max-w-full border-gray-300 rounded-md dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 prose dark:prose-headings:text-gray-300 prose-headings:text-gray-800 mx-auto focus:outline-none p-4 shadow-sm scrollbar-none text-gray-900 overflow-y-auto scroll-smooth scrollbar-none`,
     },
   },
 
@@ -94,7 +99,7 @@ onBeforeUnmount(() => {
 
 <template>
   <section
-    v-if="editor"
+    v-if="editor && hasControls"
     class="flex mb-4 items-center justify-start gap-6 overflow-x-auto scrollbar-thin scroll-smooth"
   >
     <button

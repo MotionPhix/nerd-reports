@@ -7,8 +7,10 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^2.11.5",
+    "@antv/g2plot": "^2.4.31",
     "@headlessui/vue": "^1.7.19",
     "@inertiajs/vue3": "^1.0.0",
+    "@opd/g2plot-vue": "^3.6.9",
     "@tabler/icons-vue": "^3.1.0",
     "@tailwindcss/forms": "^0.5.3",
     "@tailwindcss/typography": "^0.5.12",
@@ -21,6 +23,7 @@
     "@types/lodash": "^4.17.0",
     "@vitejs/plugin-vue": "^5.0.0",
     "@vueuse/components": "^10.9.0",
+    "apexcharts": "^3.49.0",
     "autoprefixer": "^10.4.12",
     "autosize": "^6.0.1",
     "axios": "^1.6.8",
@@ -45,7 +48,8 @@
     "vite": "^5.0",
     "vue": "^3.4.0",
     "vue-draggable-next": "^2.2.1",
-    "vue-toastification": "^2.0.0-rc.5"
+    "vue-toastification": "^2.0.0-rc.5",
+    "vue3-apexcharts": "^1.5.2"
   },
   "dependencies": {
     "tw-to-css": "0.0.12"

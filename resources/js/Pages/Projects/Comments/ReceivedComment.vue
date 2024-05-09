@@ -18,7 +18,7 @@ const props = defineProps<{
 
         <Menu
           as="div"
-          v-if="props.comment.user_id === $page.props.auth.user.id">
+          class="relative">
 
           <MenuButton
             class="items-center flex justify-center w-5 h-5 text-gray-500 dark:text-gray-100">
@@ -44,9 +44,10 @@ const props = defineProps<{
             leave-to-class="scale-90 opacity-0">
 
             <MenuItems
-              class="absolute right-0 w-40 overflow-hidden origin-top-left bg-white border-gray-300 border rounded-md shadow-lg top-5 dark:text-gray-300 dark:bg-gray-800 dark:border-gray-700 focus:outline-none">
+              class="absolute w-24 overflow-hidden origin-top-left bg-white border-gray-300 border rounded-md shadow-lg top-5 dark:text-gray-300 dark:bg-gray-800 dark:border-gray-700 focus:outline-none">
 
-              <MenuItem>
+              <MenuItem
+                v-if="props.comment.user_id !== $page.props.auth.user.id">
 
                 <button
                   class="flex items-center w-full gap-2 px-4 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-600">
@@ -55,7 +56,7 @@ const props = defineProps<{
                     stroke="2.5"
                     class="w-4 h-4" />
 
-                  <span>Add file</span>
+                  <span>Reply</span>
 
                 </button>
 

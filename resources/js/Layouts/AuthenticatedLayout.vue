@@ -57,6 +57,22 @@ window.Echo
 
         break;
 
+      case 'App\\Notifications\\CommentRemoved':
+
+        if (usePage().url.startsWith('/projects/s')) {
+
+          reFetchProject()
+
+        }
+
+        if (usePage().url.startsWith('/tasks/s')) {
+
+          reFetchTask()
+
+        }
+
+        break;
+
     }
 
   })
