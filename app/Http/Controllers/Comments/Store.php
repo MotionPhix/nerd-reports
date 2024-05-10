@@ -50,13 +50,13 @@ class Store extends Controller
 
     }
 
-    // Notification::send($users, new CommentAdded(auth()->user(), $comment));
+    Notification::send($users, new CommentAdded(auth()->user(), $comment));
 
     // $task->user->notify(new CommentAdded(auth()->user(), $comment));
 
     // foreach ($users as $user) {
 
-      broadcast(new TaskCommentAdded(auth()->user(), $comment))->toOthers();
+      // broadcast(new TaskCommentAdded(auth()->user(), $comment))->toOthers();
 
     // }
 

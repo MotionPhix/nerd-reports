@@ -35,9 +35,9 @@ const { unreadNotifications } = storeToRefs(notificationStore)
 
 window.Echo
   .private(`App.Models.User.${user.id}`)
-  .listen('TaskCommentAdded', (e) => {
+  .notification((notification) => {
 
-    console.log(e);
+    console.log(notification);
 
     fetchNotifications()
 
