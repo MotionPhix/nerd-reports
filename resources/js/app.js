@@ -44,6 +44,17 @@ const options = {
   }
 }
 
+// isTyping() {
+//   let channel = Echo.private('chat');
+
+//   setTimeout(function() {
+//     channel.whisper('typing', {
+//       user: Laravel.user,
+//         typing: true
+//     });
+//   }, 300);
+// }
+
 createInertiaApp({
   title: (title) => `${title} - ${appName}`,
   resolve: (name) => resolvePageComponent(`./Pages/${name}.vue`, import.meta.glob('./Pages/**/*.vue')),

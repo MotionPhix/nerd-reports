@@ -54,11 +54,11 @@ class Store extends Controller
 
     // $task->user->notify(new CommentAdded(auth()->user(), $comment));
 
-    foreach ($users as $user) {
+    // foreach ($users as $user) {
 
-      event(new TaskCommentAdded($user, $comment));
+      broadcast(new TaskCommentAdded(auth()->user(), $comment))->toOthers();
 
-    }
+    // }
 
     return redirect()->back();
   }

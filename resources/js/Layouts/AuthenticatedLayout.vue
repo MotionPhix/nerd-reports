@@ -35,43 +35,21 @@ const { unreadNotifications } = storeToRefs(notificationStore)
 
 window.Echo
   .private(`App.Models.User.${user.id}`)
-  .notification((notification) => {
+  .listen('TaskCommentAdded', (e) => {
 
-    switch (notification.type) {
+    console.log(e);
 
-      case 'App\\Notifications\\CommentAdded':
+    fetchNotifications()
 
-        fetchNotifications()
+    if (usePage().url.startsWith('/projects/s')) {
 
-        if (usePage().url.startsWith('/projects/s')) {
+      reFetchProject()
 
-          reFetchProject()
+    }
 
-        }
+    if (usePage().url.startsWith('/tasks/s')) {
 
-        if (usePage().url.startsWith('/tasks/s')) {
-
-          reFetchTask()
-
-        }
-
-        break;
-
-      case 'App\\Notifications\\CommentRemoved':
-
-        if (usePage().url.startsWith('/projects/s')) {
-
-          reFetchProject()
-
-        }
-
-        if (usePage().url.startsWith('/tasks/s')) {
-
-          reFetchTask()
-
-        }
-
-        break;
+      reFetchTask()
 
     }
 
