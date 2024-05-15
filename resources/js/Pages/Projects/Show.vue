@@ -29,7 +29,7 @@ const { navClasses } = useStickyTop();
   <Head :title="title" />
 
   <nav
-    class="flex items-center w-full h-16 max-w-5xl gap-6 px-8 mx-auto dark:text-white dark:border-gray-700"
+    class="flex items-center w-full h-16 max-w-3xl gap-6 px-8 mx-auto dark:text-white dark:border-gray-700"
     :class="navClasses">
 
     <Link
@@ -58,7 +58,7 @@ const { navClasses } = useStickyTop();
 
   </nav>
 
-  <section class="relative flex flex-col max-w-3xl gap-24 px-6 pt-12 mx-auto">
+  <section class="relative flex flex-col max-w-3xl gap-24 px-8 pt-12 mx-auto">
 
     <article class="flex" v-if="!! project.contact.firm">
 

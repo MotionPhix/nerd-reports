@@ -47,7 +47,7 @@ defineOptions({
   <Head title="Explore Projects" />
 
   <nav
-    class="flex items-center h-16 max-w-3xl gap-6 px-8 mx-auto dark:text-white dark:border-gray-700"
+    class="flex items-center h-16 max-w-3xl gap-6 px-6 mx-auto dark:text-white dark:border-gray-700"
     :class="navClasses">
     <h2
       class="flex items-center gap-2 text-xl font-semibold leading-tight text-gray-900 dark:text-white">
@@ -71,16 +71,6 @@ defineOptions({
 
   <section class="max-w-3xl px-6 py-12 mx-auto">
 
-    <!-- <CardList
-      v-if="projects.total">
-
-      <ProjectCard
-        :project="project"
-        v-for="project in projects.data"
-        :key="project.id" />
-
-    </CardList> -->
-
     <ProjectGrid
       v-if="projects.total">
 
@@ -93,9 +83,9 @@ defineOptions({
 
     <div
       v-else
-      class="flex flex-col items-center justify-center flex-1 p-6 sm:px-6 lg:px-8">
+      class="flex flex-col items-center justify-center flex-1 px-8">
       <div
-        class="flex flex-col items-center w-full gap-2 py-12 mx-auto max-w-7xl sm:px-6 lg:px-8">
+        class="flex flex-col items-center w-full gap-2 py-12 mx-auto sm:px-6 lg:px-8">
         <IconReceipt class="text-gray-400 h-36 w-36" />
 
         <h2

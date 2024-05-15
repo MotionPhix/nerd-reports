@@ -285,51 +285,51 @@ defineOptions({
     "
   />
 
-  <article>
+  <nav
+    class="flex items-center w-full max-w-4xl h-16 gap-6 px-2 mx-auto dark:text-white dark:border-gray-700"
+    :class="navClasses">
+    <SecondaryButton
+      class="flex items-center gap-2 font-bold text-blue-300 transition duration-300 rounded-full dark:text-lime-300 hover:text-blue-500"
+      v-if="!hasFirm && !form.firm_keys?.fid"
+      @click="toggleField('hasFirm')">
+      <IconPlus class="w-6 h-6" /> <span>Add Company</span>
+    </SecondaryButton>
 
-    <nav
-      class="flex items-center w-full max-w-4xl h-16 gap-6 px-2 mx-auto dark:text-white dark:border-gray-700"
-      :class="navClasses">
-      <SecondaryButton
-        class="flex items-center gap-2 font-bold text-blue-300 transition duration-300 rounded-full dark:text-lime-300 hover:text-blue-500"
-        v-if="!hasFirm && !form.firm_keys?.fid"
-        @click="toggleField('hasFirm')">
-        <IconPlus class="w-6 h-6" /> <span>Add Company</span>
-      </SecondaryButton>
-
-      <h2
-        v-else
-        class="flex items-center gap-2 text-xl font-bold text-gray-800 dark:text-gray-200">
-        <Link :href="route('contacts.index')" as="button">
-          <IconArrowLeft stroke="2.5" class="w-6 h-6" />
-        </Link>
-        <span>{{ form.firm_keys?.name ?? props.contact.firm.name }}</span>
-      </h2>
-
-      <span class="flex-1"></span>
-
-      <PrimaryButton
-        @click.prevent="onSubmit"
-        type="submit"
-        :disabled="form.processing"
-        class="gap-2 rounded-full">
-
-        <IconPlus stroke="2.5" class="w-6 h-6 fill-current" />
-
-        <span>
-          {{ props.contact.id ? "Update" : "Create" }}
-        </span>
-
-        <Spinner v-if="form.processing" />
-      </PrimaryButton>
-
-      <Link
-        as="button"
-        :href="route('contacts.index')"
-        class="py-2.5 text-gray-800 font-semibold dark:text-white hover:text-opacity-40 transition duration-300 inline-flex items-center border-gray-700 hover:border-opacity-40 focus:ring-4 focus:outline-none focus:ring-gray-300 rounded-full px-5 text-center border dark:border-gray-600 dark:hover:border-gray-700 dark:focus:ring-gray-800">
-        Cancel
+    <h2
+      v-else
+      class="flex items-center gap-2 text-xl font-bold text-gray-800 dark:text-gray-200">
+      <Link :href="route('contacts.index')" as="button">
+        <IconArrowLeft stroke="2.5" class="w-6 h-6" />
       </Link>
-    </nav>
+      <span>{{ form.firm_keys?.name ?? props.contact.firm.name }}</span>
+    </h2>
+
+    <span class="flex-1"></span>
+
+    <PrimaryButton
+      @click.prevent="onSubmit"
+      type="submit"
+      :disabled="form.processing"
+      class="gap-2 rounded-full">
+
+      <IconPlus stroke="2.5" class="w-6 h-6 fill-current" />
+
+      <span>
+        {{ props.contact.id ? "Update" : "Create" }}
+      </span>
+
+      <Spinner v-if="form.processing" />
+    </PrimaryButton>
+
+    <Link
+      as="button"
+      :href="route('contacts.index')"
+      class="py-2.5 text-gray-800 font-semibold dark:text-white hover:text-opacity-40 transition duration-300 inline-flex items-center border-gray-700 hover:border-opacity-40 focus:ring-4 focus:outline-none focus:ring-gray-300 rounded-full px-5 text-center border dark:border-gray-600 dark:hover:border-gray-700 dark:focus:ring-gray-800">
+      Cancel
+    </Link>
+  </nav>
+
+  <article class="pb-12">
 
     <form
       class="flex flex-col max-w-3xl gap-6 px-4 pb-16 my-16 sm:pb-0 sm:px-8 md:mx-auto">
@@ -573,7 +573,8 @@ defineOptions({
           <InputError :message="$page.props.errors['firm.url']" />
         </div>
 
-        <div v-if="hasSlogan || !!form.firm_slogan">
+        <div
+          v-if="hasSlogan || !!form.firm_slogan">
           <label
             for="company_slogan"
             class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
@@ -606,7 +607,9 @@ defineOptions({
               leave-to-class="scale-90 opacity-0">
               <MenuItems
                 class="absolute left-0 z-10 w-48 mt-2 overflow-hidden origin-top-left bg-white border rounded-md shadow-lg -top-44 focus:outline-none">
-                <MenuItem v-slot="{ active }" @click="hasJobTitle = !hasJobTitle">
+                <MenuItem
+                  v-slot="{ active }"
+                  @click="toggleField('hasJobTitle')">
                   <span
                     :class="{ 'bg-gray-100': active }"
                     class="block px-4 py-2 text-sm text-gray-700">
@@ -614,7 +617,9 @@ defineOptions({
                   </span>
                 </MenuItem>
 
-                <MenuItem v-slot="{ active }" @click="hasAddress = !hasAddress">
+                <MenuItem
+                  v-slot="{ active }"
+                  @click="toggleField('hasAddress')">
                   <span
                     :class="{ 'bg-gray-100': active }"
                     class="block px-4 py-2 text-sm text-gray-700">
@@ -622,7 +627,9 @@ defineOptions({
                   </span>
                 </MenuItem>
 
-                <MenuItem v-slot="{ active }" @click="hasUrl = !hasUrl">
+                <MenuItem
+                  v-slot="{ active }"
+                  @click="toggleField('hasUrl')">
                   <span
                     :class="{ 'bg-gray-100': active }"
                     class="block px-4 py-2 text-sm text-gray-700">
@@ -630,7 +637,9 @@ defineOptions({
                   </span>
                 </MenuItem>
 
-                <MenuItem v-slot="{ active }" @click="hasSlogan = !hasSlogan">
+                <MenuItem
+                  v-slot="{ active }"
+                  @click="toggleField('hasSlogan')">
                   <span
                     :class="{ 'bg-gray-100': active }"
                     class="block px-4 py-2 text-sm text-gray-700">

@@ -22,8 +22,8 @@ export default function useStickyTop() {
   const navClasses = computed(() => {
     return {
       'sticky': true,
-      'top-10': true,
-      'border pl-4 border-gray-500 rounded-full transition duration-300 bg-gray-100 dark:bg-gray-900 z-40': isSticky.value
+      'top-0': true,
+      'border-b py-10 border-gray-500 transition duration-300 bg-gray-100 dark:bg-gray-900 z-40': isSticky.value
     };
   });
 

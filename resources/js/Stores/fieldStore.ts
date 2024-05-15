@@ -27,6 +27,8 @@ export const useFieldStore = defineStore('field', () => {
       'hasSlogan': hasSlogan,
     }[fieldKey]
 
+    console.log(fieldKey);
+
     if (field !== undefined && field !== null)
       field.value = !field.value
 

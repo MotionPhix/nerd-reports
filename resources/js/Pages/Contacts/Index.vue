@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import ContactActionMenu from "@/Components/Contact/ContactActionMenu.vue";
-import ContactCard from "@/Components/Contact/ContactCard.vue";
 import ContactGridCard from "@/Components/Contact/ContactGridCard.vue";
 import NoContactFound from "@/Components/Contact/NoContactFound.vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
@@ -18,6 +17,7 @@ defineOptions({
   layout: AuthenticatedLayout
 
 });
+
 </script>
 
 <template>

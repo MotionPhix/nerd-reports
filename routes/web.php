@@ -168,9 +168,9 @@ Route::middleware('auth')->group(function () {
   Route::prefix('reports')->group(function () {
 
     Route::get(
-      '/{user?}',
-      \App\Http\Controllers\Reports\Index::class
-    )->name('reports.index');
+      '/download',
+      \App\Http\Controllers\Reports\Download::class
+    )->name('reports.download');
 
     Route::post(
       '/w',
@@ -181,6 +181,11 @@ Route::middleware('auth')->group(function () {
       '/d/{report}',
       \App\Http\Controllers\Reports\Destroy::class
     )->name('reports.destroy');
+
+    Route::get(
+      '/{user?}',
+      \App\Http\Controllers\Reports\Index::class
+    )->name('reports.index');
 
   });
 

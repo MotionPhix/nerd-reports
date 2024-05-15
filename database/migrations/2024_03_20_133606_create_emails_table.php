@@ -6,25 +6,25 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
-    {
-        Schema::create('emails', function (Blueprint $table) {
-            $table->id();
-            $table->string('email')->unique();
-            $table->boolean('is_primary_email')->default(false);
-            $table->morphs('emailable');
-            $table->timestamps();
-        });
-    }
+  /**
+   * Run the migrations.
+   */
+  public function up(): void
+  {
+    Schema::create('emails', function (Blueprint $table) {
+      $table->id();
+      $table->string('email')->unique();
+      $table->boolean('is_primary_email')->default(false);
+      $table->morphs('emailable');
+      $table->timestamps();
+    });
+  }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('emails');
-    }
+  /**
+   * Reverse the migrations.
+   */
+  public function down(): void
+  {
+    Schema::dropIfExists('emails');
+  }
 };

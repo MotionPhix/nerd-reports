@@ -4,14 +4,19 @@ import { Head, Link } from "@inertiajs/vue3"
 import { IconPlus } from "@tabler/icons-vue"
 import useStickyTop from "@/Composables/useStickyTop"
 import { LineChart } from '@opd/g2plot-vue'
-import { onMounted, reactive } from "vue";
+import { onMounted, reactive, ref } from "vue";
 import { Line } from '@antv/g2plot';
+import { twi, twj } from "tw-to-css"
 
 const { navClasses } = useStickyTop()
 
 const props = defineProps<{
   dashboardData: Object
 }>()
+
+const chartColor = ref(twj(`text-gray-500 dark:text-gray-200`))
+
+console.log(chartColor.value);
 
 const chartSeries = reactive([
   {
@@ -31,7 +36,7 @@ chartSeries[1].data = !! previous_month
 ? Object.entries(previous_month).map(([date, count]) => [new Date(date).getTime(), count])
 : null;
 
-console.log(current_month);
+console.log(chartSeries);
 console.log(previous_month);
 
 const options = {
@@ -46,7 +51,7 @@ const options = {
       enabled: false
     },
 
-    type: 'area',
+    type: 'line',
 
     animations: {
       enabled: true,
@@ -67,7 +72,7 @@ const options = {
   },
 
   stroke: {
-    width: 5,
+    width: 3,
     curve: 'smooth'
   },
 
@@ -76,7 +81,7 @@ const options = {
     align: 'left',
     style: {
       fontSize: "16px",
-      color: '#666'
+      color: chartColor.value.color,
     }
   },
 
@@ -84,18 +89,18 @@ const options = {
     count: 2
   },
 
-  // fill: {
-  //   type: 'gradient',
-  //   gradient: {
-  //     shade: 'dark',
-  //     gradientToColors: [ '#FDD835'],
-  //     shadeIntensity: 1,
-  //     type: 'horizontal',
-  //     opacityFrom: 1,
-  //     opacityTo: 1,
-  //     stops: [0, 100, 100, 100]
-  //   },
-  // }
+  fill: {
+    type: 'gradient',
+    gradient: {
+      shade: 'dark',
+      gradientToColors: [ '#FDD835'],
+      shadeIntensity: 1,
+      type: 'horizontal',
+      opacityFrom: 1,
+      opacityTo: 1,
+      stops: [0, 100, 100, 100]
+    },
+  }
 }
 
 const series = [
@@ -2111,7 +2116,7 @@ defineOptions({
   <Head title="Dashboard" />
 
   <nav
-    class="flex items-center h-16 max-w-5xl gap-6 px-8 mx-auto dark:text-white dark:border-gray-700"
+    class="flex items-center h-16 max-w-3xl gap-6 px-8 mx-auto dark:text-white dark:border-gray-700"
     :class="navClasses">
     <h2
       class="flex items-center gap-2 text-xl font-semibold leading-tight text-gray-900 dark:text-white">
@@ -2131,18 +2136,18 @@ defineOptions({
     </Link>
   </nav>
 
-  <section class="max-w-4xl px-6 py-12 mx-auto">
+  <section class="max-w-3xl px-8 py-12 mx-auto">
 
     <!-- Card Section -->
-    <div class="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
+    <div class="max-w-[85rem] py-10 lg:py-14 mx-auto">
       <!-- Grid -->
       <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         <!-- Card -->
         <div
-          class="flex flex-col bg-white border shadow-sm rounded-xl dark:bg-neutral-900 dark:border-neutral-800">
+          class="flex flex-col bg-white border shadow-sm rounded-xl dark:bg-neutral-900 dark:border-neutral-800 border-neutral-300">
           <div class="p-4 md:p-5 flex gap-x-4">
             <div
-              class="flex-shrink-0 flex justify-center items-center size-[46px] bg-gray-100 rounded-lg dark:bg-neutral-800">
+              class="flex-shrink-0 flex justify-center items-center size-[46px] bg-gray-200 rounded-lg dark:bg-neutral-800">
               <svg class="flex-shrink-0 size-5 text-gray-600 dark:text-neutral-400"
                    xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -2158,7 +2163,7 @@ defineOptions({
               <div class="flex items-center gap-x-2">
 
                 <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-neutral-500">
-                  Total contacts
+                  Total <br> contacts
                 </p>
 
                 <div v-tooltip="'The number of contacts (not companies)'">
@@ -2192,10 +2197,10 @@ defineOptions({
 
         <!-- Card -->
         <div
-          class="flex flex-col bg-white border shadow-sm rounded-xl dark:bg-neutral-900 dark:border-neutral-800">
+          class="flex flex-col bg-white border shadow-sm rounded-xl dark:bg-neutral-900 dark:border-neutral-800 border-neutral-300">
           <div class="p-4 md:p-5 flex gap-x-4">
             <div
-              class="flex-shrink-0 flex justify-center items-center size-[46px] bg-gray-100 rounded-lg dark:bg-neutral-800">
+              class="flex-shrink-0 flex justify-center items-center size-[46px] bg-gray-200 rounded-lg dark:bg-neutral-800">
               <svg class="flex-shrink-0 size-5 text-gray-600 dark:text-neutral-400"
                    xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -2209,7 +2214,7 @@ defineOptions({
             <div class="grow">
               <div class="flex items-center gap-x-2">
                 <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-neutral-500">
-                  Total Projects
+                  Total <br> Projects
                 </p>
               </div>
 
@@ -2226,10 +2231,10 @@ defineOptions({
 
         <!-- Card -->
         <div
-          class="flex flex-col bg-white border shadow-sm rounded-xl dark:bg-neutral-900 dark:border-neutral-800">
+          class="flex flex-col bg-white border shadow-sm rounded-xl dark:bg-neutral-900 dark:border-neutral-800 border-neutral-300">
           <div class="p-4 md:p-5 flex gap-x-4">
             <div
-              class="flex-shrink-0 flex justify-center items-center size-[46px] bg-gray-100 rounded-lg dark:bg-neutral-800">
+              class="flex-shrink-0 flex justify-center items-center size-[46px] bg-gray-200 rounded-lg dark:bg-neutral-800">
               <svg class="flex-shrink-0 size-5 text-gray-600 dark:text-neutral-400"
                    xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -2241,7 +2246,7 @@ defineOptions({
             <div class="grow">
               <div class="flex items-center gap-x-2">
                 <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-neutral-500">
-                  Total Tasks
+                  Total <br> Tasks
                 </p>
               </div>
               <div class="mt-1 flex items-center gap-x-2">
@@ -2264,12 +2269,12 @@ defineOptions({
     <!-- Charts Section -->
 
 
-    <!-- <apexchart
+    <apexchart
       width="100%"
-      type="area"
+      type="line"
       :options="options"
       :series="series">
-    </apexchart> -->
+    </apexchart>
 
     <line-chart v-bind="config" />
 

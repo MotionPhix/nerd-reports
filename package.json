@@ -3,7 +3,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build"
+    "build": "vite build",
+    "uno": "unocss \"./storage/framework/views/*.php\" \"./resources/views/**/*.blade.php\" -c \"./uno.config.js\" -o \"./public/css/uno.css\" -m -w"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^2.11.5",
@@ -42,6 +43,7 @@
     "tailwind-scrollbar": "^3.1.0",
     "tailwindcss": "^3.2.1",
     "typescript": "^5.4.3",
+    "unocss": "^0.60.0",
     "unplugin-vue-define-options": "^1.4.2",
     "v-calendar": "^3.1.2",
     "vfonts": "^0.0.3",

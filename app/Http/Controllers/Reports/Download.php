@@ -5,11 +5,11 @@ namespace App\Http\Controllers\Reports;
 use App\Enums\ProjectStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Project;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 
-class Index extends Controller
+class Download extends Controller
 {
   /**
    * Handle the incoming request.
@@ -17,33 +17,13 @@ class Index extends Controller
   public function __invoke(Request $request)
   {
     $startOfWeek = Carbon::now()->startOfWeek()->startOfDay(); // Start of Monday
-    $endOfWeek = Carbon::now()->startOfWeek()->addWeek()->subDay()->setHour(16)->setMinute(30)->setSecond(0); // Friday, 4:30 PM
-
-    // Get projects with associated tasks within the weekly range
-    /*$projects = Project::with(['contact.firm', 'boards.tasks' => function ($query) use ($startOfWeek, $endOfWeek) {
-
-      $sql = $query->toSql();
-
-      dd($sql);
-
-      $startOfWeekend = Carbon::now()->startOfWeek()->addDays(5)->startOfDay(); // Start of Saturday
-      $endOfWeekend = Carbon::now()->startOfWeek()->addDays(6)->endOfDay(); // End of Sunday
-
-      // $query->whereBetween('created_at', [$startOfWeek, $endOfWeek])
-      // $query->whereBetween('created_at', [$startOfWeekend, $endOfWeekend])
-      $query->whereBetween('created_at', [Carbon::THURSDAY, Carbon::yesterday()])
-        ->selectRaw('DATE(created_at) as date, COUNT(*) as task_count')
-        ->groupBy('date')
-        ->orderBy('date', 'asc');
-
-    }])->get();*/
+    $endOfWeek = Carbon::now()->startOfWeek()->addWeek()->subDay()->setHour(16)->setMinute(30)->setSecond(0);
 
     $projects = Project::with(['contact.firm', 'boards.tasks'])
       ->whereHas('boards.tasks', function ($query) use ($startOfWeek, $endOfWeek) {
 
         // $query->where('tasks.created_at', '=', Carbon::yesterday());
         $query->whereBetween('tasks.created_at', [$startOfWeek, $endOfWeek]);
-
       })
       ->get();
 
@@ -75,17 +55,22 @@ class Index extends Controller
         }
       }
 
-      // Determin project status
+      // Get project status
       $projectData['status'] = $this->getProjectStatus($projectData['tasks']);
 
       $reportData[] = $projectData;
     }
 
-    return Inertia::render('Reports/Index', [
-
+    $report = Pdf::loadView('reports.download', [
       'reportData' => $reportData,
       'weekNumber' => date('W', strtotime($startOfWeek)),
+    ]);
 
+    return $report->download(Carbon::now('africa/blantyre')->format('d M, Y h:i:s') . '-Weekly-Report.pdf');
+
+    return view('reports.download', [
+      'reportData' => $reportData,
+      'weekNumber' => date('W', strtotime($startOfWeek)),
     ]);
   }
 

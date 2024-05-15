@@ -62,7 +62,7 @@ console.log(styleInline)
 
 <template>
   <nav
-    class="bg-white border-b border-gray-100 dark:bg-gray-800 dark:border-gray-700">
+    class="print:hidden bg-white border-b border-gray-100 dark:bg-gray-800 dark:border-gray-700">
 
     <div class="max-w-5xl px-4 mx-auto sm:px-6 lg:px-8">
 

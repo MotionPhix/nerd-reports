@@ -4,6 +4,7 @@ import useStickyTop from "@/Composables/useStickyTop"
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue"
 import { Head, Link } from "@inertiajs/vue3"
 import { IconDownload, IconPlus } from "@tabler/icons-vue"
+import { twi, twj } from "tw-to-css"
 
 const props = defineProps<{
   reportData: Object,
@@ -19,7 +20,7 @@ defineOptions({ layout: AuthenticatedLayout })
   <Head title="Explore Reports" />
 
   <nav
-    class="flex items-center h-16 max-w-3xl gap-6 px-8 mx-auto dark:text-white dark:border-gray-700"
+    class="print:hidden flex items-center h-16 max-w-3xl gap-6 px-8 mx-auto dark:text-white dark:border-gray-700"
     :class="navClasses"
   >
     <h2
@@ -30,25 +31,26 @@ defineOptions({ layout: AuthenticatedLayout })
 
     <span class="flex-1"></span>
 
-    <Link
-      as="button"
-      :href="route('projects.create')"
+    <a
+      :href="route('reports.download')"
       class="inline-flex items-center gap-2 px-3 py-2 ml-6 font-semibold transition duration-300 rounded-md dark:text-slate-300 bg-slate-100 dark:bg-slate-800 dark:hover:text-slate-900 dark:hover:bg-slate-500 hover:bg-gray-200"
-    >
+      download>
       <IconDownload stroke="2.5" class="w-4 h-4" />
       <span>Download</span>
-    </Link>
+    </a>
   </nav>
 
-  <article class="max-w-3xl px-6 py-12 mx-auto">
+  <article class="max-w-3xl px-8 py-12 mx-auto">
 
     <section v-if="Object.keys(props.reportData).length">
 
       <!-- start here -->
 
-      <p class="text-4xl dark:text-white font-display">Weekly Report</p>
+      <p :style="twj('text-4xl font-display')">
+        Weekly Report
+      </p>
 
-      <hr class="my-10 dark:border-gray-700 border-gray-400" />
+      <hr :style="twj('my-10 border-gray-300')" />
 
       <table style="width: 100%">
         <thead>
@@ -56,11 +58,11 @@ defineOptions({ layout: AuthenticatedLayout })
           <tr>
             <th></th>
 
-            <th class="text-left text-lg">
+            <th :style="twj('text-left text-lg')">
               Assigned by
             </th>
 
-            <th class="text-left text-lg">
+            <th :style="twj('text-left text-lg pl-[10px]')">
               Status
             </th>
           </tr>
@@ -75,19 +77,21 @@ defineOptions({ layout: AuthenticatedLayout })
             v-if="project.tasks.length">
 
             <tr>
-              <td style="width: 100%; border: none rgb(0, 0, 0)" colspan="3">
+              <td style="width: 60%; border: none rgb(0, 0, 0)">
 
-                <span class="text-xl font-display block">
+                <span :style="twj('text-xl font-display block')">
 
                   {{ project.project_name }}
 
                 </span>
 
-                <span class="text-sm block">
+                <span :style="twj('text-sm block')">
                   For {{ project.project_contact.firm?.name ?? `${project.project_contact.first_name} ${project.project_contact.last_name}` }} | Week {{ props.weekNumber }}
                 </span>
 
               </td>
+
+              <td sty="width: 40%;" colspan="2"></td>
             </tr>
 
             <tr>
@@ -109,27 +113,36 @@ defineOptions({ layout: AuthenticatedLayout })
                 style="
                   width: 60%;
                   padding: 10px;
-                  border-top: 1px solid rgb(0, 0, 0);
                   border-left: none rgb(0, 0, 0);
                   border-right: none rgb(0, 0, 0);
                   border-bottom: none rgb(0, 0, 0);
-                ">
+                  vertical-align: top;
+                "
+                :style="twj('border-t border-gray-300')">
                 <strong>
                   {{ task.task_name }}
                 </strong>
 
-                <div v-html="task.task_info" v-if="task.task_info" class="text-gray-500"></div>
+                <div
+                  v-html="task.task_info"
+                  v-if="task.task_info"
+                  :style="twj('text-sm text-gray-500')"></div>
+
+                <div :style="twj('pt-2 text-sm mt-2 text-gray-400')">
+                  {{ `${task.assigned_at} | ${task.actual_date}` }}
+                </div>
               </td>
 
               <td
                 style="
-                  padding: 10px;
-                  border-top: 1px solid rgb(0, 0, 0);
+                  padding-top: 10px;
                   border-left: none rgb(0, 0, 0);
                   border-right: none rgb(0, 0, 0);
                   border-bottom: none rgb(0, 0, 0);
                   width: 20%;
-                ">
+                  vertical-align: top;
+                "
+                :style="twj('border-t border-gray-300')">
                 <span>
                   {{ task.assigned_by }}
                 </span>
@@ -138,11 +151,14 @@ defineOptions({ layout: AuthenticatedLayout })
               <td
                 style="
                   width: 20%;
-                  border-top: 1px solid rgb(0, 0, 0);
+                  padding-top: 10px;
+                  padding-left: 10px;
                   border-left: none rgb(0, 0, 0);
                   border-right: none rgb(0, 0, 0);
                   border-bottom: none rgb(0, 0, 0);
-                ">
+                  vertical-align: top;
+                "
+                :style="twj('border-t border-gray-300')">
                 <span>{{ task.status }}</span>
               </td>
             </tr>
@@ -175,5 +191,6 @@ defineOptions({ layout: AuthenticatedLayout })
         </div>
       </NoContactFound>
     </section>
+
   </article>
 </template>

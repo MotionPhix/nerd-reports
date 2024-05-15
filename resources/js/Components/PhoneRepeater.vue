@@ -53,11 +53,11 @@ onMounted(() => {
       {{ phone.type }} phone
     </label>
 
+    <!-- :only-countries="['MW', 'ZA', 'ZM', 'ZW']" -->
     <MazPhoneNumberInput
       v-model:country-code="phone.country_code"
       v-model="phone.number"
       country-selector-display-name
-      :only-countries="['MW', 'ZA', 'ZM', 'ZW']"
       show-code-on-list
       class="w-full"
       :class="{ 'border-r-4 rounded-xl border-r-indigo-600 dark:border-r-yellow-500': phone.is_primary_phone }"

@@ -8,18 +8,18 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Phone extends Model
 {
-    use HasFactory;
+  use HasFactory;
 
-    protected $fillable = [
-        'country_code',
-        'is_primary_phone',
-        'formatted',
-        'number',
-        'type',
-    ];
+  protected $fillable = [
+    'country_code',
+    'is_primary_phone',
+    'formatted',
+    'number',
+    'type',
+  ];
 
-    public function phoneable(): MorphTo
-    {
-        return $this->morphTo();
-    }
+  public function phoneable(): MorphTo
+  {
+    return $this->morphTo();
+  }
 }
