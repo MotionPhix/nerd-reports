@@ -19,7 +19,7 @@ class ProjectFactory extends Factory
     return [
       'name' => fake()->sentence(),
       'description' => fake()->paragraph(),
-      'due_date' => fake()->dateTimeBetween('-6 months', '+6 months'),
+      'due_date' => fake()->dateTimeBetween('-2 months', '+2 months'),
       'status' => fake()->randomElement(['completed', 'in_progress', 'cancelled']),
     ];
   }

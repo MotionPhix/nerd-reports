@@ -13,18 +13,18 @@ class DatabaseSeeder extends Seeder
    */
   public function run(): void
   {
-    // User::factory(10)->create();
+//     User::factory(10)->create();
 
-    // User::factory(2)->create();
+     User::factory(2)->create();
 
     $this->call([
-      // FirmSeeder::class,
-      // ContactSeeder::class,
+      FirmSeeder::class,
+      ContactSeeder::class,
       ProjectSeeder::class,
       BoardSeeder::class,
       TaskSeeder::class,
-      // PhoneSeeder::class,
-      // EmailSeeder::class
+      PhoneSeeder::class,
+      EmailSeeder::class
     ]);
   }
 }

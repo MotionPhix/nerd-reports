@@ -104,16 +104,16 @@ const disabledDates = ref([
   <article class="sm:px-6 lg:px-8">
 
     <nav
-      class="flex items-center max-w-4xl h-16 gap-6 px-2 mx-auto dark:text-white dark:border-gray-700"
+      class="flex items-center max-w-4xl h-16 gap-6 px-4 mx-auto dark:text-white dark:border-gray-700"
       :class="navClasses"
     >
       <h2
-        class="font-semibold text-gray-800 dark:text-gray-300"
+        class="font-semibold text-gray-800 dark:text-gray-300 hidden sm:inline-block"
       >
         New Project
       </h2>
 
-      <span class="flex-1"></span>
+      <span class="flex-1 hidden sm:inline-block"></span>
 
       <PrimaryButton
         type="button"
@@ -131,6 +131,8 @@ const disabledDates = ref([
 
       </PrimaryButton>
 
+      <span class="flex-1 sm:hidden"></span>
+
       <Link
         as="button"
         :href="route('projects.index')"
@@ -143,7 +145,7 @@ const disabledDates = ref([
     <section class="max-w-3xl px-6 py-12 mx-auto">
 
       <form>
-        <div class="grid gap-8 mb-4 sm:grid-cols-2">
+        <div class="grid gap-4 sm:gap-8 mb-4 grid-cols-1 sm:grid-cols-2">
           <div class="col-span-2">
             <label
               for="name"
@@ -156,13 +158,14 @@ const disabledDates = ref([
               id="name"
               v-model="form.name"
               placeholder="Type project's name"
+              class="w-full"
               type="text"
             />
 
             <InputError :message="form.errors.name" />
           </div>
 
-          <section class="col-span-2 grid sm: grid-cols-2 gap-8">
+          <section class="col-span-2 grid sm:grid-cols-2 gap-8">
 
             <div>
               <label
