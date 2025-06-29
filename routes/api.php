@@ -1,13 +1,12 @@
 <?php
 
-use App\Models\Project;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->group(function () {
 
   Route::get(
     '/get-files',
-    \App\Http\Controllers\Comments\Api\Show::class
+    \App\Http\Controllers\Api\Comments\Show::class
   )->name('files.load');
 
   Route::get('/users', function () {
@@ -56,7 +55,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
       Route::get(
         '/',
-        \App\Http\Controllers\Contacts\Api\Index::class
+        \App\Http\Controllers\Api\Contacts\Index::class
       )->name('api.contacts.index');
     }
   );
@@ -67,7 +66,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
       Route::put(
         '/m/{task}',
-        \App\Http\Controllers\Tasks\Api\Move::class
+        \App\Http\Controllers\Api\Tasks\Move::class
       )->name('tasks.move');
 
     }
@@ -96,32 +95,32 @@ Route::middleware('auth:sanctum')->group(function () {
 
       Route::get(
         '/',
-        \App\Http\Controllers\Tags\Api\Index::class
+        \App\Http\Controllers\Api\Tags\Index::class
       )->name('tags.index');
 
       Route::post(
         '/{contact:cid}',
-        \App\Http\Controllers\Tags\Api\Store::class
+        \App\Http\Controllers\Api\Tags\Store::class
       )->name('tags.store');
 
       Route::patch(
         '/{contact:cid}',
-        \App\Http\Controllers\Tags\Api\Detach::class
+        \App\Http\Controllers\Api\Tags\Detach::class
       )->name('tags.detach');
 
       Route::put(
         '/{contact:cid}',
-        \App\Http\Controllers\Tags\Api\Update::class
+        \App\Http\Controllers\Api\Tags\Update::class
       )->name('tags.update');
 
       Route::delete(
         'delete/{tag:name}',
-        \App\Http\Controllers\Tags\Api\Destroy::class
+        \App\Http\Controllers\Api\Tags\Destroy::class
       )->name('tags.destroy');
 
       Route::get(
         '/{filter}',
-        \App\Http\Controllers\Tags\Api\Filtered::class
+        \App\Http\Controllers\Api\Tags\Filtered::class
       )->name('tags.filter');
     }
   );

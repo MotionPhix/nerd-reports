@@ -23,7 +23,7 @@ class Index extends Controller
 
         }
 
-        return Inertia::render('Projects/Index'/*, [
+        return Inertia::render('projects/Index'/*, [
             'projects' => $projects,
         ]*/);
     }

@@ -2,22 +2,23 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-
+use App\Traits\HasUuid;
+use Illuminate\Contracts\auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail, HasMedia
 {
-  use HasFactory, Notifiable, HasApiTokens;
+  use HasFactory, Notifiable, HasApiTokens, HasUuid, HasRoles, InteractsWithMedia;
 
   /**
    * The attributes that are mass assignable.
@@ -27,10 +28,15 @@ class User extends Authenticatable
   protected $fillable = [
     'first_name',
     'last_name',
-    'role',
     'email',
     'password',
   ];
+
+  protected $primaryKey = 'uuid';
+
+  protected $keyType = 'string';
+
+  public $incrementing = false;
 
   /**
    * The attributes that should be hidden for serialization.
@@ -64,7 +70,7 @@ class User extends Authenticatable
 
   public function avatar(): MorphOne
   {
-    return $this->morphOne(File::class, 'model');
+    return $this->morphOne(Media::class, 'model')->where('collection_name', 'avatar');
   }
 
   public function comments(): HasMany
@@ -77,28 +83,35 @@ class User extends Authenticatable
     return $this->hasMany(Reply::class);
   }
 
+  public function assignedTasks(): HasMany
+  {
+    return $this->hasMany(Task::class, 'assigned_to');
+  }
+
+  public function createdTasks(): HasMany
+  {
+    return $this->hasMany(Task::class, 'assigned_by');
+  }
+
+  public function createdProjects(): HasMany
+  {
+    return $this->hasMany(Project::class, 'created_by');
+  }
+
+  public function generatedReports(): HasMany
+  {
+    return $this->hasMany(Report::class, 'generated_by');
+  }
+
+  public function interactions(): HasMany
+  {
+    return $this->hasMany(Interaction::class, 'user_id');
+  }
+
   public function avatarUrl(): Attribute
   {
     return Attribute::make(
-      get: fn() => $this->avatar?->full_url ?? 'https://www.gravatar.com/avatar/' . md5(strtolower(trim($this->email)))
-    );
-  }
-
-  protected static function boot()
-  {
-    parent::boot();
-
-    static::created(function ($user) {
-
-      if (static::count() === 1) {
-
-        $user->role = 'admin';
-
-        $user->save();
-
-      }
-
-    });
-
+      get: fn() => 'https://www.gravatar.com/avatar/' . md5(strtolower(trim($this->email)))
+    ); // TODO: check on the internal avatar relation to return that URL if it exists
   }
 }

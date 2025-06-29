@@ -13,7 +13,7 @@ class Index extends Controller
   {
     $contactsQuery = ContactData::collect(Contact::with('emails', 'firm')->get());
 
-    return Inertia::render('Contacts/Index', [
+    return Inertia::render('contacts/Index', [
       'contacts' => $contactsQuery
     ]);
   }

@@ -14,6 +14,8 @@ return new class extends Migration
     Schema::create('projects', function (Blueprint $table) {
       $table->id();
 
+      $table->uuid('uuid')->unique();
+
       $table->uuid('pid')->nullable();
 
       $table->string('name');
@@ -24,10 +26,10 @@ return new class extends Migration
 
       $table->enum(
         'status',
-        ['completed', 'approved', 'in_progress', 'cancelled'
+        ['in_progress', 'approved', 'completed', 'cancelled', 'done'
       ])->default('in_progress');
 
-      $table->foreignId('contact_id')->index()->constrained('contacts');
+      $table->foreignUuid('contact_id')->index()->constrained('contacts', 'uuid');
 
       $table->foreignId('created_by')->index()->constrained('users');
 

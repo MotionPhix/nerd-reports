@@ -27,7 +27,7 @@ enum ProjectStatus: string
 
       self::COMPLETED => 'Ready for production',
 
-      self::CANCELLED => 'Project cancelled',
+      self::CANCELLED => 'project cancelled',
 
       self::FINISHED => 'Task done',
 

@@ -10,14 +10,14 @@
   "require": {
     "php": "^8.2",
     "barryvdh/laravel-dompdf": "^2.1",
-    "google/apiclient": "2.15.0",
     "inertiajs/inertia-laravel": "^1.0",
     "laravel/framework": "^11.0",
     "laravel/sanctum": "^4.0",
     "laravel/tinker": "^2.9",
     "propaganistas/laravel-phone": "^5.2",
-    "pusher/pusher-php-server": "^7.2",
     "spatie/laravel-data": "^4.4",
+    "spatie/laravel-medialibrary": "^11.13",
+    "spatie/laravel-permission": "^6.20",
     "spatie/laravel-tags": "^4.6",
     "spatie/laravel-typescript-transformer": "^2.4",
     "stevebauman/purify": "^6.2",
@@ -61,16 +61,12 @@
       "@php artisan key:generate --ansi",
       "@php -r \"file_exists('database/database.sqlite') || touch('database/database.sqlite');\"",
       "@php artisan migrate --graceful --ansi"
-    ],
-    "pre-autoload-dump": "Google\\Task\\Composer::cleanup"
+    ]
   },
   "extra": {
     "laravel": {
       "dont-discover": []
-    },
-    "google/apiclient-services": [
-      "Drive"
-    ]
+    }
   },
   "config": {
     "optimize-autoloader": true,

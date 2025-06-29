@@ -81,21 +81,21 @@ class Destroy extends Controller
     });
 
     $toastTitles = collect([
-      "Project Deleted",
+      "project Deleted",
       "Mission Accomplished",
-      "Project Annihilated",
-      "Project Obliterated",
-      "Project Expunged",
-      "Project Eradicated",
-      "Project Disintegrated",
-      "Project Exterminated",
-      "Project Vanished"
+      "project Annihilated",
+      "project Obliterated",
+      "project Expunged",
+      "project Eradicated",
+      "project Disintegrated",
+      "project Exterminated",
+      "project Vanished"
     ]);
 
     return redirect()->route('projects.index')->with('toast', [
       'type' => 'success',
       'title' => $toastTitles->random(),
-      'message' => 'Project was permanently deleted.'
+      'message' => 'project was permanently deleted.'
     ]);
   }
 }

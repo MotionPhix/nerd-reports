@@ -21,7 +21,7 @@ class Show extends Controller
         //     })
         // );;
 
-        return Inertia::render('Contacts/Show', [
+        return Inertia::render('contacts/Show', [
             'contact' => $contactsQuery,
         ]);
     }

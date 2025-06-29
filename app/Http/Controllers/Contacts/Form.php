@@ -68,7 +68,7 @@ class Form extends Controller
       }
     }
 
-    return Inertia::render('Contacts/Form', [
+    return Inertia::render('contacts/Form', [
 
       'contact' => $contact
 

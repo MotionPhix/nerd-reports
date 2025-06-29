@@ -20,7 +20,7 @@ class Index extends Controller
     $endOfWeek = Carbon::now()->startOfWeek()->addWeek()->subDay()->setHour(16)->setMinute(30)->setSecond(0); // Friday, 4:30 PM
 
     // Get projects with associated tasks within the weekly range
-    /*$projects = Project::with(['contact.firm', 'boards.tasks' => function ($query) use ($startOfWeek, $endOfWeek) {
+    /*$projects = project::with(['contact.firm', 'boards.tasks' => function ($query) use ($startOfWeek, $endOfWeek) {
 
       $sql = $query->toSql();
 
@@ -81,7 +81,7 @@ class Index extends Controller
       $reportData[] = $projectData;
     }
 
-    return Inertia::render('Reports/Index', [
+    return Inertia::render('reports/Index', [
 
       'reportData' => $reportData,
       'weekNumber' => date('W', strtotime($startOfWeek)),

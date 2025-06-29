@@ -60,7 +60,7 @@ class Store extends Controller
     return redirect()->route('projects.index')->with('toast', [
       'type' => 'success',
       'title' => $toastTitles->random(),
-      'message' => 'Project was successfully created!'
+      'message' => 'project was successfully created!'
     ]);
   }
 }

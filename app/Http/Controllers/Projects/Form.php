@@ -35,7 +35,7 @@ class Form extends Controller
 
       }
 
-      return Inertia::render('Projects/Form', [
+      return Inertia::render('projects/Form', [
 
         'project' => $project,
 

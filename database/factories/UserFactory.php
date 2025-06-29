@@ -24,15 +24,47 @@ class UserFactory extends Factory
   public function definition(): array
   {
     return [
-      'first_name' => fake('ZA')->firstName(),
-      'last_name' => fake('ZA')->lastName(),
-      'email' => fake()->unique()->companyEmail(),
+      'first_name' => fake()->firstName(),
+      'last_name' => fake()->lastName(),
+      'email' => fake()->unique()->safeEmail(),
       'email_verified_at' => now(),
-      'avatar' => fake()->imageUrl(),
-      'role' => fake()->randomElement(['designer', 'sales', 'manager', 'marketing', null]),
       'password' => static::$password ??= Hash::make('password'),
       'remember_token' => Str::random(10),
     ];
+  }
+
+  /**
+   * Create a user with a specific role
+   */
+  public function withRole(string $role): static
+  {
+    return $this->afterCreating(function ($user) use ($role) {
+      $user->assignRole($role);
+    });
+  }
+
+  /**
+   * Create an admin user
+   */
+  public function admin(): static
+  {
+    return $this->withRole('admin');
+  }
+
+  /**
+   * Create a project manager user
+   */
+  public function projectManager(): static
+  {
+    return $this->withRole('project-manager');
+  }
+
+  /**
+   * Create a team member user
+   */
+  public function teamMember(): static
+  {
+    return $this->withRole('team-member');
   }
 
   /**

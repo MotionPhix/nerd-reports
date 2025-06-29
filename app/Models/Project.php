@@ -3,13 +3,13 @@
 namespace App\Models;
 
 use App\Enums\ProjectStatus;
+use App\Traits\HasUuid;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Str;
 use Stevebauman\Purify\Casts\PurifyHtmlOnGet;
 use Illuminate\Support\Facades\DB;
 
@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\DB;
  */
 class Project extends Model
 {
-  use HasFactory;
+  use HasFactory, HasUuid;
 
   protected $fillable = [
     'name',
@@ -33,6 +33,12 @@ class Project extends Model
   ];
 
   protected $appends = ['deadline'];
+
+  protected $primaryKey = 'uuid';
+
+  public $incrementing = false;
+
+  protected $keyType = 'string';
 
   protected function casts(): array
   {
@@ -60,12 +66,12 @@ class Project extends Model
 
   public function contact(): BelongsTo
   {
-    return $this->belongsTo(Contact::class);
+    return $this->belongsTo(Contact::class, 'contact_id', 'uuid');
   }
 
-  public function firm(): BelongsTo
+  public function firm()
   {
-    return $this->contact->firm();
+    return $this->hasOneThrough(Firm::class, Contact::class, 'uuid', 'uuid', 'contact_id', 'firm_id');
   }
 
   public function author(): BelongsTo
@@ -75,24 +81,29 @@ class Project extends Model
 
   public function boards(): HasMany
   {
-    return $this->hasMany(Board::class);
+    return $this->hasMany(Board::class, 'project_id', 'uuid');
   }
 
-  public function files()
+  public function tasks(): HasMany
   {
-    return $this->morphMany(File::class, 'model');
+    return $this->hasMany(Task::class, 'project_id', 'uuid');
   }
 
-  public function getUsersAttribute()
+  public function interactions(): HasMany
   {
-    $users = DB::table('users')
-      ->select(['users.id', 'users.first_name', 'users.last_name'])
-      ->where('users.id', '!=', auth()->id())
-      ->orderBy('users.first_name')
-      ->orderBy('users.last_name')
-      ->get();
+    return $this->hasMany(Interaction::class, 'project_id', 'uuid');
+  }
 
-    return $users;
+  public function users(): Attribute
+  {
+    return Attribute::make(
+      get: fn () => DB::table('users')
+        ->select(['users.id', 'users.first_name', 'users.last_name'])
+        ->where('users.id', '!=', auth()->id())
+        ->orderBy('users.first_name')
+        ->orderBy('users.last_name')
+        ->get()
+    );
   }
 
   public function scopeTransferOwnershipTo($newOwnerId)
@@ -113,17 +124,51 @@ class Project extends Model
     ]);
   }
 
-  protected static function boot()
+  // Reporting helper methods
+  public function getTasksWorkedOnInWeek(Carbon $startOfWeek, Carbon $endOfWeek, $userId = null)
   {
-    parent::boot();
+    $query = $this->tasks()->workedOnInWeek($startOfWeek, $endOfWeek);
 
-    static::creating(function ($project) {
-      $project->pid = Str::orderedUuid();
-    });
+    if ($userId) {
+      $query->forUser($userId);
+    }
 
-    static::updating(function ($project) {
-      if (!isset($project->pid)) {
-        $project->pid = Str::orderedUuid();
+    return $query->get();
+  }
+
+  public function getCompletedTasksInWeek(Carbon $startOfWeek, Carbon $endOfWeek, $userId = null)
+  {
+    $query = $this->tasks()->completedInWeek($startOfWeek, $endOfWeek);
+
+    if ($userId) {
+      $query->forUser($userId);
+    }
+
+    return $query->get();
+  }
+
+  public function getTotalHoursInWeek(Carbon $startOfWeek, Carbon $endOfWeek, $userId = null)
+  {
+    $query = $this->tasks()->workedOnInWeek($startOfWeek, $endOfWeek);
+
+    if ($userId) {
+      $query->forUser($userId);
+    }
+
+    return $query->sum('actual_hours') ?? 0;
+  }
+
+  public function hasActivityInWeek(Carbon $startOfWeek, Carbon $endOfWeek, $userId = null): bool
+  {
+    return $this->getTasksWorkedOnInWeek($startOfWeek, $endOfWeek, $userId)->isNotEmpty();
+  }
+
+  public function scopeWithActivityInWeek($query, Carbon $startOfWeek, Carbon $endOfWeek, $userId = null)
+  {
+    return $query->whereHas('tasks', function ($taskQuery) use ($startOfWeek, $endOfWeek, $userId) {
+      $taskQuery->workedOnInWeek($startOfWeek, $endOfWeek);
+      if ($userId) {
+        $taskQuery->forUser($userId);
       }
     });
   }

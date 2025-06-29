@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Data\FirmData;
+use App\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,7 +16,15 @@ use Stevebauman\Purify\Casts\PurifyHtmlOnGet;
 
 class Contact extends Model
 {
-  use HasFactory, SoftDeletes, HasTags;
+  use HasFactory, SoftDeletes, HasTags, HasUuid;
+
+  protected $table = 'contacts';
+
+  protected $primaryKey = 'uuid';
+
+  public $incrementing = false;
+
+  protected $keyType = 'string';
 
   protected $fillable = [
     'first_name',
@@ -24,7 +33,7 @@ class Contact extends Model
     'job_title',
     'title',
     'middle_name',
-    'firm_fid',
+    'firm_id',
     'nickname'
   ];
 
@@ -51,41 +60,36 @@ class Contact extends Model
 
   public function interactions(): HasMany
   {
-    return $this->hasMany(Interaction::class);
+    return $this->hasMany(Interaction::class, 'contact_id', 'uuid');
   }
 
   public function firm()
   {
-    return $this->belongsTo(Firm::class);
+    return $this->belongsTo(Firm::class, 'firm_id', 'uuid');
+  }
+
+  public function projects(): HasMany
+  {
+    return $this->hasMany(Project::class);
   }
 
   protected function fullName(): Attribute
   {
     return Attribute::make(
-      get: fn () => "{$this->first_name} {$this->last_name}"
+      get: fn() => "{$this->first_name} {$this->last_name}"
     );
   }
 
   public function primaryEmail(): Attribute
   {
     return Attribute::make(
-      get: fn () => $this->emails->firstWhere('is_primary_email', true)?->email ?? null
+      get: fn() => $this->emails->firstWhere('is_primary_email', true)?->email ?? null
     );
   }
 
   protected static function boot()
   {
     parent::boot();
-
-    static::creating(function ($contact) {
-      $contact->cid = Str::orderedUuid();
-    });
-
-    static::updating(function ($contact) {
-      if (!isset($contact->cid)) {
-        $contact->cid = Str::orderedUuid();
-      }
-    });
 
     static::forceDeleting(function ($contact) {
       $contact->load('phones', 'emails', 'tags');

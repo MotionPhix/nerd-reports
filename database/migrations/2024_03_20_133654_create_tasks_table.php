@@ -14,19 +14,37 @@ return new class extends Migration
     Schema::create('tasks', function (Blueprint $table) {
       $table->id();
 
+      $table->uuid('uuid')->unique();
+
       $table->string('name');
 
       $table->longText('description')->nullable();
 
-      $table->enum('status', ['done', 'cancelled', 'in_progress'])->default(false);
+      $table->enum('status', ['todo', 'in_progress', 'completed', 'cancelled', 'on_hold', 'review'])->default('todo');
 
       $table->double('position')->nullable();
 
-      $table->enum('priority', ['normal', 'medium', 'high'])->default('normal');
+      $table->enum('priority', ['low', 'medium', 'high', 'urgent'])->default('medium');
 
-      $table->foreignId('board_id')->index()->constrained('boards')->onDelete('cascade');
+      $table->decimal('estimated_hours', 8, 2)->nullable();
+
+      $table->decimal('actual_hours', 8, 2)->nullable();
+
+      $table->timestamp('started_at')->nullable();
+
+      $table->timestamp('completed_at')->nullable();
+
+      $table->timestamp('due_date')->nullable();
+
+      $table->text('notes')->nullable();
+
+      $table->foreignUuid('board_id')->index()->constrained('boards', 'uuid')->onDelete('cascade');
+
+      $table->foreignUuid('project_id')->nullable()->index()->constrained('projects', 'uuid')->onDelete('cascade');
 
       $table->foreignId('assigned_to')->index()->constrained('users');
+
+      $table->foreignId('assigned_by')->nullable()->constrained('users');
 
       $table->timestamps();
     });

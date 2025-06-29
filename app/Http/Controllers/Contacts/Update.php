@@ -146,7 +146,7 @@ class Update extends Controller
         return redirect(route('contacts.show', $contact->cid))
             ->with('toast', [
                 'type' => $title,
-                'message' => 'Contact was updated successfully!'
+                'message' => 'contact was updated successfully!'
             ]);
     }
 }

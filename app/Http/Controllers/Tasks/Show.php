@@ -36,7 +36,7 @@ class Show extends Controller
 
     }
 
-    return Inertia::render('Tasks/Show', [
+    return Inertia::render('tasks/Show', [
 
       'localTask' => $task
 

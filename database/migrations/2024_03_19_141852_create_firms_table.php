@@ -14,7 +14,7 @@ return new class extends Migration
     Schema::create('firms', function (Blueprint $table) {
       $table->id();
 
-      $table->uuid('fid')->nullable();
+      $table->uuid('uuid')->unique()->index();
 
       $table->string('name', 50)->unique();
 
