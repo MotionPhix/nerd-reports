@@ -1,7 +1,3 @@
-import forms from '@tailwindcss/forms';
-import typography from '@tailwindcss/typography';
-import scrollbar from 'tailwind-scrollbar'
-
 /** @type {import('tailwindcss').Config} */
 export default {
   darkMode: 'class',
@@ -23,5 +19,5 @@ export default {
     },
   },
 
-  plugins: [forms, typography, scrollbar],
+  plugins: [],
 };
