@@ -1,37 +1,36 @@
 <script setup>
-import ApplicationLogo from "@/components/ApplicationLogo.vue"
-import Dropdown from "@/components/Dropdown.vue"
-import DropdownLink from "@/components/DropdownLink.vue"
-import NavLink from "@/components/NavLink.vue"
-import NotificationList from "@/components/NotificationList.vue"
-import ResponsiveNavLink from "@/components/ResponsiveNavLink.vue"
-import { useProjectStore } from "@/stores/projectStore"
-import { Link, usePage } from "@inertiajs/vue3"
-import { IconBell, IconMoon, IconSun } from "@tabler/icons-vue"
-import { UseDark } from "@vueuse/components"
-import { ref } from "vue"
-import { useTaskStore } from "@/stores/taskStore"
-import { useNotificationStore } from "@/stores/notificationStore"
-import { storeToRefs } from "pinia"
-import { twi } from "tw-to-css"
+import ApplicationLogo from '@/components/ApplicationLogo.vue';
+import Dropdown from '@/components/Dropdown.vue';
+import DropdownLink from '@/components/DropdownLink.vue';
+import NavLink from '@/components/NavLink.vue';
+import NotificationList from '@/components/NotificationList.vue';
+import ResponsiveNavLink from '@/components/ResponsiveNavLink.vue';
+import { useProjectStore } from '@/stores/projectStore';
+import { Link, usePage } from '@inertiajs/vue3';
+import { IconBell, IconMoon, IconSun } from '@tabler/icons-vue';
+import { UseDark } from '@vueuse/components';
+import { ref } from 'vue';
+import { useTaskStore } from '@/stores/taskStore';
+import { useNotificationStore } from '@/stores/notificationStore';
+import { storeToRefs } from 'pinia';
 
-const showingNavigationDropdown = ref(false)
+const showingNavigationDropdown = ref(false);
 
-const { user } = usePage().props.auth
+const { user } = usePage().props.auth;
 
-const projectStore = useProjectStore()
+const projectStore = useProjectStore();
 
-const { reFetchProject } = projectStore
+const { reFetchProject } = projectStore;
 
-const taskStore = useTaskStore()
+const taskStore = useTaskStore();
 
-const { reFetchTask } = taskStore
+const { reFetchTask } = taskStore;
 
-const notificationStore = useNotificationStore()
+const notificationStore = useNotificationStore();
 
-const { fetchNotifications } = notificationStore
+const { fetchNotifications } = notificationStore;
 
-const { unreadNotifications } = storeToRefs(notificationStore)
+const { unreadNotifications } = storeToRefs(notificationStore);
 
 window.Echo
   .private(`App.Models.User.${user.id}`)
@@ -39,25 +38,21 @@ window.Echo
 
     console.log(notification);
 
-    fetchNotifications()
+    fetchNotifications();
 
     if (usePage().url.startsWith('/projects/s')) {
 
-      reFetchProject()
+      reFetchProject();
 
     }
 
     if (usePage().url.startsWith('/tasks/s')) {
 
-      reFetchTask()
+      reFetchTask();
 
     }
 
-  })
-
-const styleInline = twi(`bg-white mx-auto`);
-
-console.log(styleInline)
+  });
 </script>
 
 <template>

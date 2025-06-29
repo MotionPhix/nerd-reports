@@ -17,8 +17,9 @@
   <meta name="theme-color" content="#ffffff">
 
   <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.bunny.net">
-  <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&display=swap" rel="stylesheet">
 
   <!-- Scripts -->
   @routes
@@ -26,7 +27,8 @@
   @inertiaHead
 </head>
 
-<body class="relative h-screen font-sans antialiased bg-gray-100 min-h-dvh dark:bg-gray-900">
+<body
+  class="relative h-screen font-sans antialiased bg-gray-100 min-h-dvh dark:bg-gray-900">
   @inertia
 </body>
 </html>

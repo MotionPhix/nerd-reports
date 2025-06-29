@@ -1,6 +1,7 @@
 import { defineConfig } from "vite"
 import laravel from "laravel-vite-plugin"
 import vue from "@vitejs/plugin-vue"
+import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
   plugins: [
@@ -16,10 +17,11 @@ export default defineConfig({
         }
       }
     }),
+    tailwindcss()
   ],
   server: {
-    fs: {
-      cachedChecks: false
-    }
-  }
+    cors: {
+      origin: /^https?:\/\/(?:(?:[^:]+\.)?localhost|nerd-reports\.test|127\.0\.0\.1|\[::1\])(?::\d+)?$/,
+    },
+  },
 })

@@ -1,10 +1,8 @@
 <?php
 
-use Illuminate\Foundation\Inspiring;
-use Illuminate\Support\Facades\Artisan;
+use App\Jobs\GenerateWeeklyReportsJob;
+use Illuminate\Support\Facades\Schedule;
 
-Artisan::command('inspire', function () {
-
-  $this->comment(Inspiring::quote());
-
-})->purpose('Display an inspiring quote')->everyMinute();
+Schedule::job(new GenerateWeeklyReportsJob)
+  ->everyMinute();
+  //->weeklyOn(5, '16:30'); // Friday 4:30 PM

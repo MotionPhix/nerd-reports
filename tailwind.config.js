@@ -12,7 +12,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Figtree'],
+        sans: ['Geist Mono', monospace],
         display: ['Source Serif Pro', 'Georgia', 'serif'],
         body: ['Synonym', 'system-ui', 'sans-serif'],
       },

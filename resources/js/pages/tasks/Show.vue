@@ -60,7 +60,7 @@ defineOptions({
   <section class="flex-1 max-w-5xl mx-auto relative px-4 sm:px-6 lg:px-8">
 
     <article
-      class="grid gap-6 sm:grid-cols-2 h-[100vh] scrollbar-none overflow-y-auto py-12"
+      class="grid gap-6 sm:grid-cols-2 h-screen scrollbar-none overflow-y-auto py-12"
       ref="messageContainer">
 
       <div class="sm:col-span-2">

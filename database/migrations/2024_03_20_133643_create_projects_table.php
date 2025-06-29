@@ -16,8 +16,6 @@ return new class extends Migration
 
       $table->uuid('uuid')->unique();
 
-      $table->uuid('pid')->nullable();
-
       $table->string('name');
 
       $table->date('due_date')->nullable();

@@ -105,7 +105,7 @@ const fetchTask = () => {
       </div>
 
       <span
-        class="ms-auto -mx-1.5 my-1 text-xs justify-center items-center flex-shrink-0 text-gray-400 rounded-lg dark:text-gray-500">
+        class="ms-auto -mx-1.5 my-1 text-xs justify-center items-center shrink-0 text-gray-400 rounded-lg dark:text-gray-500">
         {{ notification.data.comment.created_at }}
       </span>
     </div>

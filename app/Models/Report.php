@@ -37,10 +37,6 @@ class Report extends Model implements HasMedia
     'metadata'
   ];
 
-  protected $primaryKey = 'uuid';
-  public $incrementing = false;
-  protected $keyType = 'string';
-
   protected function casts(): array
   {
     return [

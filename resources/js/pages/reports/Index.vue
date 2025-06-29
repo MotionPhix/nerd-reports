@@ -4,7 +4,6 @@ import useStickyTop from "@/composables/useStickyTop"
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue"
 import { Head, Link } from "@inertiajs/vue3"
 import { IconDownload, IconPlus } from "@tabler/icons-vue"
-import { twi, twj } from "tw-to-css"
 
 const props = defineProps<{
   reportData: Object,
@@ -46,11 +45,11 @@ defineOptions({ layout: AuthenticatedLayout })
 
       <!-- start here -->
 
-      <p :style="twj('text-4xl font-display')">
+      <p class="text-4xl font-display">
         Weekly Report
       </p>
 
-      <hr :style="twj('my-10 border-gray-300')" />
+      <hr class="my-10 border-gray-300" />
 
       <table style="width: 100%">
         <thead>
@@ -58,11 +57,11 @@ defineOptions({ layout: AuthenticatedLayout })
           <tr>
             <th></th>
 
-            <th :style="twj('text-left text-lg')">
+            <th class="text-left text-lg">
               Assigned by
             </th>
 
-            <th :style="twj('text-left text-lg pl-[10px]')">
+            <th class="text-left text-lg pl-[10px]">
               Status
             </th>
           </tr>
@@ -79,19 +78,19 @@ defineOptions({ layout: AuthenticatedLayout })
             <tr>
               <td style="width: 60%; border: none rgb(0, 0, 0)">
 
-                <span :style="twj('text-xl font-display block')">
+                <span class="text-xl font-display block">
 
                   {{ project.project_name }}
 
                 </span>
 
-                <span :style="twj('text-sm block')">
+                <span class="text-sm block">
                   For {{ project.project_contact.firm?.name ?? `${project.project_contact.first_name} ${project.project_contact.last_name}` }} | Week {{ props.weekNumber }}
                 </span>
 
               </td>
 
-              <td sty="width: 40%;" colspan="2"></td>
+              <td style="width: 40%;" colspan="2"></td>
             </tr>
 
             <tr>
@@ -118,7 +117,7 @@ defineOptions({ layout: AuthenticatedLayout })
                   border-bottom: none rgb(0, 0, 0);
                   vertical-align: top;
                 "
-                :style="twj('border-t border-gray-300')">
+                class="border-t border-gray-300">
                 <strong>
                   {{ task.task_name }}
                 </strong>
@@ -126,9 +125,9 @@ defineOptions({ layout: AuthenticatedLayout })
                 <div
                   v-html="task.task_info"
                   v-if="task.task_info"
-                  :style="twj('text-sm text-gray-500')"></div>
+                  class="text-sm text-gray-500"></div>
 
-                <div :style="twj('pt-2 text-sm mt-2 text-gray-400')">
+                <div class="pt-2 text-sm mt-2 text-gray-400">
                   {{ `${task.assigned_at} | ${task.actual_date}` }}
                 </div>
               </td>
@@ -142,7 +141,7 @@ defineOptions({ layout: AuthenticatedLayout })
                   width: 20%;
                   vertical-align: top;
                 "
-                :style="twj('border-t border-gray-300')">
+                class="border-t border-gray-300">
                 <span>
                   {{ task.assigned_by }}
                 </span>
@@ -158,7 +157,7 @@ defineOptions({ layout: AuthenticatedLayout })
                   border-bottom: none rgb(0, 0, 0);
                   vertical-align: top;
                 "
-                :style="twj('border-t border-gray-300')">
+                class="border-t border-gray-300">
                 <span>{{ task.status }}</span>
               </td>
             </tr>
@@ -182,8 +181,7 @@ defineOptions({ layout: AuthenticatedLayout })
           <Link
             :href="route('contacts.create')"
             class="flex gap-2 items-center text-gray-500 border-gray-500 border hover:border-gray-900 rounded-lg dark:border-slate-600 dark:text-gray-500 font-semibold my-4 px-3 py-1.5 dark:hover:text-gray-400 dark:hover:border-gray-400 hover:text-gray-900 transition duration-300"
-            as="button"
-          >
+            as="button">
             <IconPlus class="w-5 h-5" stroke-width="3.5" />
 
             <span>Create contact</span>

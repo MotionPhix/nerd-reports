@@ -65,7 +65,7 @@ class Index extends Controller
       ])->values(),
     ];
 
-    return Inertia::render('Dashboard', [
+    return Inertia::render('dashboard', [
 
       'dashboardData' => [
         'totalContacts' => $contacts,

@@ -60,7 +60,7 @@ router.on('navigate', (e) => {
     class="relative flex px-4 py-3 transition duration-300 ease-in-out border border-gray-300 rounded-xl dark:border-gray-700 sm:py-4 hover:bg-gray-200 dark:hover:bg-gray-800 group"
     :class="{ 'bg-gray-300 dark:bg-gray-700': props.contact.cid === param.contact }">
     <div
-      class="absolute z-20 flex items-center justify-center flex-shrink-0 w-10 h-10 font-semibold transition duration-300 rounded-full cursor-pointer hover:bg-transparent group"
+      class="absolute z-20 flex items-center justify-center shrink-0 w-10 h-10 font-semibold transition duration-300 rounded-full cursor-pointer hover:bg-transparent group"
       :class="selectedContacts.length ? '' : 'bg-lime-500 text-lime-900'">
 
       <span

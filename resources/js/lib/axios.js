@@ -1,7 +1,7 @@
 import Axios from "axios";
 
 const axios = Axios.create({
-  baseURL: "http://nerd-reports.test",
+  baseURL: "https://nerd-reports.test",
   timeout: 60000,
   withCredentials: true,
   xsrfCookieName: "XSRF-TOKEN",
