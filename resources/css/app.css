@@ -1,9 +1,27 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@config '../../tailwind.config.js';
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
 
 .m-tabs-bar {
-    @apply border border-gray-300 dark:border-gray-600 !important;
+    @apply border! border-gray-300! dark:border-gray-600!;
 }
 
 .tiptap p.is-empty::before {
@@ -24,11 +42,11 @@
 }
 
 .m-radio-buttons__items {
-  @apply shadow-none border border-gray-300 rounded-lg dark:border-gray-700 dark:bg-gray-800 !important;
+  @apply shadow-none! border! border-gray-300! rounded-lg! dark:border-gray-700! dark:bg-gray-800!;
 }
 
 .--is-selected {
-  @apply dark:bg-lime-500 dark:text-gray-800 bg-gray-400 font-semibold !important;
+  @apply dark:bg-lime-500! dark:text-gray-800! bg-gray-400! font-semibold!;
 }
 
 .Vue-Toastification__toast {

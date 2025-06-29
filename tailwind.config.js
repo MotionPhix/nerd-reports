@@ -1,6 +1,5 @@
 import forms from '@tailwindcss/forms';
 import typography from '@tailwindcss/typography';
-import defaultTheme from 'tailwindcss/defaultTheme';
 
 const scrollbar = require('tailwind-scrollbar')
 // import scrollbar from 'tailwind-scrollbar'
@@ -19,7 +18,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+        sans: ['Figtree'],
         display: ['Source Serif Pro', 'Georgia', 'serif'],
         body: ['Synonym', 'system-ui', 'sans-serif'],
       },
