@@ -12,7 +12,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Stevebauman\Purify\Casts\PurifyHtmlOnGet;
@@ -32,6 +31,7 @@ class Task extends Model implements HasMedia
     'assigned_by',
     'status',
     'board_id',
+    'project_id',
     'position',
     'priority',
     'estimated_hours',
@@ -39,7 +39,7 @@ class Task extends Model implements HasMedia
     'started_at',
     'completed_at',
     'due_date',
-    'notes'
+    'notes',
   ];
 
   protected function casts(): array
@@ -149,21 +149,9 @@ class Task extends Model implements HasMedia
   {
     static::creating(function ($task) {
 
-      $task->tid = Str::orderedUuid();
-
       $task->position = self::query()->where('board_id', $task->board_id)
           ->orderByDesc('position')
           ->first()?->position + self::POSITION_GAP;
-
-    });
-
-    static::updating(function ($task) {
-
-      if (!isset($task->tid)) {
-
-        $task->tid = Str::orderedUuid();
-
-      }
 
     });
 

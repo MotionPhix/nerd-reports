@@ -32,11 +32,8 @@ class User extends Authenticatable implements MustVerifyEmail, HasMedia
     'password',
   ];
 
-  protected $primaryKey = 'uuid';
-
-  protected $keyType = 'string';
-
-  public $incrementing = false;
+  // Using standard integer primary key for compatibility with Spatie Permissions
+  // UUID is available as a secondary identifier
 
   /**
    * The attributes that should be hidden for serialization.

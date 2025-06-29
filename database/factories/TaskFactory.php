@@ -47,7 +47,6 @@ class TaskFactory extends Factory
     return [
       'name' => fake()->sentence(4),
       'description' => fake()->paragraph(),
-      'tid' => Str::orderedUuid(),
       'status' => $status,
       'priority' => fake()->randomElement(TaskPriority::cases()),
       'estimated_hours' => $estimatedHours,

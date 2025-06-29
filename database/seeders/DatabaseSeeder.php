@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
   {
     $this->call([
       RoleAndPermissionSeeder::class,
+      ReportTemplateSeeder::class,
     ]);
 
     // Only seed development data if we're not in production

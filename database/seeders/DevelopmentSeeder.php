@@ -12,6 +12,7 @@ use App\Models\ReportItem;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class DevelopmentSeeder extends Seeder
 {
@@ -73,18 +74,23 @@ class DevelopmentSeeder extends Seeder
     // Create boards for projects
     $this->command->info('📊 Creating boards...');
     $boards = collect();
+
     $projects->each(function ($project) use (&$boards) {
-      $boardCount = fake()->numberBetween(2, 4);
+
       $boardNames = ['To Do', 'In Progress', 'Review', 'Done', 'Backlog'];
 
-      for ($i = 0; $i < $boardCount; $i++) {
-        $board = Board::factory()->create([
-          'project_id' => $project->uuid,
-          'name' => $boardNames[$i] ?? "Board " . ($i + 1),
-          'slug' => strtolower(str_replace(' ', '-', $boardNames[$i] ?? "board-" . ($i + 1))),
-        ]);
-        $boards->push($board);
-      }
+      $boardName = $boardNames[fake()->numberBetween(0, count($boardNames) - 1)];
+
+      $slug = strtolower(str_replace(' ', '-', $boardName)) . '-' . Str::uuid();
+
+      $board = Board::factory()->create([
+        'project_id' => $project->uuid,
+        'name' => $boardName,
+        'slug' => $slug,
+      ]);
+
+      $boards->push($board);
+
     });
 
     // Create tasks

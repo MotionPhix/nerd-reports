@@ -19,7 +19,6 @@ class FirmFactory extends Factory
   {
     return [
       'name' => fake()->company(),
-      'fid' => Str::orderedUuid(),
       'slogan' => fake()->sentence(),
       'url' => fake()->url(),
     ];
