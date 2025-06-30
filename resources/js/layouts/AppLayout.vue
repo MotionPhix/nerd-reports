@@ -26,7 +26,7 @@ const isMobileNavOpen = ref(false)
 
 const navigation = [
   { name: 'Dashboard', href: route('dashboard'), icon: LayoutDashboard },
-  // { name: 'Firms', href: route('firms.index'), icon: Briefcase },
+  { name: 'Firms', href: route('firms.index'), icon: Briefcase },
   { name: 'Contacts', href: route('contacts.index'), icon: Users },
   { name: 'Projects', href: route('projects.index'), icon: Home },
   { name: 'Tasks', href: route('tasks.index'), icon: ClipboardList },
@@ -102,7 +102,7 @@ const navigation = [
 
       <!-- Main Content -->
       <main class="flex-1 bg-gray-50 dark:bg-gray-900">
-        <div class="h-full overflow-y-auto">
+        <div class="h-full overflow-y-auto max-w-4xl p-6">
           <slot />
         </div>
       </main>

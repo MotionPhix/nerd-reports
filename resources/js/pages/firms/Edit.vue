@@ -350,10 +350,10 @@ onMounted(() => {
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
     <div class="p-6 space-y-6">
       <!-- Header -->
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div class="flex items-center gap-4">
           <Button variant="ghost" size="sm" as="a" :href="route('firms.show', firm.uuid)" class="gap-2">
-            <ArrowLeft class="h-4 w-4" />
+            <ArrowLeft class="w-4 h-4" />
             Back to Firm
           </Button>
           <Separator orientation="vertical" class="h-6" />
@@ -361,7 +361,7 @@ onMounted(() => {
             <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
               Edit {{ firm.name }}
             </h1>
-            <p class="text-muted-foreground mt-1">
+            <p class="mt-1 text-muted-foreground">
               Update firm information and settings
             </p>
           </div>
@@ -369,17 +369,17 @@ onMounted(() => {
 
         <div class="flex items-center gap-3">
           <Button variant="outline" size="sm" as="a" :href="route('firms.show', firm.uuid)" class="gap-2">
-            <Eye class="h-4 w-4" />
+            <Eye class="w-4 h-4" />
             View Firm
           </Button>
 
           <Button variant="outline" size="sm" @click="saveDraft" class="gap-2">
-            <Save class="h-4 w-4" />
+            <Save class="w-4 h-4" />
             Save Draft
           </Button>
 
           <Button variant="outline" size="sm" @click="resetForm" :disabled="!hasChanges" class="gap-2">
-            <RefreshCw class="h-4 w-4" />
+            <RefreshCw class="w-4 h-4" />
             Reset
           </Button>
         </div>
@@ -397,9 +397,9 @@ onMounted(() => {
               </Badge>
             </div>
           </div>
-          <div class="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+          <div class="w-full h-2 bg-gray-200 rounded-full dark:bg-gray-700">
             <div
-              class="bg-blue-600 h-2 rounded-full transition-all duration-300"
+              class="h-2 transition-all duration-300 bg-blue-600 rounded-full"
               :style="{ width: `${formProgress}%` }"
             ></div>
           </div>
@@ -409,12 +409,12 @@ onMounted(() => {
       <form @submit.prevent="submitForm" class="space-y-6">
         <div class="grid gap-6 lg:grid-cols-3">
           <!-- Main Information -->
-          <div class="lg:col-span-2 space-y-6">
+          <div class="space-y-6 lg:col-span-2">
             <!-- Basic Information -->
             <Card>
               <CardHeader>
                 <CardTitle class="flex items-center gap-2">
-                  <Building2 class="h-5 w-5" />
+                  <Building2 class="w-5 h-5" />
                   Basic Information
                 </CardTitle>
                 <CardDescription>
@@ -432,8 +432,8 @@ onMounted(() => {
                       :class="{ 'border-red-500': form.errors.name }"
                       required
                     />
-                    <p v-if="form.errors.name" class="text-sm text-red-600 flex items-center gap-1">
-                      <AlertCircle class="h-3 w-3" />
+                    <p v-if="form.errors.name" class="flex items-center gap-1 text-sm text-red-600">
+                      <AlertCircle class="w-3 h-3" />
                       {{ form.errors.name }}
                     </p>
                   </div>
@@ -444,4 +444,644 @@ onMounted(() => {
                       id="slogan"
                       v-model="form.slogan"
                       placeholder="Enter firm slogan"
-                      :class="{ 'border-
+                      :class="{ 'border-red-500': form.errors.slogan }"
+                    />
+                    <p v-if="form.errors.slogan" class="flex items-center gap-1 text-sm text-red-600">
+                      <AlertCircle class="w-3 h-3" />
+                      {{ form.errors.slogan }}
+                    </p>
+                  </div>
+                </div>
+
+                <div class="space-y-2">
+                  <Label for="url">Website URL</Label>
+                  <div class="relative">
+                    <Globe class="absolute w-4 h-4 left-3 top-3 text-muted-foreground" />
+                    <Input
+                      id="url"
+                      v-model="form.url"
+                      placeholder="https://example.com"
+                      class="pl-10"
+                      :class="{ 'border-red-500': form.errors.url }"
+                    />
+                  </div>
+                  <p v-if="form.errors.url" class="flex items-center gap-1 text-sm text-red-600">
+                    <AlertCircle class="w-3 h-3" />
+                    {{ form.errors.url }}
+                  </p>
+                </div>
+
+                <div class="space-y-2">
+                  <Label for="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    v-model="form.description"
+                    placeholder="Describe the firm's business, services, or focus areas..."
+                    rows="4"
+                    :class="{ 'border-red-500': form.errors.description }"
+                  />
+                  <p v-if="form.errors.description" class="flex items-center gap-1 text-sm text-red-600">
+                    <AlertCircle class="w-3 h-3" />
+                    {{ form.errors.description }}
+                  </p>
+                </div>
+
+                <div class="grid gap-4 md:grid-cols-2">
+                  <div class="space-y-2">
+                    <Label for="industry">Industry</Label>
+                    <Select v-model="form.industry">
+                      <SelectTrigger :class="{ 'border-red-500': form.errors.industry }">
+                        <SelectValue placeholder="Select industry" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem v-for="industry in industries" :key="industry" :value="industry">
+                          {{ industry }}
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p v-if="form.errors.industry" class="flex items-center gap-1 text-sm text-red-600">
+                      <AlertCircle class="w-3 h-3" />
+                      {{ form.errors.industry }}
+                    </p>
+                  </div>
+
+                  <div class="space-y-2">
+                    <Label for="size">Company Size</Label>
+                    <Select v-model="form.size">
+                      <SelectTrigger :class="{ 'border-red-500': form.errors.size }">
+                        <SelectValue placeholder="Select size" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem v-for="size in sizes" :key="size" :value="size">
+                          {{ size }}
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p v-if="form.errors.size" class="flex items-center gap-1 text-sm text-red-600">
+                      <AlertCircle class="w-3 h-3" />
+                      {{ form.errors.size }}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <!-- Contact Information -->
+            <Card>
+              <CardHeader>
+                <CardTitle class="flex items-center gap-2">
+                  <Mail class="w-5 h-5" />
+                  Contact Information
+                </CardTitle>
+                <CardDescription>
+                  Primary contact details for the firm
+                </CardDescription>
+              </CardHeader>
+              <CardContent class="space-y-4">
+                <div class="grid gap-4 md:grid-cols-2">
+                  <div class="space-y-2">
+                    <Label for="email">Primary Email</Label>
+                    <div class="relative">
+                      <Mail class="absolute w-4 h-4 left-3 top-3 text-muted-foreground" />
+                      <Input
+                        id="email"
+                        v-model="form.email"
+                        type="email"
+                        placeholder="contact@firm.com"
+                        class="pl-10"
+                        :class="{ 'border-red-500': form.errors.email }"
+                      />
+                    </div>
+                    <p v-if="form.errors.email" class="flex items-center gap-1 text-sm text-red-600">
+                      <AlertCircle class="w-3 h-3" />
+                      {{ form.errors.email }}
+                    </p>
+                  </div>
+
+                  <div class="space-y-2">
+                    <Label for="phone">Primary Phone</Label>
+                    <div class="relative">
+                      <Phone class="absolute w-4 h-4 left-3 top-3 text-muted-foreground" />
+                      <Input
+                        id="phone"
+                        v-model="form.phone"
+                        type="tel"
+                        placeholder="+1 (555) 123-4567"
+                        class="pl-10"
+                        :class="{ 'border-red-500': form.errors.phone }"
+                      />
+                    </div>
+                    <p v-if="form.errors.phone" class="flex items-center gap-1 text-sm text-red-600">
+                      <AlertCircle class="w-3 h-3" />
+                      {{ form.errors.phone }}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <!-- Address -->
+            <Card>
+              <CardHeader>
+                <CardTitle class="flex items-center gap-2">
+                  <MapPin class="w-5 h-5" />
+                  Address
+                </CardTitle>
+                <CardDescription>
+                  Physical location of the firm
+                </CardDescription>
+              </CardHeader>
+              <CardContent class="space-y-4">
+                <div class="space-y-2">
+                  <Label for="street">Street Address</Label>
+                  <Input
+                    id="street"
+                    v-model="form.address.street"
+                    placeholder="123 Business Ave"
+                    :class="{ 'border-red-500': form.errors['address.street'] }"
+                  />
+                  <p v-if="form.errors['address.street']" class="flex items-center gap-1 text-sm text-red-600">
+                    <AlertCircle class="w-3 h-3" />
+                    {{ form.errors['address.street'] }}
+                  </p>
+                </div>
+
+                <div class="grid gap-4 md:grid-cols-2">
+                  <div class="space-y-2">
+                    <Label for="city">City</Label>
+                    <Input
+                      id="city"
+                      v-model="form.address.city"
+                      placeholder="New York"
+                      :class="{ 'border-red-500': form.errors['address.city'] }"
+                    />
+                    <p v-if="form.errors['address.city']" class="flex items-center gap-1 text-sm text-red-600">
+                      <AlertCircle class="w-3 h-3" />
+                      {{ form.errors['address.city'] }}
+                    </p>
+                  </div>
+
+                  <div class="space-y-2">
+                    <Label for="state">State/Province</Label>
+                    <Input
+                      id="state"
+                      v-model="form.address.state"
+                      placeholder="NY"
+                      :class="{ 'border-red-500': form.errors['address.state'] }"
+                    />
+                    <p v-if="form.errors['address.state']" class="flex items-center gap-1 text-sm text-red-600">
+                      <AlertCircle class="w-3 h-3" />
+                      {{ form.errors['address.state'] }}
+                    </p>
+                  </div>
+                </div>
+
+                <div class="grid gap-4 md:grid-cols-2">
+                  <div class="space-y-2">
+                    <Label for="country">Country</Label>
+                    <Input
+                      id="country"
+                      v-model="form.address.country"
+                      placeholder="United States"
+                      :class="{ 'border-red-500': form.errors['address.country'] }"
+                    />
+                    <p v-if="form.errors['address.country']" class="flex items-center gap-1 text-sm text-red-600">
+                      <AlertCircle class="w-3 h-3" />
+                      {{ form.errors['address.country'] }}
+                    </p>
+                  </div>
+
+                  <div class="space-y-2">
+                    <Label for="postal_code">Postal Code</Label>
+                    <Input
+                      id="postal_code"
+                      v-model="form.address.postal_code"
+                      placeholder="10001"
+                      :class="{ 'border-red-500': form.errors['address.postal_code'] }"
+                    />
+                    <p v-if="form.errors['address.postal_code']" class="flex items-center gap-1 text-sm text-red-600">
+                      <AlertCircle class="w-3 h-3" />
+                      {{ form.errors['address.postal_code'] }}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <!-- Social Media -->
+            <Card>
+              <CardHeader>
+                <CardTitle class="flex items-center gap-2">
+                  <Globe class="w-5 h-5" />
+                  Social Media
+                </CardTitle>
+                <CardDescription>
+                  Social media profiles and online presence
+                </CardDescription>
+              </CardHeader>
+              <CardContent class="space-y-4">
+                <div class="space-y-2">
+                  <Label for="linkedin_url">LinkedIn URL</Label>
+                  <div class="relative">
+                    <Linkedin class="absolute w-4 h-4 left-3 top-3 text-muted-foreground" />
+                    <Input
+                      id="linkedin_url"
+                      v-model="form.linkedin_url"
+                      placeholder="https://linkedin.com/company/firm-name"
+                      class="pl-10"
+                      :class="{ 'border-red-500': form.errors.linkedin_url }"
+                    />
+                  </div>
+                  <p v-if="form.errors.linkedin_url" class="flex items-center gap-1 text-sm text-red-600">
+                    <AlertCircle class="w-3 h-3" />
+                    {{ form.errors.linkedin_url }}
+                  </p>
+                </div>
+
+                <div class="space-y-2">
+                  <Label for="twitter_url">Twitter URL</Label>
+                  <div class="relative">
+                    <Twitter class="absolute w-4 h-4 left-3 top-3 text-muted-foreground" />
+                    <Input
+                      id="twitter_url"
+                      v-model="form.twitter_url"
+                      placeholder="https://twitter.com/firmname"
+                      class="pl-10"
+                      :class="{ 'border-red-500': form.errors.twitter_url }"
+                    />
+                  </div>
+                  <p v-if="form.errors.twitter_url" class="flex items-center gap-1 text-sm text-red-600">
+                    <AlertCircle class="w-3 h-3" />
+                    {{ form.errors.twitter_url }}
+                  </p>
+                </div>
+
+                <div class="space-y-2">
+                  <Label for="facebook_url">Facebook URL</Label>
+                  <div class="relative">
+                    <Facebook class="absolute w-4 h-4 left-3 top-3 text-muted-foreground" />
+                    <Input
+                      id="facebook_url"
+                      v-model="form.facebook_url"
+                      placeholder="https://facebook.com/firmname"
+                      class="pl-10"
+                      :class="{ 'border-red-500': form.errors.facebook_url }"
+                    />
+                  </div>
+                  <p v-if="form.errors.facebook_url" class="flex items-center gap-1 text-sm text-red-600">
+                    <AlertCircle class="w-3 h-3" />
+                    {{ form.errors.facebook_url }}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <!-- Additional Information -->
+            <Card>
+              <CardHeader>
+                <CardTitle>Additional Information</CardTitle>
+                <CardDescription>
+                  Extra details and notes about the firm
+                </CardDescription>
+              </CardHeader>
+              <CardContent class="space-y-4">
+                <div class="space-y-2">
+                  <Label for="total_revenue">Total Revenue (Optional)</Label>
+                  <Input
+                    id="total_revenue"
+                    v-model="form.total_revenue"
+                    type="number"
+                    placeholder="1000000"
+                    :class="{ 'border-red-500': form.errors.total_revenue }"
+                  />
+                  <p v-if="form.errors.total_revenue" class="flex items-center gap-1 text-sm text-red-600">
+                    <AlertCircle class="w-3 h-3" />
+                    {{ form.errors.total_revenue }}
+                  </p>
+                </div>
+
+                <div class="space-y-2">
+                  <Label for="source">Source</Label>
+                  <Input
+                    id="source"
+                    v-model="form.source"
+                    placeholder="How did you discover this firm?"
+                    :class="{ 'border-red-500': form.errors.source }"
+                  />
+                  <p v-if="form.errors.source" class="flex items-center gap-1 text-sm text-red-600">
+                    <AlertCircle class="w-3 h-3" />
+                    {{ form.errors.source }}
+                  </p>
+                </div>
+
+                <div class="space-y-2">
+                  <Label for="notes">Notes</Label>
+                  <Textarea
+                    id="notes"
+                    v-model="form.notes"
+                    placeholder="Additional notes about the firm..."
+                    rows="4"
+                    :class="{ 'border-red-500': form.errors.notes }"
+                  />
+                  <p v-if="form.errors.notes" class="flex items-center gap-1 text-sm text-red-600">
+                    <AlertCircle class="w-3 h-3" />
+                    {{ form.errors.notes }}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <!-- Sidebar -->
+          <div class="space-y-6">
+            <!-- Status & Priority -->
+            <Card>
+              <CardHeader>
+                <CardTitle>Status & Priority</CardTitle>
+                <CardDescription>
+                  Current status and priority level
+                </CardDescription>
+              </CardHeader>
+              <CardContent class="space-y-4">
+                <div class="space-y-2">
+                  <Label for="status">Status *</Label>
+                  <Select v-model="form.status">
+                    <SelectTrigger :class="{ 'border-red-500': form.errors.status }">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="prospect">
+                        <div class="flex items-center gap-2">
+                          <div class="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                          Prospect
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="active">
+                        <div class="flex items-center gap-2">
+                          <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                          Active
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="inactive">
+                        <div class="flex items-center gap-2">
+                          <div class="w-2 h-2 bg-gray-500 rounded-full"></div>
+                          Inactive
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p v-if="form.errors.status" class="flex items-center gap-1 text-sm text-red-600">
+                    <AlertCircle class="w-3 h-3" />
+                    {{ form.errors.status }}
+                  </p>
+                </div>
+
+                <div class="space-y-2">
+                  <Label for="priority">Priority</Label>
+                  <Select v-model="form.priority">
+                    <SelectTrigger :class="{ 'border-red-500': form.errors.priority }">
+                      <SelectValue placeholder="Select priority" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="low">
+                        <div class="flex items-center gap-2">
+                          <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                          Low
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="medium">
+                        <div class="flex items-center gap-2">
+                          <div class="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                          Medium
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="high">
+                        <div class="flex items-center gap-2">
+                          <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+                          High
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p v-if="form.errors.priority" class="flex items-center gap-1 text-sm text-red-600">
+                    <AlertCircle class="w-3 h-3" />
+                    {{ form.errors.priority }}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <!-- Logo Upload -->
+            <Card>
+              <CardHeader>
+                <CardTitle class="flex items-center gap-2">
+                  <ImageIcon class="w-5 h-5" />
+                  Logo
+                </CardTitle>
+                <CardDescription>
+                  Upload or update the firm's logo
+                </CardDescription>
+              </CardHeader>
+              <CardContent class="space-y-4">
+                <div class="flex flex-col items-center space-y-4">
+                  <div v-if="logoPreview" class="relative">
+                    <img
+                      :src="logoPreview"
+                      alt="Logo preview"
+                      class="object-contain w-24 h-24 border border-gray-200 rounded-lg dark:border-gray-700"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      class="absolute w-6 h-6 p-0 rounded-full -top-2 -right-2"
+                      @click="removeLogo"
+                    >
+                      <X class="w-3 h-3" />
+                    </Button>
+                  </div>
+
+                  <div class="w-full">
+                    <input
+                      id="logo-upload"
+                      type="file"
+                      accept="image/*"
+                      class="hidden"
+                      @change="handleLogoUpload"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      class="w-full gap-2"
+                      @click="() => document.getElementById('logo-upload')?.click()"
+                    >
+                      <Upload class="w-4 h-4" />
+                      {{ logoPreview ? 'Change Logo' : 'Upload Logo' }}
+                    </Button>
+                  </div>
+
+                  <p class="text-xs text-center text-muted-foreground">
+                    Recommended: Square image, max 5MB
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <!-- Tags -->
+            <Card>
+              <CardHeader>
+                <CardTitle>Tags</CardTitle>
+                <CardDescription>
+                  Add tags to categorize this firm
+                </CardDescription>
+              </CardHeader>
+              <CardContent class="space-y-4">
+                <div class="flex flex-wrap gap-2">
+                  <Badge
+                    v-for="(tag, index) in form.tags"
+                    :key="index"
+                    variant="secondary"
+                    class="flex items-center gap-1"
+                  >
+                    {{ tag }}
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      class="w-3 h-3 p-0 hover:bg-transparent"
+                      @click="removeTag(index)"
+                    >
+                      <X class="w-2 h-2" />
+                    </Button>
+                  </Badge>
+                </div>
+
+                <div class="flex gap-2">
+                  <Input
+                    id="new-tag"
+                    placeholder="Add a tag..."
+                    @keydown.enter.prevent="(e) => {
+                      const target = e.target as HTMLInputElement;
+                      addTag(target.value);
+                      target.value = '';
+                    }"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    @click="() => {
+                      const input = document.getElementById('new-tag') as HTMLInputElement;
+                      addTag(input.value);
+                      input.value = '';
+                    }"
+                  >
+                    <Plus class="w-4 h-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <!-- Actions -->
+            <Card>
+              <CardHeader>
+                <CardTitle>Actions</CardTitle>
+                <CardDescription>
+                  Manage this firm record
+                </CardDescription>
+              </CardHeader>
+              <CardContent class="space-y-3">
+                <Button
+                  type="submit"
+                  class="w-full gap-2"
+                  :disabled="isSubmitting || !hasChanges"
+                >
+                  <Loader2 v-if="isSubmitting" class="w-4 h-4 animate-spin" />
+                  <Save v-else class="w-4 h-4" />
+                  {{ isSubmitting ? 'Updating...' : 'Update Firm' }}
+                </Button>
+
+                <Separator />
+
+                <AlertDialog>
+                  <AlertDialogTrigger as-child>
+                    <Button variant="destructive" class="w-full gap-2" :disabled="isDeleting">
+                      <Loader2 v-if="isDeleting" class="w-4 h-4 animate-spin" />
+                      <Trash2 v-else class="w-4 h-4" />
+                      {{ isDeleting ? 'Deleting...' : 'Delete Firm' }}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete the firm
+                        "{{ firm.name }}" and remove all associated data from our servers.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        class="bg-red-600 hover:bg-red-700"
+                        @click="deleteFirm"
+                      >
+                        Delete Firm
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+/* Custom styles for better form presentation */
+.logo-preview {
+  transition: all 0.2s ease-in-out;
+}
+
+.logo-preview:hover {
+  transform: scale(1.05);
+}
+
+.action-button {
+  transition: all 0.2s ease-in-out;
+}
+
+.action-button:hover {
+  transform: scale(1.05);
+}
+
+.error-message {
+  animation: slideInFromLeft 0.2s ease-in-out;
+}
+
+.success-indicator {
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+</style>

@@ -18,8 +18,8 @@ import {
   Home,
   Users,
   ClipboardList,
-  LayoutDashboard,
-} from 'lucide-vue-next'
+  LayoutDashboard, BriefcaseBusinessIcon
+} from 'lucide-vue-next';
 import { Link, usePage } from '@inertiajs/vue3';
 import { Separator } from '@/components/ui/separator';
 import NavUser from '@/components/NavUser.vue';
@@ -30,6 +30,12 @@ const items = [
     url: route('dashboard'),
     icon: LayoutDashboard,
     active: usePage().url === new URL(route('dashboard')).pathname
+  },
+  {
+    title: 'Firms',
+    url: route('firms.index'),
+    icon: BriefcaseBusinessIcon,
+    active: usePage().url.startsWith(new URL(route('firms.index'))).pathname
   },
   {
     title: 'Projects',

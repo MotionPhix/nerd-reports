@@ -16,7 +16,7 @@ return new class extends Migration {
       $table->enum('size', ['small', 'medium', 'large', 'enterprise'])->nullable()->after('industry');
 
       // Status and priority
-      $table->enum('status', ['active', 'inactive', 'prospect'])->default('prospect')->after('logo_url');
+      $table->enum('status', ['active', 'inactive', 'prospect'])->default('prospect')->after('industry');
       $table->enum('priority', ['low', 'medium', 'high'])->default('medium')->after('status');
 
       // Source and assignment

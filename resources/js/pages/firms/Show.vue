@@ -630,7 +630,10 @@ onMounted(() => {
                   </Button>
                 </div>
                 <div v-else class="space-y-4">
-                  <div v-for="interaction in recentInteractions.slice(0, 5)" :key="interaction.uuid" class="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                  <div
+                    v-for="(interaction, index) in recentInteractions"
+                    :key="interaction.uuid" v-if="index < 5"
+                    class="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
                     <div class="rounded-full bg-purple-100 p-2 dark:bg-purple-900/20">
                       <component :is="getInteractionIcon(interaction.type)" class="h-4 w-4 text-purple-600" />
                     </div>

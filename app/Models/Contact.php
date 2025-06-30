@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Data\FirmData;
 use App\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,7 +9,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Str;
 use Spatie\Tags\HasTags;
 use Stevebauman\Purify\Casts\PurifyHtmlOnGet;
 
@@ -43,7 +41,6 @@ class Contact extends Model
       'created_at' => 'date:d m, Y',
       'deleted_at' => 'date:d M, Y',
       'last_interaction' => 'datetime',
-      'firm' => FirmData::class,
       'bio' => PurifyHtmlOnGet::class,
     ];
   }

@@ -83,7 +83,7 @@ import {
   AlertTriangle
 } from 'lucide-vue-next'
 import AppSidebarLayout from '@/layouts/AppSidebarLayout.vue'
-import { Modal } from '@inertiaui/modal-vue'
+import AppLayout from '@/layouts/AppLayout.vue';
 
 // Types
 interface Firm {
@@ -129,26 +129,21 @@ interface PaginationLinks {
   next: string | null
 }
 
-interface PaginationMeta {
-  current_page: number
-  from: number | null
-  last_page: number
-  links: Array<{
-    url: string | null
-    label: string
-    active: boolean
-  }>
-  path: string
-  per_page: number
-  to: number | null
-  total: number
-}
-
 interface Props {
   firms: {
     data: Firm[]
-    links: PaginationLinks
-    meta: PaginationMeta
+    current_page: number
+    from: number | null
+    last_page: number
+    links: Array<{
+      url: string | null
+      label: string
+      active: boolean
+    }>
+    path: string
+    per_page: number
+    to: number | null
+    total: number
   }
   filters: {
     search?: string
@@ -200,7 +195,7 @@ const hasFilters = computed(() => {
     searchQuery.value !== ''
 })
 
-const filteredFirmsCount = computed(() => props.firms.meta.total)
+const filteredFirmsCount = computed(() => props.firms.total)
 
 const isAllSelected = computed(() => {
   return props.firms.data.length > 0 &&
@@ -392,7 +387,7 @@ watch([selectedStatus, selectedIndustry, selectedSize, perPage], () => {
 
 // Layout
 defineOptions({
-  layout: AppSidebarLayout
+  layout: AppLayout
 })
 
 // Lifecycle
@@ -435,17 +430,15 @@ onMounted(() => {
             Export
           </Button>
 
-          <Modal>
-            <Button class="gap-2">
-              <Plus class="h-4 w-4" />
-              Add Firm
-            </Button>
-          </Modal>
+          <Button class="gap-2">
+            <Plus class="h-4 w-4" />
+            Add Firm
+          </Button>
         </div>
       </div>
 
       <!-- Stats Cards -->
-      <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
+      <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         <Card class="border-l-4 border-l-blue-500">
           <CardContent class="p-4">
             <div class="flex items-center justify-between">
@@ -775,12 +768,11 @@ onMounted(() => {
                           {{ hasFilters ? 'Try adjusting your search criteria' : 'Get started by adding your first firm' }}
                         </p>
                       </div>
-                      <Modal v-if="!hasFilters">
-                        <Button class="gap-2">
-                          <Plus class="h-4 w-4" />
-                          Add Your First Firm
-                        </Button>
-                      </Modal>
+
+                      <Button class="gap-2" v-if="!hasFilters">
+                        <Plus class="h-4 w-4" />
+                        Add Your First Firm
+                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -868,8 +860,8 @@ onMounted(() => {
 
                   <TableCell>
                     <div class="space-y-2">
-                      <Badge :class="getStatusColor(firm.status)" class="text-xs">
-                        {{ firm.status.charAt(0).toUpperCase() + firm.status.slice(1) }}
+                      <Badge :class="getStatusColor(firm.status)" class="text-xs capitalize">
+                        {{ firm.status }}
                       </Badge>
                       <div v-if="firm.metadata?.priority" class="flex items-center gap-1">
                         <Badge :class="getPriorityColor(firm.metadata.priority)" class="text-xs">
@@ -975,9 +967,9 @@ onMounted(() => {
         </CardContent>
 
         <!-- Pagination -->
-        <CardFooter v-if="firms.meta.last_page > 1" class="flex items-center justify-between">
+        <CardFooter v-if="firms.last_page > 1" class="flex items-center justify-between">
           <div class="text-sm text-muted-foreground">
-            Showing {{ firms.meta.from || 0 }} to {{ firms.meta.to || 0 }} of {{ firms.meta.total }} results
+            Showing {{ firms.from || 0 }} to {{ firms.to || 0 }} of {{ firms.total }} results
           </div>
 
           <div class="flex items-center gap-2">
@@ -998,7 +990,7 @@ onMounted(() => {
             </Button>
 
             <div class="flex items-center gap-1">
-              <template v-for="link in firms.meta.links" :key="link.label">
+              <template v-for="link in firms.links" :key="link.label">
                 <Button
                   v-if="link.url && !link.label.includes('Previous') && !link.label.includes('Next')"
                   :variant="link.active ? 'default' : 'outline'"
