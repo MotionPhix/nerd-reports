@@ -1,21 +1,20 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { toast } from 'vue-sonner'
-import { router, Link, usePage } from '@inertiajs/vue3'
-import { useDark } from '@vueuse/core'
+import { router, Link } from '@inertiajs/vue3'
+import { useDark, useStorage } from "@vueuse/core"
 import {
   Card,
   CardHeader,
   CardTitle,
   CardDescription,
   CardContent,
-  CardFooter
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,7 +35,6 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import {
-  Building2,
   Edit,
   Trash2,
   MoreHorizontal,
@@ -46,33 +44,24 @@ import {
   Mail,
   MapPin,
   Globe,
-  Calendar,
-  DollarSign,
-  Activity,
   Star,
   Plus,
   ArrowLeft,
   ExternalLink,
   FileText,
   Image as ImageIcon,
-  Download,
   Upload,
   MessageSquare,
-  Clock,
-  TrendingUp,
-  Target,
-  CheckCircle2,
   Settings,
   Eye,
   Linkedin,
   Twitter,
   Facebook,
   Copy,
-  Share2,
-  RefreshCw
+  Forward,
+  ListRestart
 } from 'lucide-vue-next'
 import AppSidebarLayout from '@/layouts/AppSidebarLayout.vue'
-import { Modal } from '@inertiaui/modal-vue'
 
 // Types
 interface Firm {
@@ -152,14 +141,27 @@ interface Firm {
 
 interface Props {
   firm: Firm
-  recentInteractions: Array<{
+  recentInteractions: Record<string, {
     id: number
     uuid: string
+    contact_id: string
+    project_id: string | null
+    user_id: number
     type: string
     subject: string | null
     description: string
+    notes: string | null
+    duration_minutes: number | null
     interaction_date: string
-    contact: {
+    follow_up_required: boolean
+    follow_up_date: string | null
+    outcome: string | null
+    location: string | null
+    participants: string[] | null
+    metadata: any
+    created_at: string
+    updated_at: string
+    contact?: {
       id: number
       uuid: string
       first_name: string
@@ -192,7 +194,7 @@ const props = defineProps<Props>()
 // Reactive state
 const isLoading = ref(false)
 const isDeleting = ref(false)
-const activeTab = ref('overview')
+const activeTab = useStorage('tabs_on_firm', 'overview')
 const isDark = useDark()
 
 // Computed properties
@@ -266,6 +268,17 @@ const getInteractionIcon = (type: string) => {
   return icons[type] || MessageSquare
 }
 
+const getStatusColor = (status: string) => {
+  const colors = {
+    active: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400',
+    inactive: 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400',
+    completed: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400',
+    pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400',
+    cancelled: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
+  }
+  return colors[status.toLowerCase()] || 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400'
+}
+
 const copyToClipboard = async (text: string, label: string) => {
   try {
     await navigator.clipboard.writeText(text)
@@ -273,6 +286,22 @@ const copyToClipboard = async (text: string, label: string) => {
   } catch (error) {
     toast.error('Failed to copy to clipboard')
   }
+}
+
+// Helper function to get contact name from interaction
+const getContactName = (interaction: any) => {
+  if (interaction.contact) {
+    return `${interaction.contact.first_name} ${interaction.contact.last_name}`
+  }
+
+  // Fallback: try to find contact in firm.contacts by contact_id
+  const contact = props.firm.contacts.find(c => c.uuid === interaction.contact_id)
+  if (contact) {
+    return `${contact.first_name} ${contact.last_name}`
+  }
+
+  // Final fallback
+  return 'Unknown Contact'
 }
 
 // Actions
@@ -303,6 +332,13 @@ const refreshData = async () => {
   }
 }
 
+// Fixed interactions computed properties
+const interactionsArray = computed(() => {
+  return Object.values(props.recentInteractions)
+})
+
+const partialInteractions = computed(() => interactionsArray.value.slice(0, 5))
+
 // Layout
 defineOptions({
   layout: AppSidebarLayout
@@ -320,15 +356,18 @@ onMounted(() => {
       <!-- Header -->
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div class="flex items-center gap-4">
-          <Button variant="ghost" size="sm" as="a" :href="route('firms.index')" class="gap-2">
-            <ArrowLeft class="h-4 w-4" />
-            Back to Firms
-          </Button>
-          <Separator orientation="vertical" class="h-6" />
           <div>
+            <div>
+              <Button variant="link" size="sm" as="a" :href="route('firms.index')" class="gap-2">
+                <ArrowLeft class="h-4 w-4" />
+                Back to Firms
+              </Button>
+            </div>
+
             <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
               {{ firm.name }}
             </h1>
+
             <p v-if="firm.slogan" class="text-muted-foreground mt-1">
               {{ firm.slogan }}
             </p>
@@ -342,12 +381,12 @@ onMounted(() => {
             @click="refreshData"
             :disabled="isLoading"
             class="gap-2">
-            <RefreshCw :class="{ 'animate-spin': isLoading }" class="h-4 w-4" />
+            <ListRestart :class="{ 'animate-spin': isLoading }" class="h-4 w-4" />
             Refresh
           </Button>
 
           <Button variant="outline" size="sm" class="gap-2">
-            <Share2 class="h-4 w-4" />
+            <Forward class="h-4 w-4" />
             Share
           </Button>
 
@@ -622,17 +661,18 @@ onMounted(() => {
                 </Button>
               </CardHeader>
               <CardContent>
-                <div v-if="recentInteractions.length === 0" class="text-center py-8 text-muted-foreground">
+                <div v-if="interactionsArray.length === 0" class="text-center py-8 text-muted-foreground">
                   <MessageSquare class="h-12 w-12 mx-auto mb-4 opacity-50" />
                   <p>No recent interactions</p>
                   <Button variant="outline" size="sm" class="mt-2" as="a" :href="route('interactions.create', { firm: firm.uuid })">
                     Log Interaction
                   </Button>
                 </div>
+
                 <div v-else class="space-y-4">
                   <div
-                    v-for="(interaction, index) in recentInteractions"
-                    :key="interaction.uuid" v-if="index < 5"
+                    v-for="interaction in partialInteractions"
+                    :key="interaction.uuid"
                     class="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
                     <div class="rounded-full bg-purple-100 p-2 dark:bg-purple-900/20">
                       <component :is="getInteractionIcon(interaction.type)" class="h-4 w-4 text-purple-600" />
@@ -640,7 +680,7 @@ onMounted(() => {
                     <div class="flex-1 min-w-0">
                       <div class="flex items-center justify-between mb-1">
                         <h4 class="font-medium text-gray-900 dark:text-gray-100 truncate">
-                          {{ interaction.contact.first_name }} {{ interaction.contact.last_name }}
+                          {{ getContactName(interaction) }}
                         </h4>
                         <span class="text-xs text-muted-foreground">
                           {{ formatDateTime(interaction.interaction_date) }}
@@ -849,7 +889,7 @@ onMounted(() => {
               </Button>
             </CardHeader>
             <CardContent>
-              <div v-if="recentInteractions.length === 0" class="text-center py-12 text-muted-foreground">
+              <div v-if="interactionsArray.length === 0" class="text-center py-12 text-muted-foreground">
                 <MessageSquare class="h-16 w-16 mx-auto mb-4 opacity-50" />
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">No interactions logged</h3>
                 <p class="mb-4">Start tracking your communications with this firm.</p>
@@ -859,7 +899,7 @@ onMounted(() => {
                 </Button>
               </div>
               <div v-else class="space-y-4">
-                <div v-for="interaction in recentInteractions" :key="interaction.uuid" class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                <div v-for="interaction in interactionsArray" :key="interaction.uuid" class="border rounded-lg p-4 hover:shadow-md transition-shadow">
                   <div class="flex items-start gap-4">
                     <div class="rounded-full bg-purple-100 p-3 dark:bg-purple-900/20">
                       <component :is="getInteractionIcon(interaction.type)" class="h-5 w-5 text-purple-600" />
@@ -868,7 +908,7 @@ onMounted(() => {
                     <div class="flex-1 min-w-0">
                       <div class="flex items-center justify-between mb-2">
                         <h4 class="font-medium text-gray-900 dark:text-gray-100">
-                          {{ interaction.contact.first_name }} {{ interaction.contact.last_name }}
+                          {{ getContactName(interaction) }}
                         </h4>
                         <div class="flex items-center gap-2">
                           <Badge variant="outline" class="text-xs">
@@ -888,12 +928,21 @@ onMounted(() => {
                         {{ interaction.description }}
                       </p>
 
+                      <div v-if="interaction.outcome" class="mt-2">
+                        <Badge variant="secondary" class="text-xs">
+                          Outcome: {{ interaction.outcome }}
+                        </Badge>
+                      </div>
+
                       <div class="flex items-center justify-between mt-3">
                         <div class="flex items-center gap-2">
                           <Button variant="ghost" size="sm" as="a" :href="route('interactions.show', interaction.uuid)">
                             <Eye class="h-4 w-4 mr-1" />
                             View Details
                           </Button>
+                        </div>
+                        <div v-if="interaction.duration_minutes" class="text-xs text-muted-foreground">
+                          Duration: {{ interaction.duration_minutes }} minutes
                         </div>
                       </div>
                     </div>

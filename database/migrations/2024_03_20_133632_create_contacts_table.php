@@ -44,7 +44,6 @@ return new class extends Migration
 
       // Indexes for performance
       $table->index(['first_name', 'last_name']);
-      $table->index('firm_id');
       $table->index('job_title');
       $table->index('created_at');
       $table->index('deleted_at');
@@ -52,7 +51,7 @@ return new class extends Migration
       $table->index('last_interaction_at');
 
       // Full-text search index for better search performance
-      $table->fullText(['first_name', 'last_name', 'middle_name', 'nickname', 'job_title', 'bio']);
+      $table->fullText(['first_name', 'last_name', 'job_title', 'bio']);
     });
   }
 

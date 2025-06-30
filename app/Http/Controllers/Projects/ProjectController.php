@@ -44,7 +44,7 @@ class ProjectController extends Controller
       ]);
     });
 
-    return Inertia::render('Projects/Index', [
+    return Inertia::render('projects/Index', [
       'projects' => $projects,
       'overdueProjects' => $overdueProjects,
       'recentlyActive' => $recentlyActive,
@@ -73,7 +73,7 @@ class ProjectController extends Controller
     $progress = $this->projectService->getProjectProgress($project);
     $timeline = $this->projectService->getProjectTimeline($project);
 
-    return Inertia::render('Projects/Show', [
+    return Inertia::render('projects/Show', [
       'project' => $project,
       'stats' => $stats,
       'progress' => $progress,
@@ -86,7 +86,7 @@ class ProjectController extends Controller
    */
   public function create(Request $request)
   {
-    return Inertia::render('Projects/Create', [
+    return Inertia::render('projects/Create', [
       'contacts' => Contact::with('firm')->get(),
       'firms' => Firm::all(),
       'defaultContact' => $request->contact_id,
@@ -125,7 +125,7 @@ class ProjectController extends Controller
 
     $project->load(['contact.firm']);
 
-    return Inertia::render('Projects/Edit', [
+    return Inertia::render('projects/Edit', [
       'project' => $project,
       'contacts' => Contact::with('firm')->get(),
       'firms' => Firm::all(),

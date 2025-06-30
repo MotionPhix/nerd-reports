@@ -62,8 +62,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/', [\App\Http\Controllers\Firms\FirmController::class, 'index'])->name('index');
     Route::get('/create', [\App\Http\Controllers\Firms\FirmController::class, 'create'])->name('create');
     Route::post('/', [\App\Http\Controllers\Firms\FirmController::class, 'store'])->name('store');
-    Route::get('/{uuid}', [\App\Http\Controllers\Firms\FirmController::class, 'show'])->name('show');
-    Route::get('/{uuid}/edit', [\App\Http\Controllers\Firms\FirmController::class, 'edit'])->name('edit');
+    Route::get('/s/{uuid}', [\App\Http\Controllers\Firms\FirmController::class, 'show'])->name('show');
+    Route::get('/e/{uuid}', [\App\Http\Controllers\Firms\FirmController::class, 'edit'])->name('edit');
     Route::put('/{uuid}', [\App\Http\Controllers\Firms\FirmController::class, 'update'])->name('update');
     Route::patch('/{uuid}', [\App\Http\Controllers\Firms\FirmController::class, 'update'])->name('update.patch');
     Route::delete('/{uuid}', [\App\Http\Controllers\Firms\FirmController::class, 'destroy'])->name('destroy');
@@ -126,8 +126,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/', [\App\Http\Controllers\Contacts\ContactController::class, 'index'])->name('index');
     Route::get('/create', [\App\Http\Controllers\Contacts\ContactController::class, 'create'])->name('create');
     Route::post('/', [\App\Http\Controllers\Contacts\ContactController::class, 'store'])->name('store');
-    Route::get('/{uuid}', [\App\Http\Controllers\Contacts\ContactController::class, 'show'])->name('show');
-    Route::get('/{uuid}/edit', [\App\Http\Controllers\Contacts\ContactController::class, 'edit'])->name('edit');
+    Route::get('/s/{uuid}', [\App\Http\Controllers\Contacts\ContactController::class, 'show'])->name('show');
+    Route::get('/e/{uuid}', [\App\Http\Controllers\Contacts\ContactController::class, 'edit'])->name('edit');
     Route::put('/{uuid}', [\App\Http\Controllers\Contacts\ContactController::class, 'update'])->name('update');
     Route::patch('/{uuid}', [\App\Http\Controllers\Contacts\ContactController::class, 'update'])->name('update.patch');
     Route::delete('/{uuid}', [\App\Http\Controllers\Contacts\ContactController::class, 'destroy'])->name('destroy');

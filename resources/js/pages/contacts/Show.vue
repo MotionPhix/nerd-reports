@@ -23,6 +23,7 @@ import {
   MapPin, Calendar, Tag, Star, Plus, X, Check, Upload, Download,
   MessageCircle, Briefcase, Clock, User, Globe
 } from 'lucide-vue-next'
+import AppSidebarLayout from "@/layouts/AppSidebarLayout.vue"
 
 // Props
 const props = defineProps({
@@ -178,25 +179,30 @@ const formatDateTime = (dateString: string) => {
     minute: '2-digit'
   })
 }
+
+defineOptions({
+  layout: AppSidebarLayout
+})
 </script>
 
 <template>
   <Head :title="contact.full_name" />
 
-  <AppLayout :title="contact.full_name">
+  <div class="p-6 space-y-6">
+
     <div class="flex items-center justify-between">
         <div class="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            @click="goBack"
-            class="flex items-center gap-2"
-          >
-            <ArrowLeft class="h-4 w-4" />
-            Back to Contacts
-          </Button>
-          <Separator orientation="vertical" class="h-6" />
           <div>
+            <div>
+              <Button
+                variant="link"
+                @click="goBack"
+                class="flex items-center gap-2">
+                <ArrowLeft class="h-4 w-4" />
+                All contacts
+              </Button>
+            </div>
+
             <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
               {{ contact.full_name }}
             </h2>
@@ -250,9 +256,9 @@ const formatDateTime = (dateString: string) => {
         </div>
       </div>
 
-    <div class="py-6">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="grid gap-6 lg:grid-cols-3">
+    <div>
+
+      <div class="grid gap-6 lg:grid-cols-3">
           <!-- Main Content -->
           <div class="lg:col-span-2 space-y-6">
             <!-- Contact Overview -->
@@ -810,7 +816,7 @@ const formatDateTime = (dateString: string) => {
             </Card>
           </div>
         </div>
-      </div>
+
     </div>
 
     <!-- Delete Confirmation Dialog -->
@@ -1008,5 +1014,6 @@ const formatDateTime = (dateString: string) => {
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  </AppLayout>
+
+  </div>
 </template>
