@@ -184,7 +184,8 @@ const formatDateTime = (dateString: string) => {
   <Head :title="contact.full_name" />
 
   <AppLayout :title="contact.full_name">
-    <div class="flex items-center justify-between">
+    <template #header>
+      <div class="flex items-center justify-between">
         <div class="flex items-center gap-4">
           <Button
             variant="ghost"
@@ -249,6 +250,7 @@ const formatDateTime = (dateString: string) => {
           </DropdownMenu>
         </div>
       </div>
+    </template>
 
     <div class="py-6">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
