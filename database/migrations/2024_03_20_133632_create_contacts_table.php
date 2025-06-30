@@ -12,29 +12,47 @@ return new class extends Migration
   public function up(): void
   {
     Schema::create('contacts', function (Blueprint $table) {
-      $table->id();
+      // Primary key - UUID
+      $table->uuid('uuid')->primary();
 
-      $table->uuid('uuid')->unique();
+      // Basic contact information
+      $table->string('first_name');
+      $table->string('last_name');
+      $table->string('middle_name')->nullable();
+      $table->string('nickname')->nullable();
 
-      $table->string('first_name', 50);
-
-      $table->string('last_name', 50);
-
-      $table->string('job_title', 70)->nullable();
-
-      $table->enum('title', ['mr', 'mrs', 'ms', 'sr', 'dr', 'prof'])->nullable();
-
-      $table->string('middle_name', 50)->nullable();
-
-      $table->string('nickname', 50)->nullable();
-
+      // Professional information
+      $table->string('job_title')->nullable();
+      $table->string('title')->nullable(); // Mr., Mrs., Dr., etc.
       $table->text('bio')->nullable();
 
+      // Firm relationship
+      $table->uuid('firm_id')->nullable();
+      $table->foreign('firm_id')->references('uuid')->on('firms')->onDelete('set null');
+
+      // Activity tracking
+      $table->timestamp('last_viewed_at')->nullable();
+      $table->timestamp('last_interaction_at')->nullable();
+
+      // Metadata
+      $table->json('metadata')->nullable();
+      $table->text('notes')->nullable();
+
+      // Timestamps
+      $table->timestamps();
       $table->softDeletes();
 
-      $table->foreignUuid('firm_id')->nullable()->constrained('firms', 'uuid');
+      // Indexes for performance
+      $table->index(['first_name', 'last_name']);
+      $table->index('firm_id');
+      $table->index('job_title');
+      $table->index('created_at');
+      $table->index('deleted_at');
+      $table->index('last_viewed_at');
+      $table->index('last_interaction_at');
 
-      $table->timestamps();
+      // Full-text search index for better search performance
+      $table->fullText(['first_name', 'last_name', 'middle_name', 'nickname', 'job_title', 'bio']);
     });
   }
 

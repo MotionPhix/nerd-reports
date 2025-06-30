@@ -120,15 +120,57 @@ Route::middleware('auth')->group(function () {
   });
 
   // Existing Routes (keeping your current structure)
-  Route::prefix('contacts')->group(function () {
-    Route::get('/', \App\Http\Controllers\Contacts\Index::class)->name('contacts.index');
-    Route::get('/c/new', \App\Http\Controllers\Contacts\Form::class)->name('contacts.create');
-    Route::post('/store', \App\Http\Controllers\Contacts\Store::class)->name('contacts.store');
-    Route::get('/s/{contact:cid}', \App\Http\Controllers\Contacts\Show::class)->name('contacts.show');
-    Route::get('/e/{contact:cid}', \App\Http\Controllers\Contacts\Form::class)->name('contacts.edit');
-    Route::patch('/u/{contact:cid}', \App\Http\Controllers\Contacts\Update::class)->name('contacts.update');
-    Route::delete('/d/{ids}', \App\Http\Controllers\Contacts\Destroy::class)->name('contacts.destroy');
-    Route::put('/r/{contact:cid}', \App\Http\Controllers\Contacts\Restore::class)->name('contacts.restore');
+  // Contact Management Routes (Updated)
+  Route::prefix('contacts')->name('contacts.')->group(function () {
+    // Main CRUD routes
+    Route::get('/', [\App\Http\Controllers\Contacts\ContactController::class, 'index'])->name('index');
+    Route::get('/create', [\App\Http\Controllers\Contacts\ContactController::class, 'create'])->name('create');
+    Route::post('/', [\App\Http\Controllers\Contacts\ContactController::class, 'store'])->name('store');
+    Route::get('/{uuid}', [\App\Http\Controllers\Contacts\ContactController::class, 'show'])->name('show');
+    Route::get('/{uuid}/edit', [\App\Http\Controllers\Contacts\ContactController::class, 'edit'])->name('edit');
+    Route::put('/{uuid}', [\App\Http\Controllers\Contacts\ContactController::class, 'update'])->name('update');
+    Route::patch('/{uuid}', [\App\Http\Controllers\Contacts\ContactController::class, 'update'])->name('update.patch');
+    Route::delete('/{uuid}', [\App\Http\Controllers\Contacts\ContactController::class, 'destroy'])->name('destroy');
+
+    // Search and filtering
+    Route::get('/search/autocomplete', [\App\Http\Controllers\Contacts\ContactController::class, 'search'])->name('search');
+    Route::get('/firm/{firmId}/contacts', [\App\Http\Controllers\Contacts\ContactController::class, 'getByFirm'])->name('by-firm');
+
+    // Bulk operations
+    Route::post('/bulk-delete', [\App\Http\Controllers\Contacts\ContactController::class, 'bulkDelete'])->name('bulk-delete');
+    Route::post('/{uuid}/duplicate', [\App\Http\Controllers\Contacts\ContactController::class, 'duplicate'])->name('duplicate');
+
+    // Import/Export functionality
+    Route::get('/export/csv', [\App\Http\Controllers\Contacts\ContactController::class, 'export'])->name('export');
+    Route::get('/import/form', [\App\Http\Controllers\Contacts\ContactController::class, 'showImport'])->name('import.form');
+    Route::post('/import', [\App\Http\Controllers\Contacts\ContactController::class, 'import'])->name('import');
+
+    // Email management
+    Route::post('/{uuid}/emails', [\App\Http\Controllers\Contacts\ContactController::class, 'addEmail'])->name('emails.add');
+    Route::delete('/{uuid}/emails/{emailId}', [\App\Http\Controllers\Contacts\ContactController::class, 'removeEmail'])->name('emails.remove');
+    Route::patch('/{uuid}/emails/{emailId}/primary', [\App\Http\Controllers\Contacts\ContactController::class, 'setPrimaryEmail'])->name('emails.set-primary');
+
+    // Phone management
+    Route::post('/{uuid}/phones', [\App\Http\Controllers\Contacts\ContactController::class, 'addPhone'])->name('phones.add');
+    Route::delete('/{uuid}/phones/{phoneId}', [\App\Http\Controllers\Contacts\ContactController::class, 'removePhone'])->name('phones.remove');
+    Route::patch('/{uuid}/phones/{phoneId}/primary', [\App\Http\Controllers\Contacts\ContactController::class, 'setPrimaryPhone'])->name('phones.set-primary');
+
+    // Avatar management
+    Route::post('/{uuid}/avatar', [\App\Http\Controllers\Contacts\ContactController::class, 'uploadAvatar'])->name('avatar.upload');
+    Route::delete('/{uuid}/avatar', [\App\Http\Controllers\Contacts\ContactController::class, 'removeAvatar'])->name('avatar.remove');
+
+    // Advanced operations
+    Route::post('/merge', [\App\Http\Controllers\Contacts\ContactController::class, 'merge'])->name('merge');
+    Route::put('/{uuid}/restore', [\App\Http\Controllers\Contacts\ContactController::class, 'restore'])->name('restore');
+    Route::delete('/{uuid}/force', [\App\Http\Controllers\Contacts\ContactController::class, 'forceDelete'])->name('force-delete');
+
+    // Statistics and analytics
+    Route::get('/data/stats', [\App\Http\Controllers\Contacts\ContactController::class, 'stats'])->name('stats');
+    Route::get('/data/recent', [\App\Http\Controllers\Contacts\ContactController::class, 'recent'])->name('recent');
+
+    // Special views
+    Route::get('/management/orphaned', [\App\Http\Controllers\Contacts\ContactController::class, 'orphaned'])->name('orphaned');
+    Route::get('/management/duplicates', [\App\Http\Controllers\Contacts\ContactController::class, 'duplicates'])->name('duplicates');
   });
 
   Route::prefix('boards')->group(function () {

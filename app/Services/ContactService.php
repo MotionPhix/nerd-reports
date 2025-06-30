@@ -427,4 +427,308 @@ class ContactService
     do {
       $newEmail = $localPart . '_' . $counter . '@' . $domain;
       $counter++;
-    } while
+    } while (Email::where('email', $newEmail)->exists());
+
+    return $newEmail;
+  }
+
+  /**
+   * Export contacts to array
+   */
+  public function exportContacts(array $filters = []): array
+  {
+    $query = Contact::with(['firm', 'tags', 'emails', 'phones']);
+
+    // Apply filters similar to getPaginatedContacts
+    if (!empty($filters['firm_id'])) {
+      $query->where('firm_id', $filters['firm_id']);
+    }
+
+    if (!empty($filters['tags'])) {
+      $tags = is_array($filters['tags']) ? $filters['tags'] : [$filters['tags']];
+      $query->whereHas('tags', function ($q) use ($tags) {
+        $q->whereIn('name', $tags);
+      });
+    }
+
+    return $query->get()->map(function ($contact) {
+      return [
+        'uuid' => $contact->uuid,
+        'first_name' => $contact->first_name,
+        'last_name' => $contact->last_name,
+        'middle_name' => $contact->middle_name,
+        'nickname' => $contact->nickname,
+        'full_name' => $contact->full_name,
+        'primary_email' => $contact->primary_email,
+        'primary_phone' => $contact->primary_phone_number,
+        'job_title' => $contact->job_title,
+        'title' => $contact->title,
+        'bio' => $contact->bio,
+        'firm' => $contact->firm?->name,
+        'tags' => $contact->tags->pluck('name')->implode(', '),
+        'avatar_url' => $contact->avatar_url,
+        'created_at' => $contact->created_at?->format('Y-m-d H:i:s'),
+        'updated_at' => $contact->updated_at?->format('Y-m-d H:i:s'),
+      ];
+    })->toArray();
+  }
+
+  /**
+   * Add additional email to contact
+   */
+  public function addEmail(Contact $contact, string $email, bool $isPrimary = false): Email
+  {
+    if ($isPrimary) {
+      // Remove primary flag from existing emails
+      $contact->emails()->update(['is_primary_email' => false]);
+    }
+
+    return $contact->emails()->create([
+      'email' => $email,
+      'is_primary_email' => $isPrimary,
+    ]);
+  }
+
+  /**
+   * Add additional phone to contact
+   */
+  public function addPhone(Contact $contact, string $phone, string $countryCode = '+1', string $type = 'mobile', bool $isPrimary = false): Phone
+  {
+    if ($isPrimary) {
+      // Remove primary flag from existing phones
+      $contact->phones()->update(['is_primary_phone' => false]);
+    }
+
+    return $contact->phones()->create([
+      'number' => $phone,
+      'formatted' => $phone,
+      'country_code' => $countryCode,
+      'type' => $type,
+      'is_primary_phone' => $isPrimary,
+    ]);
+  }
+
+  /**
+   * Remove email from contact
+   */
+  public function removeEmail(Contact $contact, string $emailId): bool
+  {
+    $email = $contact->emails()->where('uuid', $emailId)->first();
+
+    if (!$email) {
+      return false;
+    }
+
+    // If removing primary email, make another email primary if exists
+    if ($email->is_primary_email) {
+      $nextEmail = $contact->emails()->where('uuid', '!=', $emailId)->first();
+      if ($nextEmail) {
+        $nextEmail->update(['is_primary_email' => true]);
+      }
+    }
+
+    return $email->delete();
+  }
+
+  /**
+   * Remove phone from contact
+   */
+  public function removePhone(Contact $contact, string $phoneId): bool
+  {
+    $phone = $contact->phones()->where('uuid', $phoneId)->first();
+
+    if (!$phone) {
+      return false;
+    }
+
+    // If removing primary phone, make another phone primary if exists
+    if ($phone->is_primary_phone) {
+      $nextPhone = $contact->phones()->where('uuid', '!=', $phoneId)->first();
+      if ($nextPhone) {
+        $nextPhone->update(['is_primary_phone' => true]);
+      }
+    }
+
+    return $phone->delete();
+  }
+
+  /**
+   * Set primary email
+   */
+  public function setPrimaryEmail(Contact $contact, string $emailId): bool
+  {
+    $email = $contact->emails()->where('uuid', $emailId)->first();
+
+    if (!$email) {
+      return false;
+    }
+
+    // Remove primary flag from all emails
+    $contact->emails()->update(['is_primary_email' => false]);
+
+    // Set this email as primary
+    $email->update(['is_primary_email' => true]);
+
+    return true;
+  }
+
+  /**
+   * Set primary phone
+   */
+  public function setPrimaryPhone(Contact $contact, string $phoneId): bool
+  {
+    $phone = $contact->phones()->where('uuid', $phoneId)->first();
+
+    if (!$phone) {
+      return false;
+    }
+
+    // Remove primary flag from all phones
+    $contact->phones()->update(['is_primary_phone' => false]);
+
+    // Set this phone as primary
+    $phone->update(['is_primary_phone' => true]);
+
+    return true;
+  }
+
+  /**
+   * Get contacts without firms (orphaned contacts)
+   */
+  public function getOrphanedContacts(): Collection
+  {
+    return Contact::with(['tags', 'emails', 'phones'])
+      ->whereNull('firm_id')
+      ->orderBy('first_name')
+      ->orderBy('last_name')
+      ->get();
+  }
+
+  /**
+   * Get contacts with duplicate emails
+   */
+  public function getDuplicateEmailContacts(): Collection
+  {
+    $duplicateEmails = Email::select('email')
+      ->groupBy('email')
+      ->havingRaw('COUNT(*) > 1')
+      ->pluck('email');
+
+    return Contact::with(['firm', 'tags', 'emails', 'phones'])
+      ->whereHas('emails', function ($query) use ($duplicateEmails) {
+        $query->whereIn('email', $duplicateEmails);
+      })
+      ->get();
+  }
+
+  /**
+   * Merge two contacts
+   */
+  public function mergeContacts(Contact $primaryContact, Contact $secondaryContact): Contact
+  {
+    return DB::transaction(function () use ($primaryContact, $secondaryContact) {
+      // Merge emails (avoid duplicates)
+      $secondaryEmails = $secondaryContact->emails;
+      foreach ($secondaryEmails as $email) {
+        $existingEmail = $primaryContact->emails()->where('email', $email->email)->first();
+        if (!$existingEmail) {
+          $email->update(['contact_id' => $primaryContact->id]);
+        }
+      }
+
+      // Merge phones (avoid duplicates)
+      $secondaryPhones = $secondaryContact->phones;
+      foreach ($secondaryPhones as $phone) {
+        $existingPhone = $primaryContact->phones()->where('number', $phone->number)->first();
+        if (!$existingPhone) {
+          $phone->update(['contact_id' => $primaryContact->id]);
+        }
+      }
+
+      // Merge tags
+      $secondaryTags = $secondaryContact->tags->pluck('id')->toArray();
+      $primaryTags = $primaryContact->tags->pluck('id')->toArray();
+      $allTags = array_unique(array_merge($primaryTags, $secondaryTags));
+      $primaryContact->tags()->sync($allTags);
+
+      // Update primary contact with any missing information
+      $updateData = [];
+      if (empty($primaryContact->bio) && !empty($secondaryContact->bio)) {
+        $updateData['bio'] = $secondaryContact->bio;
+      }
+      if (empty($primaryContact->job_title) && !empty($secondaryContact->job_title)) {
+        $updateData['job_title'] = $secondaryContact->job_title;
+      }
+      if (empty($primaryContact->title) && !empty($secondaryContact->title)) {
+        $updateData['title'] = $secondaryContact->title;
+      }
+      if (empty($primaryContact->middle_name) && !empty($secondaryContact->middle_name)) {
+        $updateData['middle_name'] = $secondaryContact->middle_name;
+      }
+      if (empty($primaryContact->nickname) && !empty($secondaryContact->nickname)) {
+        $updateData['nickname'] = $secondaryContact->nickname;
+      }
+
+      if (!empty($updateData)) {
+        $primaryContact->update($updateData);
+      }
+
+      // Transfer media if primary contact doesn't have avatar
+      if (!$primaryContact->hasMedia('avatar') && $secondaryContact->hasMedia('avatar')) {
+        $media = $secondaryContact->getFirstMedia('avatar');
+        if ($media) {
+          $media->move($primaryContact, 'avatar');
+        }
+      }
+
+      // Delete secondary contact
+      $this->forceDeleteContact($secondaryContact);
+
+      return $primaryContact->load(['firm', 'tags', 'emails', 'phones']);
+    });
+  }
+
+  /**
+   * Get contact activity summary
+   */
+  public function getContactActivity(Contact $contact): array
+  {
+    return [
+      'total_emails' => $contact->emails()->count(),
+      'total_phones' => $contact->phones()->count(),
+      'total_tags' => $contact->tags()->count(),
+      'has_avatar' => $contact->hasMedia('avatar'),
+      'has_documents' => $contact->hasMedia('documents'),
+      'created_days_ago' => $contact->created_at?->diffInDays(now()),
+      'last_updated_days_ago' => $contact->updated_at?->diffInDays(now()),
+    ];
+  }
+
+  /**
+   * Import contacts from array data
+   */
+  public function importContacts(array $contactsData): array
+  {
+    $results = [
+      'success' => 0,
+      'failed' => 0,
+      'errors' => []
+    ];
+
+    foreach ($contactsData as $index => $contactData) {
+      try {
+        $this->createContact($contactData);
+        $results['success']++;
+      } catch (\Exception $e) {
+        $results['failed']++;
+        $results['errors'][] = [
+          'row' => $index + 1,
+          'error' => $e->getMessage(),
+          'data' => $contactData
+        ];
+      }
+    }
+
+    return $results;
+  }
+}
