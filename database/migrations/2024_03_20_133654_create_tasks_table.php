@@ -22,8 +22,6 @@ return new class extends Migration
 
       $table->enum('status', ['todo', 'in_progress', 'completed', 'cancelled', 'on_hold', 'review'])->default('todo');
 
-      $table->double('position')->nullable();
-
       $table->enum('priority', ['low', 'medium', 'high', 'urgent'])->default('medium');
 
       $table->decimal('estimated_hours', 8, 2)->nullable();
@@ -37,8 +35,6 @@ return new class extends Migration
       $table->timestamp('due_date')->nullable();
 
       $table->text('notes')->nullable();
-
-      $table->foreignUuid('board_id')->index()->constrained('boards', 'uuid')->onDelete('cascade');
 
       $table->foreignUuid('project_id')->nullable()->index()->constrained('projects', 'uuid')->onDelete('cascade');
 

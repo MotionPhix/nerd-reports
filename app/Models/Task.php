@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use App\Enums\TaskStatus;
+use App\Casts\PurifyHtmlOnGet;
 use App\Enums\TaskPriority;
+use App\Enums\TaskStatus;
 use App\Traits\HasUuid;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -11,28 +12,21 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\DB;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
-use Stevebauman\Purify\Casts\PurifyHtmlOnGet;
 
 class Task extends Model implements HasMedia
 {
   use HasFactory, HasUuid, InteractsWithMedia;
 
-  const POSITION_GAP = 60000;
-
-  const POSITION_MIN = 0.00002;
-
   protected $fillable = [
     'name',
+    'title', // Alternative to name
     'description',
     'assigned_to',
     'assigned_by',
     'status',
-    'board_id',
     'project_id',
-    'position',
     'priority',
     'estimated_hours',
     'actual_hours',
@@ -52,6 +46,7 @@ class Task extends Model implements HasMedia
       'due_date' => 'datetime',
       'description' => PurifyHtmlOnGet::class,
       'name' => PurifyHtmlOnGet::class,
+      'title' => PurifyHtmlOnGet::class,
       'status' => TaskStatus::class,
       'priority' => TaskPriority::class,
       'estimated_hours' => 'decimal:2',
@@ -66,9 +61,12 @@ class Task extends Model implements HasMedia
     );
   }
 
-  public function board(): BelongsTo
+  // Get task title (fallback to name if title is null)
+  protected function title(): Attribute
   {
-    return $this->belongsTo(Board::class, 'board_id', 'uuid');
+    return Attribute::make(
+      get: fn($value) => $value ?? $this->name,
+    );
   }
 
   public function user(): BelongsTo
@@ -102,6 +100,11 @@ class Task extends Model implements HasMedia
     return $this->status === TaskStatus::IN_PROGRESS;
   }
 
+  public function isOverdue(): bool
+  {
+    return $this->due_date && $this->due_date->isPast() && !$this->isCompleted();
+  }
+
   public function getTimeSpent(): ?float
   {
     return $this->actual_hours;
@@ -128,7 +131,7 @@ class Task extends Model implements HasMedia
   public function scopeCompletedInWeek($query, Carbon $startOfWeek, Carbon $endOfWeek)
   {
     return $query->where('status', TaskStatus::COMPLETED)
-                 ->whereBetween('completed_at', [$startOfWeek, $endOfWeek]);
+      ->whereBetween('completed_at', [$startOfWeek, $endOfWeek]);
   }
 
   public function scopeWorkedOnInWeek($query, Carbon $startOfWeek, Carbon $endOfWeek)
@@ -145,33 +148,38 @@ class Task extends Model implements HasMedia
     return $query->where('assigned_to', $userId);
   }
 
+  public function scopeForProject($query, $projectId)
+  {
+    return $query->where('project_id', $projectId);
+  }
+
+  public function scopeOverdue($query)
+  {
+    return $query->whereNotNull('due_date')
+      ->where('due_date', '<', now())
+      ->whereNotIn('status', [TaskStatus::COMPLETED]);
+  }
+
+  public function scopeByStatus($query, $status)
+  {
+    return $query->where('status', $status);
+  }
+
+  public function scopeByPriority($query, $priority)
+  {
+    return $query->where('priority', $priority);
+  }
+
+  // Auto-complete task when marked as completed
   public static function booted(): void
   {
-    static::creating(function ($task) {
+    static::updating(function ($task) {
+      if ($task->isDirty('status') && $task->status === TaskStatus::COMPLETED) {
+        $task->completed_at = now();
+      }
 
-      $task->position = self::query()->where('board_id', $task->board_id)
-          ->orderByDesc('position')
-          ->first()?->position + self::POSITION_GAP;
-
-    });
-
-    static::saved(function ($task) {
-
-      if ($task->position < self::POSITION_MIN) {
-
-        $previousPosition = 0;
-
-        $tasks = DB::table('tasks')
-          ->select('id')
-          ->where('board_id', $task->board_id)
-          ->orderBy('position')
-          ->get();
-
-        foreach ($tasks as $task) {
-          DB::table('tasks')
-            ->where('id', $task->id)
-            ->update(['position' => $previousPosition += self::POSITION_GAP]);
-        }
+      if ($task->isDirty('status') && $task->status === TaskStatus::IN_PROGRESS && !$task->started_at) {
+        $task->started_at = now();
       }
     });
   }

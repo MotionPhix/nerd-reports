@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\PurifyHtmlOnGet;
 use App\Enums\ProjectStatus;
 use App\Traits\HasUuid;
 use Carbon\Carbon;
@@ -10,15 +11,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Stevebauman\Purify\Casts\PurifyHtmlOnGet;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Support\Facades\DB;
 
-/**
- * @property ProjectStatus $status
- * @property PurifyHtmlOnGet $description
- * @property PurifyHtmlOnGet $name
- * @property Carbon $due_date
- */
 class Project extends Model
 {
   use HasFactory, HasUuid;
@@ -27,12 +22,19 @@ class Project extends Model
     'name',
     'description',
     'due_date',
+    'deadline',
     'created_by',
     'contact_id',
     'status',
+    'priority',
+    'estimated_hours',
+    'budget',
+    'hourly_rate',
+    'is_billable',
+    'notes',
   ];
 
-  protected $appends = ['deadline'];
+  protected $appends = ['deadline_human'];
 
   protected $primaryKey = 'uuid';
 
@@ -44,9 +46,14 @@ class Project extends Model
   {
     return [
       'due_date' => 'date:j F, Y',
+      'deadline' => 'date:j F, Y',
       'description' => PurifyHtmlOnGet::class,
       'name' => PurifyHtmlOnGet::class,
       'status' => ProjectStatus::class,
+      'is_billable' => 'boolean',
+      'estimated_hours' => 'decimal:2',
+      'budget' => 'decimal:2',
+      'hourly_rate' => 'decimal:2',
     ];
   }
 
@@ -57,10 +64,10 @@ class Project extends Model
     );
   }
 
-  protected function deadline(): Attribute
+  protected function deadlineHuman(): Attribute
   {
     return Attribute::make(
-      get: fn () => $this->due_date?->diffForHumans()
+      get: fn () => $this->deadline?->diffForHumans()
     );
   }
 
@@ -77,11 +84,6 @@ class Project extends Model
   public function author(): BelongsTo
   {
     return $this->belongsTo(User::class, 'created_by');
-  }
-
-  public function boards(): HasMany
-  {
-    return $this->hasMany(Board::class, 'project_id', 'uuid');
   }
 
   public function tasks(): HasMany
@@ -104,24 +106,6 @@ class Project extends Model
         ->orderBy('users.last_name')
         ->get()
     );
-  }
-
-  public function scopeTransferOwnershipTo($newOwnerId)
-  {
-    $currentOwner = $this->owner->first();
-
-    // Check if the current owner has any tasks on the project
-    $hasTasks = $this->tasks()->where('user_id', $currentOwner->id)->exists();
-
-    // If the current owner doesn't have tasks, remove them from the project_user table
-    if (!$hasTasks && $currentOwner) {
-      $this->users()->detach($currentOwner);
-    }
-
-    // Update the new owner's role to 'owner'
-    $this->users()->syncWithoutDetaching([
-      $newOwnerId => ['role' => 'owner'],
-    ]);
   }
 
   // Reporting helper methods
@@ -171,5 +155,66 @@ class Project extends Model
         $taskQuery->forUser($userId);
       }
     });
+  }
+
+  // Project status helpers
+  public function isActive(): bool
+  {
+    return in_array($this->status, ['in_progress', 'approved']);
+  }
+
+  public function isCompleted(): bool
+  {
+    return $this->status === 'completed';
+  }
+
+  public function isOverdue(): bool
+  {
+    return $this->due_date && $this->due_date->isPast() && !$this->isCompleted();
+  }
+
+  // Project progress calculation
+  public function getProgress(): array
+  {
+    $totalTasks = $this->tasks()->count();
+    $completedTasks = $this->tasks()->where('status', 'completed')->count();
+
+    $percentage = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100) : 0;
+
+    return [
+      'percentage' => $percentage,
+      'completed_tasks' => $completedTasks,
+      'total_tasks' => $totalTasks,
+      'status' => $this->getProgressStatus($percentage),
+    ];
+  }
+
+  private function getProgressStatus(int $percentage): string
+  {
+    if ($percentage === 100) return 'completed';
+    if ($percentage >= 75) return 'nearly_done';
+    if ($percentage >= 50) return 'on_track';
+    if ($percentage >= 25) return 'started';
+    return 'not_started';
+  }
+
+  // Project statistics
+  public function getStats(): array
+  {
+    $tasks = $this->tasks;
+
+    return [
+      'total_tasks' => $tasks->count(),
+      'completed_tasks' => $tasks->where('status', 'completed')->count(),
+      'in_progress_tasks' => $tasks->where('status', 'in_progress')->count(),
+      'todo_tasks' => $tasks->where('status', 'todo')->count(),
+      'overdue_tasks' => $tasks->filter(function ($task) {
+        return $task->due_date && $task->due_date->isPast() && $task->status !== 'completed';
+      })->count(),
+      'total_hours' => $tasks->sum('actual_hours') ?? 0,
+      'estimated_hours' => $tasks->sum('estimated_hours') ?? 0,
+      'completion_rate' => $this->getProgress()['percentage'],
+      'team_members' => $tasks->whereNotNull('assigned_to')->pluck('assigned_to')->unique()->count(),
+    ];
   }
 }

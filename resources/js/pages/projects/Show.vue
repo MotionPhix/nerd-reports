@@ -2,7 +2,7 @@
 import { ref, computed, onMounted } from "vue"
 import { router } from "@inertiajs/vue3"
 import { toast } from "vue-sonner"
-import { useDark } from "@vueuse/core"
+import { useDark, useStorage } from "@vueuse/core"
 import {
   Card,
   CardHeader,
@@ -198,7 +198,7 @@ const props = defineProps<Props>()
 // Reactive state
 const isLoading = ref(false)
 const isDeleting = ref(false)
-const activeTab = ref("overview")
+const activeTab = useStorage("project_tabs", "overview")
 const isDark = useDark()
 
 // Computed properties
@@ -995,7 +995,7 @@ onMounted(() => {
               <Plus class="h-4 w-4" />
               Upload File
             </Button>
-            
+
             <CardContent>
               <div class="text-center py-12 text-muted-foreground">
                 <FileText class="h-16 w-16 mx-auto mb-4 opacity-50" />

@@ -1,15 +1,13 @@
 import ToastItem from '@/Components/ToastItem.vue'
 import { random } from 'lodash'
 import { defineStore } from 'pinia'
-import { useToast } from 'vue-toastification'
+import { toast } from "vue-sonner"
 
 interface toastState {
   type?: string
   title?: string|boolean
   message: string
 }
-
-const toast = useToast()
 
 export const useToastStore = defineStore('toast', () => {
 

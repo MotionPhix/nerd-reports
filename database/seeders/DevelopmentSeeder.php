@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\Board;
 use App\Models\Contact;
 use App\Models\Firm;
 use App\Models\Interaction;
@@ -71,40 +70,17 @@ class DevelopmentSeeder extends Seeder
       }
     });
 
-    // Create boards for projects
-    $this->command->info('📊 Creating boards...');
-    $boards = collect();
-
-    $projects->each(function ($project) use (&$boards) {
-
-      $boardNames = ['To Do', 'In Progress', 'Review', 'Done', 'Backlog'];
-
-      $boardName = $boardNames[fake()->numberBetween(0, count($boardNames) - 1)];
-
-      $slug = strtolower(str_replace(' ', '-', $boardName)) . '-' . Str::uuid();
-
-      $board = Board::factory()->create([
-        'project_id' => $project->uuid,
-        'name' => $boardName,
-        'slug' => $slug,
-      ]);
-
-      $boards->push($board);
-
-    });
-
     // Create tasks
     $this->command->info('✅ Creating tasks...');
     $allUsers = collect([$admin, $projectManager])->merge($teamMembers)->merge($regularUsers);
 
-    $boards->each(function ($board) use ($allUsers) {
+    $projects->each(function ($project) use ($allUsers) {
       $taskCount = fake()->numberBetween(3, 12);
 
       Task::factory()
         ->count($taskCount)
         ->create([
-          'board_id' => $board->uuid,
-          'project_id' => $board->project_id,
+          'project_id' => $project->id,
           'assigned_to' => $allUsers->random()->id,
           'assigned_by' => $allUsers->random()->id,
         ]);
@@ -112,11 +88,11 @@ class DevelopmentSeeder extends Seeder
 
     // Create some tasks completed this week for reporting
     $this->command->info('📈 Creating weekly completed tasks...');
+
     Task::factory()
       ->completedThisWeek()
       ->count(15)
       ->create([
-        'board_id' => $boards->random()->uuid,
         'project_id' => $projects->random()->uuid,
         'assigned_to' => $allUsers->random()->id,
         'assigned_by' => $allUsers->random()->id,
@@ -213,7 +189,6 @@ class DevelopmentSeeder extends Seeder
     $this->command->info("🏢 Firms: " . Firm::count());
     $this->command->info("👤 Contacts: " . Contact::count());
     $this->command->info("📋 Projects: " . Project::count());
-    $this->command->info("📊 Boards: " . Board::count());
     $this->command->info("✅ Tasks: " . Task::count());
     $this->command->info("💬 Interactions: " . Interaction::count());
     $this->command->info("📈 Reports: " . Report::count());

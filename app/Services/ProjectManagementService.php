@@ -3,8 +3,6 @@
 namespace App\Services;
 
 use App\Enums\ProjectStatus;
-use App\Models\Board;
-use App\Models\Contact;
 use App\Models\Project;
 use App\Models\User;
 use Carbon\Carbon;
@@ -29,9 +27,6 @@ class ProjectManagementService
         'due_date' => isset($data['due_date']) ? Carbon::parse($data['due_date']) : null,
       ]);
 
-      // Create default boards for the project
-      $this->createDefaultBoards($project);
-
       Log::info("Project created", [
         'project_id' => $project->uuid,
         'name' => $project->name,
@@ -55,6 +50,13 @@ class ProjectManagementService
       'description' => $data['description'] ?? $project->description,
       'status' => $data['status'] ?? $project->status,
       'due_date' => isset($data['due_date']) ? Carbon::parse($data['due_date']) : $project->due_date,
+      'deadline' => $data['deadline'] ?? null,
+      'priority' => $data['priority'] ?? 'medium',
+      'estimated_hours' => $data['estimated_hours'] ?? null,
+      'budget' => $data['budget'] ?? null,
+      'hourly_rate' => $data['hourly_rate'] ?? null,
+      'is_billable' => $data['is_billable'] ?? false,
+      'notes' => $data['notes'] ?? null,
     ]);
 
     // Handle status changes
@@ -79,7 +81,7 @@ class ProjectManagementService
       ->orWhereHas('tasks', function ($q) use ($user) {
         $q->where('assigned_to', $user->id);
       })
-      ->with(['contact.firm', 'tasks', 'boards']);
+      ->with(['contact.firm', 'tasks']);
 
     // Apply filters
     if (isset($filters['status'])) {
@@ -160,7 +162,6 @@ class ProjectManagementService
       'completion_rate' => $tasks->count() > 0 ? round(($completedTasks->count() / $tasks->count()) * 100, 1) : 0,
       'average_task_completion_time' => $this->calculateAverageCompletionTime($completedTasks),
       'team_members' => $tasks->pluck('assigned_to')->unique()->count(),
-      'boards_count' => $project->boards()->count(),
     ];
   }
 
@@ -262,27 +263,6 @@ class ProjectManagementService
       'total_tasks' => $totalTasks,
       'status' => $status,
     ];
-  }
-
-  /**
-   * Create default boards for a new project
-   */
-  private function createDefaultBoards(Project $project): void
-  {
-    $defaultBoards = [
-      ['name' => 'To Do', 'slug' => 'todo'],
-      ['name' => 'In Progress', 'slug' => 'in-progress'],
-      ['name' => 'Review', 'slug' => 'review'],
-      ['name' => 'Done', 'slug' => 'done'],
-    ];
-
-    foreach ($defaultBoards as $boardData) {
-      Board::create([
-        'name' => $boardData['name'],
-        'slug' => $boardData['slug'],
-        'project_id' => $project->uuid,
-      ]);
-    }
   }
 
   /**

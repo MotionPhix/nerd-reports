@@ -90,8 +90,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/', [ProjectController::class, 'index'])->name('index');
     Route::get('/create', [ProjectController::class, 'create'])->name('create');
     Route::post('/', [ProjectController::class, 'store'])->name('store');
-    Route::get('/{project}', [ProjectController::class, 'show'])->name('show');
-    Route::get('/{project}/edit', [ProjectController::class, 'edit'])->name('edit');
+    Route::get('/s/{project}', [ProjectController::class, 'show'])->name('show');
+    Route::get('/e/{project}', [ProjectController::class, 'edit'])->name('edit');
     Route::patch('/{project}', [ProjectController::class, 'update'])->name('update');
     Route::delete('/{project}', [ProjectController::class, 'destroy'])->name('destroy');
 
@@ -171,12 +171,6 @@ Route::middleware('auth')->group(function () {
     // Special views
     Route::get('/management/orphaned', [\App\Http\Controllers\Contacts\ContactController::class, 'orphaned'])->name('orphaned');
     Route::get('/management/duplicates', [\App\Http\Controllers\Contacts\ContactController::class, 'duplicates'])->name('duplicates');
-  });
-
-  Route::prefix('boards')->group(function () {
-    Route::post('/s/{project:pid}', \App\Http\Controllers\Boards\Store::class)->name('boards.store');
-    Route::patch('/u/{project}/{board}', \App\Http\Controllers\Boards\Update::class)->name('boards.update');
-    Route::delete('d/{project}/{board}', \App\Http\Controllers\Boards\Destroy::class)->name('boards.destroy');
   });
 
   Route::prefix('comments')->group(function () {

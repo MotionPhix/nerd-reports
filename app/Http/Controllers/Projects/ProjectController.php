@@ -7,6 +7,8 @@ use App\Services\ProjectManagementService;
 use App\Models\Project;
 use App\Models\Contact;
 use App\Models\Firm;
+use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -61,23 +63,113 @@ class ProjectController extends Controller
   {
     $this->authorize('view', $project);
 
+    // Load basic relationships (removed boards)
     $project->load([
       'contact.firm',
       'author',
-      'boards.tasks.user',
       'tasks.user',
       'interactions.user'
     ]);
 
+    // Get project statistics and progress
     $stats = $this->projectService->getProjectStats($project);
     $progress = $this->projectService->getProjectProgress($project);
-    $timeline = $this->projectService->getProjectTimeline($project);
+
+    // Get tasks with proper relationships
+    $tasks = $project->tasks()->with(['user'])->get()->map(function ($task) {
+      return [
+        'uuid' => $task->uuid,
+        'title' => $task->title ?? $task->name,
+        'description' => $task->description,
+        'status' => $task->status,
+        'priority' => $task->priority ?? 'medium',
+        'due_date' => $task->due_date,
+        'assigned_to' => $task->assigned_to,
+        'estimated_hours' => $task->estimated_hours,
+        'actual_hours' => $task->actual_hours,
+        'created_at' => $task->created_at,
+        'updated_at' => $task->updated_at,
+        'assignee' => $task->user ? [
+          'uuid' => $task->user->uuid ?? $task->user->id,
+          'name' => $task->user->first_name . ' ' . $task->user->last_name,
+          'avatar_url' => $task->user->avatar_url ?? null,
+        ] : null,
+      ];
+    });
+
+    // Get team members (users assigned to tasks)
+    $teamMembers = $project->tasks()
+      ->with('user')
+      ->whereNotNull('assigned_to')
+      ->get()
+      ->pluck('user')
+      ->unique('id')
+      ->filter()
+      ->map(function ($user) use ($project) {
+        $userTasks = $project->tasks()->where('assigned_to', $user->id)->get();
+        return [
+          'uuid' => $user->uuid ?? $user->id,
+          'name' => $user->first_name . ' ' . $user->last_name,
+          'email' => $user->email,
+          'role' => 'Team Member',
+          'avatar_url' => $user->avatar_url ?? null,
+          'hours_logged' => $userTasks->sum('actual_hours') ?? 0,
+          'tasks_assigned' => $userTasks->count(),
+          'tasks_completed' => $userTasks->where('status', 'completed')->count(),
+        ];
+      })
+      ->values();
+
+    // Get recent time entries (placeholder - implement based on your time tracking system)
+    $recentTimeEntries = collect();
+
+    // Get recent activity from interactions and task updates
+    $recentActivity = collect();
+
+    // Add project creation activity
+    $recentActivity->push([
+      'id' => 'project_created',
+      'type' => 'project_created',
+      'description' => 'Project was created',
+      'user' => [
+        'name' => $project->author->first_name . ' ' . $project->author->last_name,
+        'avatar_url' => $project->author->avatar_url ?? null,
+      ],
+      'created_at' => Carbon::parse($project->created_at)->toISOString(),
+    ]);
+
+    // Add recent task activities
+    $project->tasks()->latest()->take(5)->get()->each(function ($task) use (&$recentActivity) {
+      $recentActivity->push([
+        'id' => 'task_' . $task->id,
+        'type' => 'task_created',
+        'description' => "Task '{$task->title}' was created",
+        'user' => [
+          'name' => $task->user ? $task->user->first_name . ' ' . $task->user->last_name : 'System',
+          'avatar_url' => $task->user->avatar_url ?? null,
+        ],
+        'created_at' => Carbon::parse($task->created_at)->toISOString(),
+      ]);
+    });
+
+    // Sort by date and take latest 10
+    $recentActivity = $recentActivity->sortByDesc('created_at')->take(10)->values();
+
+    // Merge stats and progress into project data
+    $projectData = array_merge($project->toArray(), [
+      'progress' => $progress,
+      'stats' => array_merge($stats, [
+        'budget_used' => 0, // Implement based on your billing system
+        'budget_remaining' => $project->budget ?? 0,
+      ]),
+    ]);
 
     return Inertia::render('projects/Show', [
-      'project' => $project,
-      'stats' => $stats,
-      'progress' => $progress,
-      'timeline' => $timeline,
+      'project' => $projectData,
+      'tasks' => $tasks,
+      'teamMembers' => $teamMembers,
+      'recentTimeEntries' => $recentTimeEntries,
+      'recentActivity' => $recentActivity,
     ]);
   }
 
@@ -89,7 +181,8 @@ class ProjectController extends Controller
     return Inertia::render('projects/Create', [
       'contacts' => Contact::with('firm')->get(),
       'firms' => Firm::all(),
-      'defaultContact' => $request->contact_id,
+      'preselectedContact' => $request->contact_id,
+      'preselectedFirm' => $request->firm_id,
     ]);
   }
 
@@ -103,7 +196,17 @@ class ProjectController extends Controller
       'description' => 'nullable|string',
       'contact_id' => 'required|exists:contacts,uuid',
       'due_date' => 'nullable|date|after:today',
+      'deadline' => 'nullable|date|after:today',
       'status' => 'nullable|in:in_progress,approved,completed,cancelled,done',
+      'priority' => 'nullable|in:low,medium,high',
+      'estimated_hours' => 'nullable|numeric|min:0',
+      'budget' => 'nullable|numeric|min:0',
+      'hourly_rate' => 'nullable|numeric|min:0',
+      'is_billable' => 'boolean',
+      'notes' => 'nullable|string',
+      'tags' => 'nullable|array',
+      'tags.*' => 'string|max:50',
+      'send_notification' => 'boolean',
     ]);
 
     try {
@@ -123,7 +226,7 @@ class ProjectController extends Controller
   {
     $this->authorize('update', $project);
 
-    $project->load(['contact.firm']);
+    $project->load(['contact.firm', 'tags']);
 
     return Inertia::render('projects/Edit', [
       'project' => $project,
@@ -143,7 +246,16 @@ class ProjectController extends Controller
       'name' => 'required|string|max:255',
       'description' => 'nullable|string',
       'due_date' => 'nullable|date',
+      'deadline' => 'nullable|date',
       'status' => 'required|in:in_progress,approved,completed,cancelled,done',
+      'priority' => 'nullable|in:low,medium,high',
+      'estimated_hours' => 'nullable|numeric|min:0',
+      'budget' => 'nullable|numeric|min:0',
+      'hourly_rate' => 'nullable|numeric|min:0',
+      'is_billable' => 'boolean',
+      'notes' => 'nullable|string',
+      'tags' => 'nullable|array',
+      'tags.*' => 'string|max:50',
     ]);
 
     try {
@@ -153,6 +265,26 @@ class ProjectController extends Controller
         ->with('success', 'Project updated successfully!');
     } catch (\Exception $e) {
       return back()->withErrors(['error' => 'Failed to update project: ' . $e->getMessage()]);
+    }
+  }
+
+  /**
+   * Update project status
+   */
+  public function updateStatus(Request $request, Project $project)
+  {
+    $this->authorize('update', $project);
+
+    $request->validate([
+      'status' => 'required|in:in_progress,approved,completed,cancelled,done',
+    ]);
+
+    try {
+      $project->update(['status' => $request->status]);
+
+      return back()->with('success', 'Project status updated successfully!');
+    } catch (\Exception $e) {
+      return back()->withErrors(['error' => 'Failed to update project status: ' . $e->getMessage()]);
     }
   }
 
