@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { router } from '@inertiajs/vue3'
 import { toast } from 'vue-sonner'
 import { useDark, useStorage } from '@vueuse/core';
@@ -67,6 +67,7 @@ import {
   BarChart3
 } from 'lucide-vue-next'
 import AppSidebarLayout from '@/layouts/AppSidebarLayout.vue'
+import { debounce } from 'lodash-es'
 
 // Types
 interface Contact {
@@ -148,7 +149,6 @@ const dueDateTo = ref(props.filters.due_date_to || '')
 const showOverdueOnly = ref(props.filters.overdue || false)
 const orderBy = ref(props.filters.order_by || 'created_at')
 const orderDirection = ref(props.filters.order_direction || 'desc')
-const isDark = useDark()
 
 // Computed properties
 const filteredProjects = computed(() => {
@@ -274,6 +274,9 @@ const applyFilters = () => {
   })
 }
 
+// Debounced version for search input
+const debouncedApplyFilters = debounce(applyFilters, 500)
+
 const clearFilters = () => {
   searchQuery.value = ''
   selectedStatus.value = ''
@@ -317,6 +320,15 @@ const refreshData = () => {
     }
   })
 }
+
+// Watchers for automatic filter application
+watch(searchQuery, () => {
+  debouncedApplyFilters()
+})
+
+watch([selectedStatus, selectedContact, selectedFirm, dueDateFrom, dueDateTo, showOverdueOnly, orderBy, orderDirection], () => {
+  applyFilters()
+})
 
 // Layout
 defineOptions({
@@ -452,7 +464,6 @@ onMounted(() => {
                 v-model="searchQuery"
                 placeholder="Search projects..."
                 class="pl-10"
-                @keydown.enter="applyFilters"
               />
             </div>
           </div>
@@ -510,11 +521,6 @@ onMounted(() => {
 
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div class="flex items-center gap-4">
-            <Button @click="applyFilters" :disabled="isLoading" class="gap-2">
-              <Search class="h-4 w-4" />
-              Apply Filters
-            </Button>
-
             <Button
               v-if="hasActiveFilters"
               variant="outline"
@@ -524,6 +530,11 @@ onMounted(() => {
               <XCircle class="h-4 w-4" />
               Clear Filters
             </Button>
+
+            <div v-if="isLoading" class="flex items-center gap-2 text-sm text-muted-foreground">
+              <RefreshCw class="h-4 w-4 animate-spin" />
+              Applying filters...
+            </div>
           </div>
 
           <div class="flex items-center gap-2">
@@ -579,7 +590,7 @@ onMounted(() => {
           </Button>
         </div>
 
-        <div v-else class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <div v-else class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <Card v-for="project in filteredProjects" :key="project.uuid" class="group hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
             <CardHeader class="pb-3">
               <div class="flex items-start gap-3">
@@ -720,7 +731,6 @@ onMounted(() => {
         </div>
         <div v-else class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <Card v-for="project in filteredProjects" :key="project.uuid" class="group hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
-            <!-- Same card content as above -->
             <CardHeader class="pb-3">
               <div class="flex items-start gap-3">
                 <div class="flex-1 min-w-0 space-y-1">
@@ -871,7 +881,133 @@ onMounted(() => {
 
           <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             <Card v-for="project in filteredProjects" :key="project.uuid" class="group hover:shadow-lg transition-all duration-200 hover:-translate-y-1 border-red-200 dark:border-red-800">
-              <!-- Same card content as above -->
+              <!-- Same card content structure as above -->
+              <CardHeader class="pb-3">
+                <div class="flex items-start gap-3">
+                  <div class="flex-1 min-w-0 space-y-1">
+                    <CardTitle class="text-lg leading-tight">
+                      <a
+                        :href="route('projects.show', project.uuid)"
+                        class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors line-clamp-2 block"
+                        :title="project.name"
+                      >
+                        {{ project.name }}
+                      </a>
+                    </CardTitle>
+                    <CardDescription class="text-sm truncate">
+                      {{ project.contact.full_name }}
+                      <span v-if="project.contact.firm" class="text-xs opacity-75">
+                        • {{ project.contact.firm.name }}
+                      </span>
+                    </CardDescription>
+                  </div>
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" class="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <MoreHorizontal class="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      <DropdownMenuItem as="a" :href="route('projects.show', project.uuid)" class="gap-2">
+                        <Eye class="h-4 w-4" />
+                        View Project
+                      </DropdownMenuItem>
+                      <DropdownMenuItem as="a" :href="route('projects.edit', project.uuid)" class="gap-2">
+                        <Edit class="h-4 w-4" />
+                        Edit Project
+                      </DropdownMenuItem>
+                      <DropdownMenuItem as="a" :href="route('projects.stats', project.uuid)" class="gap-2">
+                        <BarChart3 class="h-4 w-4" />
+                        View Stats
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem @click="archiveProject(project)" class="gap-2">
+                        <Archive class="h-4 w-4" />
+                        Archive
+                      </DropdownMenuItem>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <DropdownMenuItem class="text-red-600 dark:text-red-400 gap-2">
+                            <Trash2 class="h-4 w-4" />
+                            Delete
+                          </DropdownMenuItem>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Project</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete "{{ project.name }}"? This action cannot be undone
+                              and will remove all associated tasks and data.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction @click="deleteProject(project)" class="bg-red-600 hover:bg-red-700">
+                              Delete Project
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+
+                <div class="flex items-center gap-2 mt-3">
+                  <Badge :class="getStatusColor(project.status)" class="gap-1 text-xs">
+                    <component :is="getStatusIcon(project.status)" class="h-3 w-3" />
+                    {{ project.status.replace('_', ' ') }}
+                  </Badge>
+
+                  <Badge v-if="isOverdue(project)" variant="destructive" class="gap-1 text-xs">
+                    <AlertTriangle class="h-3 w-3" />
+                    Overdue
+                  </Badge>
+                </div>
+              </CardHeader>
+
+              <CardContent class="space-y-4">
+                <!-- Progress -->
+                <div class="space-y-2">
+                  <div class="flex items-center justify-between text-sm">
+                    <span class="text-muted-foreground">Progress</span>
+                    <span class="font-medium">{{ project.progress.percentage }}%</span>
+                  </div>
+                  <div class="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+                    <div
+                      class="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                      :style="{ width: `${project.progress.percentage}%` }"
+                    ></div>
+                  </div>
+                  <div class="flex items-center justify-between text-xs text-muted-foreground">
+                    <span>{{ project.progress.completed_tasks }}/{{ project.progress.total_tasks }} tasks</span>
+                    <span>{{ project.stats.team_members }} members</span>
+                  </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="grid grid-cols-3 gap-3 text-center">
+                  <div class="p-2 bg-muted/50 rounded-lg">
+                    <div class="text-sm font-medium">{{ project.stats.total_hours }}</div>
+                    <div class="text-xs text-muted-foreground">Hours</div>
+                  </div>
+                  <div class="p-2 bg-muted/50 rounded-lg">
+                    <div class="text-sm font-medium">{{ project.stats.overdue_tasks }}</div>
+                    <div class="text-xs text-muted-foreground">Overdue</div>
+                  </div>
+                  <div class="p-2 bg-muted/50 rounded-lg">
+                    <div class="text-sm font-medium">{{ project.stats.completion_rate }}%</div>
+                    <div class="text-xs text-muted-foreground">Complete</div>
+                  </div>
+                </div>
+
+                <!-- Dates -->
+                <div class="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t">
+                  <span>Created {{ formatDate(project.created_at) }}</span>
+                  <span v-if="project.due_date">Due {{ formatDate(project.due_date) }}</span>
+                </div>
+              </CardContent>
             </Card>
           </div>
         </div>
@@ -886,7 +1022,133 @@ onMounted(() => {
         </div>
         <div v-else class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <Card v-for="project in filteredProjects" :key="project.uuid" class="group hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
-            <!-- Same card content as above -->
+            <!-- Same card content structure as above -->
+            <CardHeader class="pb-3">
+              <div class="flex items-start gap-3">
+                <div class="flex-1 min-w-0 space-y-1">
+                  <CardTitle class="text-lg leading-tight">
+                    <a
+                      :href="route('projects.show', project.uuid)"
+                      class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors line-clamp-2 block"
+                      :title="project.name"
+                    >
+                      {{ project.name }}
+                    </a>
+                  </CardTitle>
+                  <CardDescription class="text-sm truncate">
+                    {{ project.contact.full_name }}
+                    <span v-if="project.contact.firm" class="text-xs opacity-75">
+                      • {{ project.contact.firm.name }}
+                    </span>
+                  </CardDescription>
+                </div>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" class="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <MoreHorizontal class="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                    <DropdownMenuItem as="a" :href="route('projects.show', project.uuid)" class="gap-2">
+                      <Eye class="h-4 w-4" />
+                      View Project
+                    </DropdownMenuItem>
+                    <DropdownMenuItem as="a" :href="route('projects.edit', project.uuid)" class="gap-2">
+                      <Edit class="h-4 w-4" />
+                      Edit Project
+                    </DropdownMenuItem>
+                    <DropdownMenuItem as="a" :href="route('projects.stats', project.uuid)" class="gap-2">
+                      <BarChart3 class="h-4 w-4" />
+                      View Stats
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem @click="archiveProject(project)" class="gap-2">
+                      <Archive class="h-4 w-4" />
+                      Archive
+                    </DropdownMenuItem>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <DropdownMenuItem class="text-red-600 dark:text-red-400 gap-2">
+                          <Trash2 class="h-4 w-4" />
+                          Delete
+                        </DropdownMenuItem>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Project</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to delete "{{ project.name }}"? This action cannot be undone
+                            and will remove all associated tasks and data.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction @click="deleteProject(project)" class="bg-red-600 hover:bg-red-700">
+                            Delete Project
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+
+              <div class="flex items-center gap-2 mt-3">
+                <Badge :class="getStatusColor(project.status)" class="gap-1 text-xs">
+                  <component :is="getStatusIcon(project.status)" class="h-3 w-3" />
+                  {{ project.status.replace('_', ' ') }}
+                </Badge>
+
+                <Badge v-if="isOverdue(project)" variant="destructive" class="gap-1 text-xs">
+                  <AlertTriangle class="h-3 w-3" />
+                  Overdue
+                </Badge>
+              </div>
+            </CardHeader>
+
+            <CardContent class="space-y-4">
+              <!-- Progress -->
+              <div class="space-y-2">
+                <div class="flex items-center justify-between text-sm">
+                  <span class="text-muted-foreground">Progress</span>
+                  <span class="font-medium">{{ project.progress.percentage }}%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+                  <div
+                    class="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                    :style="{ width: `${project.progress.percentage}%` }"
+                  ></div>
+                </div>
+                <div class="flex items-center justify-between text-xs text-muted-foreground">
+                  <span>{{ project.progress.completed_tasks }}/{{ project.progress.total_tasks }} tasks</span>
+                  <span>{{ project.stats.team_members }} members</span>
+                </div>
+              </div>
+
+              <!-- Stats -->
+              <div class="grid grid-cols-3 gap-3 text-center">
+                <div class="p-2 bg-muted/50 rounded-lg">
+                  <div class="text-sm font-medium">{{ project.stats.total_hours }}</div>
+                  <div class="text-xs text-muted-foreground">Hours</div>
+                </div>
+                <div class="p-2 bg-muted/50 rounded-lg">
+                  <div class="text-sm font-medium">{{ project.stats.overdue_tasks }}</div>
+                  <div class="text-xs text-muted-foreground">Overdue</div>
+                </div>
+                <div class="p-2 bg-muted/50 rounded-lg">
+                  <div class="text-sm font-medium">{{ project.stats.completion_rate }}%</div>
+                  <div class="text-xs text-muted-foreground">Complete</div>
+                </div>
+              </div>
+
+              <!-- Dates -->
+              <div class="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t">
+                <span>Created {{ formatDate(project.created_at) }}</span>
+                <span v-if="project.due_date">Due {{ formatDate(project.due_date) }}</span>
+              </div>
+            </CardContent>
           </Card>
         </div>
       </TabsContent>
@@ -900,7 +1162,133 @@ onMounted(() => {
         </div>
         <div v-else class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <Card v-for="project in filteredProjects" :key="project.uuid" class="group hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
-            <!-- Same card content as above -->
+            <!-- Same card content structure as above -->
+            <CardHeader class="pb-3">
+              <div class="flex items-start gap-3">
+                <div class="flex-1 min-w-0 space-y-1">
+                  <CardTitle class="text-lg leading-tight">
+                    <a
+                      :href="route('projects.show', project.uuid)"
+                      class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors line-clamp-2 block"
+                      :title="project.name"
+                    >
+                      {{ project.name }}
+                    </a>
+                  </CardTitle>
+                  <CardDescription class="text-sm truncate">
+                    {{ project.contact.full_name }}
+                    <span v-if="project.contact.firm" class="text-xs opacity-75">
+                      • {{ project.contact.firm.name }}
+                    </span>
+                  </CardDescription>
+                </div>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" class="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <MoreHorizontal class="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                    <DropdownMenuItem as="a" :href="route('projects.show', project.uuid)" class="gap-2">
+                      <Eye class="h-4 w-4" />
+                      View Project
+                    </DropdownMenuItem>
+                    <DropdownMenuItem as="a" :href="route('projects.edit', project.uuid)" class="gap-2">
+                      <Edit class="h-4 w-4" />
+                      Edit Project
+                    </DropdownMenuItem>
+                    <DropdownMenuItem as="a" :href="route('projects.stats', project.uuid)" class="gap-2">
+                      <BarChart3 class="h-4 w-4" />
+                      View Stats
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem @click="archiveProject(project)" class="gap-2">
+                      <Archive class="h-4 w-4" />
+                      Archive
+                    </DropdownMenuItem>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <DropdownMenuItem class="text-red-600 dark:text-red-400 gap-2">
+                          <Trash2 class="h-4 w-4" />
+                          Delete
+                        </DropdownMenuItem>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Project</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to delete "{{ project.name }}"? This action cannot be undone
+                            and will remove all associated tasks and data.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction @click="deleteProject(project)" class="bg-red-600 hover:bg-red-700">
+                            Delete Project
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+
+              <div class="flex items-center gap-2 mt-3">
+                <Badge :class="getStatusColor(project.status)" class="gap-1 text-xs">
+                  <component :is="getStatusIcon(project.status)" class="h-3 w-3" />
+                  {{ project.status.replace('_', ' ') }}
+                </Badge>
+
+                <Badge v-if="isOverdue(project)" variant="destructive" class="gap-1 text-xs">
+                  <AlertTriangle class="h-3 w-3" />
+                  Overdue
+                </Badge>
+              </div>
+            </CardHeader>
+
+            <CardContent class="space-y-4">
+              <!-- Progress -->
+              <div class="space-y-2">
+                <div class="flex items-center justify-between text-sm">
+                  <span class="text-muted-foreground">Progress</span>
+                  <span class="font-medium">{{ project.progress.percentage }}%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+                  <div
+                    class="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                    :style="{ width: `${project.progress.percentage}%` }"
+                  ></div>
+                </div>
+                <div class="flex items-center justify-between text-xs text-muted-foreground">
+                  <span>{{ project.progress.completed_tasks }}/{{ project.progress.total_tasks }} tasks</span>
+                  <span>{{ project.stats.team_members }} members</span>
+                </div>
+              </div>
+
+              <!-- Stats -->
+              <div class="grid grid-cols-3 gap-3 text-center">
+                <div class="p-2 bg-muted/50 rounded-lg">
+                  <div class="text-sm font-medium">{{ project.stats.total_hours }}</div>
+                  <div class="text-xs text-muted-foreground">Hours</div>
+                </div>
+                <div class="p-2 bg-muted/50 rounded-lg">
+                  <div class="text-sm font-medium">{{ project.stats.overdue_tasks }}</div>
+                  <div class="text-xs text-muted-foreground">Overdue</div>
+                </div>
+                <div class="p-2 bg-muted/50 rounded-lg">
+                  <div class="text-sm font-medium">{{ project.stats.completion_rate }}%</div>
+                  <div class="text-xs text-muted-foreground">Complete</div>
+                </div>
+              </div>
+
+              <!-- Dates -->
+              <div class="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t">
+                <span>Created {{ formatDate(project.created_at) }}</span>
+                <span v-if="project.due_date">Due {{ formatDate(project.due_date) }}</span>
+              </div>
+            </CardContent>
           </Card>
         </div>
       </TabsContent>
