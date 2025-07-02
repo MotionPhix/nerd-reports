@@ -590,7 +590,7 @@ onMounted(() => {
           </Button>
         </div>
 
-        <div v-else class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div v-else class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           <Card v-for="project in filteredProjects" :key="project.uuid" class="group hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
             <CardHeader class="pb-3">
               <div class="flex items-start gap-3">
@@ -729,7 +729,7 @@ onMounted(() => {
           <h3 class="text-lg font-semibold mb-2">No active projects</h3>
           <p class="text-muted-foreground mb-4">All your projects are either completed or not yet started.</p>
         </div>
-        <div v-else class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div v-else class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           <Card v-for="project in filteredProjects" :key="project.uuid" class="group hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
             <CardHeader class="pb-3">
               <div class="flex items-start gap-3">
@@ -879,7 +879,7 @@ onMounted(() => {
             </p>
           </div>
 
-          <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             <Card v-for="project in filteredProjects" :key="project.uuid" class="group hover:shadow-lg transition-all duration-200 hover:-translate-y-1 border-red-200 dark:border-red-800">
               <!-- Same card content structure as above -->
               <CardHeader class="pb-3">
@@ -1020,7 +1020,7 @@ onMounted(() => {
           <h3 class="text-lg font-semibold mb-2">No completed projects</h3>
           <p class="text-muted-foreground mb-4">Completed projects will appear here.</p>
         </div>
-        <div v-else class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div v-else class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           <Card v-for="project in filteredProjects" :key="project.uuid" class="group hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
             <!-- Same card content structure as above -->
             <CardHeader class="pb-3">
@@ -1160,7 +1160,7 @@ onMounted(() => {
           <h3 class="text-lg font-semibold mb-2">No recent activity</h3>
           <p class="text-muted-foreground mb-4">Projects with recent activity will appear here.</p>
         </div>
-        <div v-else class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div v-else class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           <Card v-for="project in filteredProjects" :key="project.uuid" class="group hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
             <!-- Same card content structure as above -->
             <CardHeader class="pb-3">
