@@ -270,35 +270,40 @@ defineOptions({
                       :src="contact.avatar_url"
                       :alt="contact.full_name"
                     />
+
                     <AvatarFallback class="text-2xl">
                       {{ contact.initials }}
                     </AvatarFallback>
                   </Avatar>
+
                   <div class="flex-1">
                     <div class="flex items-start justify-between">
                       <div>
                         <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">
                           {{ contact.full_name }}
                         </h1>
+
                         <p v-if="contact.nickname" class="text-lg text-gray-600 dark:text-gray-400">
                           "{{ contact.nickname }}"
                         </p>
+
                         <div class="mt-2 space-y-1">
                           <div v-if="contact.job_title" class="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                             <Briefcase class="h-4 w-4" />
                             <span>{{ contact.job_title }}</span>
                           </div>
+
                           <div v-if="contact.firm" class="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                             <Building2 class="h-4 w-4" />
                             <Link
                               :href="route('firms.show', contact.firm.uuid)"
-                              class="text-blue-600 hover:text-blue-800 hover:underline"
-                            >
+                              class="text-blue-600 hover:text-blue-800 hover:underline">
                               {{ contact.firm.name }}
                             </Link>
                           </div>
                         </div>
                       </div>
+
                       <div class="text-right">
                         <div class="flex items-center gap-2 mb-2">
                           <span class="text-sm text-gray-600 dark:text-gray-400">Profile Completion</span>
@@ -306,11 +311,11 @@ defineOptions({
                             {{ completionPercentage }}%
                           </span>
                         </div>
+
                         <div class="w-24 bg-gray-200 rounded-full h-2 dark:bg-gray-700">
                           <div
                             class="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                            :style="{ width: `${completionPercentage}%` }"
-                          ></div>
+                            :style="{ width: `${completionPercentage}%` }"></div>
                         </div>
                       </div>
                     </div>
@@ -329,8 +334,7 @@ defineOptions({
                           v-for="tag in contact.tags"
                           :key="tag.name"
                           variant="secondary"
-                          class="flex items-center gap-1"
-                        >
+                          class="flex items-center gap-1">
                           <Tag class="h-3 w-3" />
                           {{ tag.name }}
                         </Badge>
@@ -360,6 +364,7 @@ defineOptions({
                         <Mail class="h-5 w-5" />
                         Email Addresses
                       </CardTitle>
+
                       <CardDescription>
                         Manage contact email addresses
                       </CardDescription>
@@ -367,56 +372,57 @@ defineOptions({
                     <Button
                       size="sm"
                       @click="showAddEmailDialog = true"
-                      class="flex items-center gap-2"
-                    >
+                      class="flex items-center gap-2">
                       <Plus class="h-4 w-4" />
                       Add Email
                     </Button>
                   </CardHeader>
+
                   <CardContent>
                     <div v-if="contact.emails?.length > 0" class="space-y-3">
                       <div
                         v-for="email in contact.emails"
                         :key="email.uuid"
-                        class="flex items-center justify-between p-3 border rounded-lg"
-                      >
+                        class="flex items-center justify-between p-3 border rounded-lg">
                         <div class="flex items-center gap-3">
                           <Mail class="h-4 w-4 text-gray-500" />
                           <div>
                             <div class="flex items-center gap-2">
                               <a
                                 :href="`mailto:${email.email}`"
-                                class="text-blue-600 hover:text-blue-800 hover:underline"
-                              >
+                                class="text-blue-600 hover:text-blue-800 hover:underline">
                                 {{ email.email }}
                               </a>
+
                               <Badge v-if="email.is_primary_email" variant="default" class="text-xs">
                                 Primary
                               </Badge>
                             </div>
+
                             <p v-if="email.verified_at" class="text-xs text-green-600 mt-1">
                               Verified {{ formatDate(email.verified_at) }}
                             </p>
                           </div>
                         </div>
+
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="sm">
                               <MoreHorizontal class="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
+
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem
                               v-if="!email.is_primary_email"
-                              @click="setPrimaryEmail(email.uuid)"
-                            >
+                              @click="setPrimaryEmail(email.uuid)">
                               <Star class="mr-2 h-4 w-4" />
                               Set as Primary
                             </DropdownMenuItem>
+
                             <DropdownMenuItem
                               @click="removeEmail(email.uuid)"
-                              class="text-red-600 focus:text-red-600"
-                            >
+                              class="text-red-600 focus:text-red-600">
                               <Trash2 class="mr-2 h-4 w-4" />
                               Remove
                             </DropdownMenuItem>
@@ -424,6 +430,7 @@ defineOptions({
                         </DropdownMenu>
                       </div>
                     </div>
+
                     <div v-else class="text-center py-8 text-gray-500">
                       <Mail class="h-12 w-12 mx-auto mb-4 text-gray-300" />
                       <p>No email addresses added yet</p>
@@ -439,15 +446,16 @@ defineOptions({
                         <Phone class="h-5 w-5" />
                         Phone Numbers
                       </CardTitle>
+
                       <CardDescription>
                         Manage contact phone numbers
                       </CardDescription>
                     </div>
+
                     <Button
                       size="sm"
                       @click="showAddPhoneDialog = true"
-                      class="flex items-center gap-2"
-                    >
+                      class="flex items-center gap-2">
                       <Plus class="h-4 w-4" />
                       Add Phone
                     </Button>

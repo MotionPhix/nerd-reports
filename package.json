@@ -6,10 +6,7 @@
     "build": "vite build"
   },
   "devDependencies": {
-    "@antv/g2plot": "^2.4.31",
-    "@headlessui/vue": "^1.7.19",
     "@inertiajs/vue3": "2.0",
-    "@opd/g2plot-vue": "^3.6.9",
     "@tabler/icons-vue": "^3.1.0",
     "@tailwindcss/forms": "^0.5.10",
     "@tailwindcss/typography": "^0.5.16",
@@ -32,7 +29,6 @@
     "laravel-vite-plugin": "^1.0",
     "libphonenumber-js": "^1.10.58",
     "lodash": "^4.17.21",
-    "maz-ui": "^3.36.2",
     "pinia": "^2.1.7",
     "prettier": "^3.1.0",
     "prettier-eslint": "^16.1.2",
@@ -43,7 +39,6 @@
     "v-calendar": "^3.1.2",
     "vite": "^5.0",
     "vue": "^3.4.0",
-    "vue-draggable-next": "^2.2.1",
     "vue-sonner": "^2.0.1",
     "vue3-apexcharts": "^1.5.2"
   },

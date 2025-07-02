@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
-import { toast } from 'vue-sonner'
-import { router, Link, usePage } from '@inertiajs/vue3'
-import { useDark, useDebounce } from '@vueuse/core'
+import { ref, computed, onMounted, watch } from 'vue';
+import { toast } from 'vue-sonner';
+import { router, Link, usePage } from '@inertiajs/vue3';
+import { useDark, useDebounce } from '@vueuse/core';
 import {
   Card,
   CardHeader,
@@ -10,26 +10,26 @@ import {
   CardDescription,
   CardContent,
   CardFooter
-} from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
-} from '@/components/ui/table'
+  TableRow
+} from '@/components/ui/table';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
-  DropdownMenuLabel,
-} from '@/components/ui/dropdown-menu'
+  DropdownMenuLabel
+} from '@/components/ui/dropdown-menu';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,17 +39,16 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Separator } from '@/components/ui/separator'
+  AlertDialogTrigger
+} from '@/components/ui/alert-dialog';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+  SelectValue
+} from '@/components/ui/select';
 import {
   Building2,
   Plus,
@@ -81,36 +80,36 @@ import {
   Clock,
   CheckCircle2,
   AlertTriangle
-} from 'lucide-vue-next'
-import AppSidebarLayout from '@/layouts/AppSidebarLayout.vue'
+} from 'lucide-vue-next';
 import AppLayout from '@/layouts/AppLayout.vue';
+import AppSidebarLayout from '@/layouts/AppSidebarLayout.vue';
 
 // Types
 interface Firm {
-  id: number
-  uuid: string
-  name: string
-  email: string | null
-  phone: string | null
-  website: string | null
-  address: string | null
-  city: string | null
-  state: string | null
-  postal_code: string | null
-  country: string | null
-  industry: string | null
-  size: string | null
-  description: string | null
-  logo_url: string | null
-  status: 'active' | 'inactive' | 'prospect'
-  created_at: string
-  updated_at: string
-  contacts_count: number
-  projects_count: number
-  active_projects_count: number
-  total_revenue: number | null
-  last_interaction_date: string | null
-  tags: string[]
+  id: number;
+  uuid: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  website: string | null;
+  address: string | null;
+  city: string | null;
+  state: string | null;
+  postal_code: string | null;
+  country: string | null;
+  industry: string | null;
+  size: string | null;
+  description: string | null;
+  logo_url: string | null;
+  status: 'active' | 'inactive' | 'prospect';
+  created_at: string;
+  updated_at: string;
+  contacts_count: number;
+  projects_count: number;
+  active_projects_count: number;
+  total_revenue: number | null;
+  last_interaction_date: string | null;
+  tags: string[];
   metadata: {
     linkedin_url?: string
     twitter_url?: string
@@ -119,14 +118,14 @@ interface Firm {
     priority?: 'low' | 'medium' | 'high'
     source?: string
     assigned_to?: string
-  }
+  };
 }
 
 interface PaginationLinks {
-  first: string | null
-  last: string | null
-  prev: string | null
-  next: string | null
+  first: string | null;
+  last: string | null;
+  prev: string | null;
+  next: string | null;
 }
 
 interface Props {
@@ -144,7 +143,7 @@ interface Props {
     per_page: number
     to: number | null
     total: number
-  }
+  };
   filters: {
     search?: string
     status?: string
@@ -153,9 +152,9 @@ interface Props {
     sort?: string
     direction?: 'asc' | 'desc'
     per_page?: number
-  }
-  industries: string[]
-  sizes: string[]
+  };
+  industries: string[];
+  sizes: string[];
   stats: {
     total: number
     active: number
@@ -163,51 +162,62 @@ interface Props {
     prospects: number
     total_contacts: number
     total_projects: number
-  }
+  };
 }
 
 // Props
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 
 // Reactive state
-const isLoading = ref(false)
-const isRefreshing = ref(false)
-const searchQuery = ref(props.filters.search || '')
-const selectedStatus = ref(props.filters.status || 'all')
-const selectedIndustry = ref(props.filters.industry || 'all')
-const selectedSize = ref(props.filters.size || 'all')
-const sortField = ref(props.filters.sort || 'name')
-const sortDirection = ref(props.filters.direction || 'asc')
-const perPage = ref(props.filters.per_page || 15)
-const selectedFirms = ref<string[]>([])
-const showFilters = ref(false)
-const viewMode = ref<'table' | 'grid'>('table')
-const isDark = useDark()
+const isLoading = ref(false);
+const isRefreshing = ref(false);
+const searchQuery = ref(props.filters.search || '');
+const selectedStatus = ref(props.filters.status || 'all');
+const selectedIndustry = ref(props.filters.industry || 'all');
+const selectedSize = ref(props.filters.size || 'all');
+const sortField = ref(props.filters.sort || 'name');
+const sortDirection = ref(props.filters.direction || 'asc');
+const perPage = ref(props.filters.per_page || 15);
+const selectedFirms = ref<string[]>([]);
+const showFilters = ref(false);
+const viewMode = ref<'table' | 'grid'>('table');
+const isDark = useDark();
 
 // Debounced search
-const debouncedSearch = useDebounce(searchQuery, 300)
+const debouncedSearch = useDebounce(searchQuery, 300);
 
 // Computed properties
 const hasFilters = computed(() => {
   return selectedStatus.value !== 'all' ||
     selectedIndustry.value !== 'all' ||
     selectedSize.value !== 'all' ||
-    searchQuery.value !== ''
-})
+    searchQuery.value !== '';
+});
 
-const filteredFirmsCount = computed(() => props.firms.total)
+const filteredFirmsCount = computed(() => props.firms.total);
 
 const isAllSelected = computed(() => {
   return props.firms.data.length > 0 &&
-    selectedFirms.value.length === props.firms.data.length
-})
+    selectedFirms.value.length === props.firms.data.length;
+});
 
 const isIndeterminate = computed(() => {
   return selectedFirms.value.length > 0 &&
-    selectedFirms.value.length < props.firms.data.length
-})
+    selectedFirms.value.length < props.firms.data.length;
+});
 
-const selectedFirmsCount = computed(() => selectedFirms.value.length)
+const selectedFirmsCount = computed(() => selectedFirms.value.length);
+
+const breadcrumbs = computed(() => [
+  {
+    title: 'Dashboard',
+    href: route('dashboard')
+  },
+  {
+    title: 'Firms',
+    href: '#'
+  }
+]);
 
 // Status color mapping
 const getStatusColor = (status: string) => {
@@ -215,18 +225,18 @@ const getStatusColor = (status: string) => {
     active: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400',
     inactive: 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400',
     prospect: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
-  }
-  return colors[status] || colors.active
-}
+  };
+  return colors[status] || colors.active;
+};
 
 const getPriorityColor = (priority: string) => {
   const colors = {
     low: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400',
     medium: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400',
     high: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
-  }
-  return colors[priority] || colors.medium
-}
+  };
+  return colors[priority] || colors.medium;
+};
 
 // Utility functions
 const formatDate = (date: string) => {
@@ -234,18 +244,18 @@ const formatDate = (date: string) => {
     year: 'numeric',
     month: 'short',
     day: 'numeric'
-  })
-}
+  });
+};
 
 const formatCurrency = (amount: number | null) => {
-  if (!amount) return '$0'
+  if (!amount) return '$0';
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0
-  }).format(amount)
-}
+  }).format(amount);
+};
 
 const getInitials = (name: string) => {
   return name
@@ -253,8 +263,8 @@ const getInitials = (name: string) => {
     .map(word => word.charAt(0))
     .join('')
     .toUpperCase()
-    .slice(0, 2)
-}
+    .slice(0, 2);
+};
 
 // Actions
 const applyFilters = () => {
@@ -267,83 +277,83 @@ const applyFilters = () => {
     direction: sortDirection.value,
     per_page: perPage.value,
     page: 1 // Reset to first page when filtering
-  }
+  };
 
   router.get(route('firms.index'), params, {
     preserveState: true,
     preserveScroll: true,
     replace: true
-  })
-}
+  });
+};
 
 const clearFilters = () => {
-  searchQuery.value = ''
-  selectedStatus.value = 'all'
-  selectedIndustry.value = 'all'
-  selectedSize.value = 'all'
-  sortField.value = 'name'
-  sortDirection.value = 'asc'
-  perPage.value = 15
+  searchQuery.value = '';
+  selectedStatus.value = 'all';
+  selectedIndustry.value = 'all';
+  selectedSize.value = 'all';
+  sortField.value = 'name';
+  sortDirection.value = 'asc';
+  perPage.value = 15;
 
   router.get(route('firms.index'), {}, {
     preserveState: true,
     preserveScroll: true,
     replace: true
-  })
-}
+  });
+};
 
 const sortBy = (field: string) => {
   if (sortField.value === field) {
-    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
+    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc';
   } else {
-    sortField.value = field
-    sortDirection.value = 'asc'
+    sortField.value = field;
+    sortDirection.value = 'asc';
   }
-  applyFilters()
-}
+  applyFilters();
+};
 
 const toggleFirmSelection = (firmUuid: string) => {
-  const index = selectedFirms.value.indexOf(firmUuid)
+  const index = selectedFirms.value.indexOf(firmUuid);
   if (index > -1) {
-    selectedFirms.value.splice(index, 1)
+    selectedFirms.value.splice(index, 1);
   } else {
-    selectedFirms.value.push(firmUuid)
+    selectedFirms.value.push(firmUuid);
   }
-}
+};
 
 const toggleAllFirms = () => {
   if (isAllSelected.value) {
-    selectedFirms.value = []
+    selectedFirms.value = [];
   } else {
-    selectedFirms.value = props.firms.data.map(firm => firm.uuid)
+    selectedFirms.value = props.firms.data.map(firm => firm.uuid);
   }
-}
+};
 
 const deleteFirm = async (firmUuid: string) => {
   try {
-    await router.delete(route('firms.destroy', firmUuid))
-    toast.success('Firm deleted successfully')
-    selectedFirms.value = selectedFirms.value.filter(uuid => uuid !== firmUuid)
+    await router.delete(route('firms.destroy', firmUuid));
+    toast.success('Firm deleted successfully');
+    selectedFirms.value = selectedFirms.value.filter(uuid => uuid !== firmUuid);
   } catch (error) {
-    console.error('Delete error:', error)
-    toast.error('Failed to delete firm')
+    console.error('Delete error:', error);
+    toast.error('Failed to delete firm');
   }
-}
+};
 
 const bulkDelete = async () => {
-  if (selectedFirms.value.length === 0) return
+  if (selectedFirms.value.length === 0) return;
 
   try {
     await router.post(route('firms.bulk-delete'), {
       firm_uuids: selectedFirms.value
-    })
-    toast.success(`${selectedFirms.value.length} firms deleted successfully`)
-    selectedFirms.value = []
+    });
+    toast.success(`${selectedFirms.value.length} firms deleted successfully`);
+    selectedFirms.value = [];
   } catch (error) {
-    console.error('Bulk delete error:', error)
-    toast.error('Failed to delete selected firms')
+    console.error('Bulk delete error:', error);
+    toast.error('Failed to delete selected firms');
   }
-}
+};
 
 const exportFirms = async () => {
   try {
@@ -353,52 +363,52 @@ const exportFirms = async () => {
       industry: selectedIndustry.value !== 'all' ? selectedIndustry.value : undefined,
       size: selectedSize.value !== 'all' ? selectedSize.value : undefined,
       selected: selectedFirms.value.length > 0 ? selectedFirms.value : undefined
-    }
+    };
 
-    window.open(route('firms.export', params))
-    toast.success('Export started successfully')
+    window.open(route('firms.export', params));
+    toast.success('Export started successfully');
   } catch (error) {
-    console.error('Export error:', error)
-    toast.error('Failed to export firms')
+    console.error('Export error:', error);
+    toast.error('Failed to export firms');
   }
-}
+};
 
 const refreshData = async () => {
-  isRefreshing.value = true
+  isRefreshing.value = true;
   try {
-    await router.reload({ only: ['firms', 'stats'] })
-    toast.success('Data refreshed successfully')
+    await router.reload({ only: ['firms', 'stats'] });
+    toast.success('Data refreshed successfully');
   } catch (error) {
-    console.error('Refresh error:', error)
-    toast.error('Failed to refresh data')
+    console.error('Refresh error:', error);
+    toast.error('Failed to refresh data');
   } finally {
-    isRefreshing.value = false
+    isRefreshing.value = false;
   }
-}
+};
 
 // Watchers
 watch(debouncedSearch, () => {
-  applyFilters()
-})
+  applyFilters();
+});
 
 watch([selectedStatus, selectedIndustry, selectedSize, perPage], () => {
-  applyFilters()
-})
-
-// Layout
-defineOptions({
-  layout: AppLayout
-})
+  applyFilters();
+});
 
 // Lifecycle
 onMounted(() => {
-  console.log('Firms index mounted with:', props.firms.data.length, 'firms')
+  console.log('Firms index mounted with:', props.firms.data.length, 'firms');
+});
+
+defineOptions({
+  layout: AppSidebarLayout
 })
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
-    <div class="p-6 space-y-6">
+<!--  <AppLayout-->
+<!--    :breadcrumbs="breadcrumbs">-->
+    <div class="p-6 space-y-6 max-w-4xl">
       <!-- Header -->
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -637,7 +647,8 @@ onMounted(() => {
       </Card>
 
       <!-- Bulk Actions -->
-      <div v-if="selectedFirmsCount > 0" class="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-950/50 rounded-lg border border-blue-200 dark:border-blue-800">
+      <div v-if="selectedFirmsCount > 0"
+           class="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-950/50 rounded-lg border border-blue-200 dark:border-blue-800">
         <div class="flex items-center gap-3">
           <Badge variant="secondary">
             {{ selectedFirmsCount }} selected
@@ -748,14 +759,30 @@ onMounted(() => {
               </TableHeader>
               <TableBody>
                 <TableRow v-if="isLoading" v-for="n in 5" :key="n">
-                  <TableCell><Skeleton class="h-4 w-4" /></TableCell>
-                  <TableCell><Skeleton class="h-4 w-32" /></TableCell>
-                  <TableCell><Skeleton class="h-4 w-24" /></TableCell>
-                  <TableCell><Skeleton class="h-4 w-20" /></TableCell>
-                  <TableCell><Skeleton class="h-4 w-16" /></TableCell>
-                  <TableCell><Skeleton class="h-4 w-20" /></TableCell>
-                  <TableCell><Skeleton class="h-4 w-16" /></TableCell>
-                  <TableCell><Skeleton class="h-4 w-8" /></TableCell>
+                  <TableCell>
+                    <Skeleton class="h-4 w-4" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton class="h-4 w-32" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton class="h-4 w-24" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton class="h-4 w-20" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton class="h-4 w-16" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton class="h-4 w-20" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton class="h-4 w-16" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton class="h-4 w-8" />
+                  </TableCell>
                 </TableRow>
 
                 <TableRow v-else-if="firms.data.length === 0">
@@ -765,7 +792,8 @@ onMounted(() => {
                       <div>
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">No firms found</h3>
                         <p class="text-muted-foreground mt-1">
-                          {{ hasFilters ? 'Try adjusting your search criteria' : 'Get started by adding your first firm' }}
+                          {{ hasFilters ? 'Try adjusting your search criteria' : 'Get started by adding your first firm'
+                          }}
                         </p>
                       </div>
 
@@ -798,7 +826,8 @@ onMounted(() => {
                         <div v-if="firm.logo_url" class="h-10 w-10 rounded-lg overflow-hidden">
                           <img :src="firm.logo_url" :alt="firm.name" class="h-full w-full object-cover" />
                         </div>
-                        <div v-else class="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                        <div v-else
+                             class="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
                           <span class="text-white font-semibold text-sm">{{ getInitials(firm.name) }}</span>
                         </div>
                       </div>
@@ -828,19 +857,22 @@ onMounted(() => {
                     <div class="space-y-1">
                       <div v-if="firm.email" class="flex items-center gap-2 text-sm">
                         <Mail class="h-3 w-3 text-muted-foreground" />
-                        <a :href="`mailto:${firm.email}`" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                        <a :href="`mailto:${firm.email}`"
+                           class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
                           {{ firm.email }}
                         </a>
                       </div>
                       <div v-if="firm.phone" class="flex items-center gap-2 text-sm">
                         <Phone class="h-3 w-3 text-muted-foreground" />
-                        <a :href="`tel:${firm.phone}`" class="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200">
+                        <a :href="`tel:${firm.phone}`"
+                           class="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200">
                           {{ firm.phone }}
                         </a>
                       </div>
                       <div v-if="firm.website" class="flex items-center gap-2 text-sm">
                         <Globe class="h-3 w-3 text-muted-foreground" />
-                        <a :href="firm.website" target="_blank" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                        <a :href="firm.website" target="_blank"
+                           class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
                           Visit Website
                         </a>
                       </div>
@@ -936,7 +968,8 @@ onMounted(() => {
                         <DropdownMenuSeparator />
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <DropdownMenuItem class="text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400">
+                            <DropdownMenuItem
+                              class="text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400">
                               <Trash2 class="h-4 w-4 mr-2" />
                               Delete Firm
                             </DropdownMenuItem>
@@ -946,7 +979,8 @@ onMounted(() => {
                               <AlertDialogTitle>Delete Firm</AlertDialogTitle>
                               <AlertDialogDescription>
                                 Are you sure you want to delete "{{ firm.name }}"? This action cannot be undone
-                                and will also delete all associated contacts ({{ firm.contacts_count }}) and projects ({{ firm.projects_count }}).
+                                and will also delete all associated contacts ({{ firm.contacts_count }}) and projects
+                                ({{ firm.projects_count }}).
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
@@ -999,7 +1033,8 @@ onMounted(() => {
                 >
                   <Link :href="link.url">{{ link.label }}</Link>
                 </Button>
-                <span v-else-if="!link.url && !link.label.includes('Previous') && !link.label.includes('Next')" class="px-3 py-1 text-sm">
+                <span v-else-if="!link.url && !link.label.includes('Previous') && !link.label.includes('Next')"
+                      class="px-3 py-1 text-sm">
                   {{ link.label }}
                 </span>
               </template>
@@ -1024,5 +1059,5 @@ onMounted(() => {
         </CardFooter>
       </Card>
     </div>
-  </div>
+<!--  </AppLayout>-->
 </template>

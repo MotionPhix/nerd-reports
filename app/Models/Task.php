@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Casts\PurifyHtmlOnGet;
 use App\Enums\TaskPriority;
 use App\Enums\TaskStatus;
 use App\Traits\HasUuid;
@@ -14,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Stevebauman\Purify\Casts\PurifyHtmlOnGet;
 
 class Task extends Model implements HasMedia
 {

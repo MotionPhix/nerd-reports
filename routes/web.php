@@ -7,13 +7,9 @@ use App\Http\Controllers\Tasks\TaskController;
 use App\Http\Controllers\Projects\ProjectController;
 use App\Http\Controllers\Interactions\InteractionController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 Route::get('/', function () {
-  return Inertia::render('Welcome', [
-    'canLogin' => Route::has('login'),
-    'canRegister' => Route::has('register'),
-  ]);
+  return redirect(route('dashboard'));
 });
 
 Route::middleware('auth')->group(function () {

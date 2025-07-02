@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Casts\PurifyHtmlOnGet;
 use App\Enums\ProjectStatus;
 use App\Traits\HasUuid;
 use Carbon\Carbon;
@@ -11,8 +10,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Support\Facades\DB;
+use Stevebauman\Purify\Casts\PurifyHtmlOnGet;
 
 class Project extends Model
 {

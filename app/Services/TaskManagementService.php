@@ -205,7 +205,7 @@ class TaskManagementService
   public function getUserTasks(User $user, array $filters = []): Collection
   {
     $query = Task::where('assigned_to', $user->id)
-      ->with(['project.contact.firm', 'board']);
+      ->with(['project.contact.firm']);
 
     // Apply filters
     if (isset($filters['status'])) {
@@ -254,7 +254,7 @@ class TaskManagementService
   {
     $query = Task::where('due_date', '<', now())
       ->whereNotIn('status', [TaskStatus::COMPLETED, TaskStatus::CANCELLED])
-      ->with(['project.contact.firm', 'board', 'user']);
+      ->with(['project.contact.firm', 'user']);
 
     if ($user) {
       $query->where('assigned_to', $user->id);

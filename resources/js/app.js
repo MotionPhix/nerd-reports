@@ -2,8 +2,6 @@ import '../css/app.css';
 
 import './bootstrap';
 
-import 'maz-ui/styles';
-
 import 'vue-sonner/style.css';
 
 import { createInertiaApp } from '@inertiajs/vue3';

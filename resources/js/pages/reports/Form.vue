@@ -3,7 +3,7 @@ import AddressInput from "@/Components/AddressInput.vue";
 
 import EmailRepeater from "@/Components/EmailRepeater.vue";
 
-import FirmInput from "@/Components/FirmInput.vue";
+import FirmInput from "@/components/NavProjects.vue";
 
 import InputError from "@/Components/InputError.vue";
 
