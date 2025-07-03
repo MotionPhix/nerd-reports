@@ -19,7 +19,6 @@ import {
   Home,
   Users,
   ClipboardList,
-  ListTodo,
   BriefcaseBusiness,
   ChartLine
 } from 'lucide-vue-next';
@@ -29,7 +28,6 @@ import NavUser from '@/components/NavUser.vue'
 import { computed } from 'vue'
 import NavFooter from '@/components/NavFooter.vue';
 
-// Get current page URL for active state comparison
 const page = usePage()
 const currentUrl = computed(() => page.url)
 
@@ -73,7 +71,7 @@ const items = computed(() => [
 
     <Sidebar variant="inset">
       <SidebarHeader>
-        <div class="flex items-center gap-2 px-4 py-2">
+        <div class="flex items-center gap-2 py-2">
           <ApplicationLogo class="size-10" />
           <span class="font-semibold text-2xl text-muted-foreground">
             {{ $page.props.appName }}

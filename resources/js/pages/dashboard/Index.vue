@@ -61,6 +61,8 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator
 } from '@/components/ui/dropdown-menu';
+import { Separator } from '@/components/ui/separator';
+import QuickStats from '@/components/QuickStats.vue';
 
 // Props
 const props = defineProps<{
@@ -285,7 +287,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="p-6 space-y-8">
+  <div class="p-6 space-y-8 max-w-5xl">
     <!-- Header Section -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
@@ -407,99 +409,63 @@ onMounted(() => {
     </div>
 
     <!-- Quick Stats Grid -->
-    <div class="grid gap-6 md:grid-cols-2">
-      <Card class="relative overflow-hidden hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500">
-        <CardContent class="p-6">
-          <div class="flex items-center justify-between">
-            <div class="space-y-2">
-              <p class="text-sm font-medium text-muted-foreground">Total Tasks</p>
-              <p class="text-3xl font-bold text-blue-600 dark:text-blue-400">
-                {{ dashboardData.overview?.tasks?.total_assigned || 0 }}
-              </p>
-              <div class="flex items-center gap-2 text-xs text-muted-foreground">
-                <CheckCircle2 class="h-3 w-3 text-green-500" />
-                {{ dashboardData.overview?.tasks?.complete_this_week || 0 }} completed this week
-              </div>
-            </div>
-            <div class="rounded-full bg-blue-100 p-3 dark:bg-blue-900/20">
-              <ClipboardList class="h-6 w-6 text-blue-600 dark:text-blue-400" />
-            </div>
-          </div>
-          <div v-if="dashboardData.overview?.tasks?.overdue > 0" class="mt-4">
-            <Badge variant="destructive" class="text-xs">
-              {{ dashboardData.overview.tasks.overdue }} overdue
-            </Badge>
-          </div>
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <Card class="bg-blue-400/10 dark:bg-blue-900/20 relative overflow-hidden hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500">
+        <CardContent class="flex flex-col h-full">
+          <QuickStats
+            title="Total Tasks"
+            :main-icon="ClipboardList"
+            :main-count="dashboardData.overview?.tasks?.total_assigned || 0"
+            :sub-count-label="`${dashboardData.overview?.tasks?.complete_this_week || 0} completed this week`"
+            :sub-count-icon="CheckCircle2"
+            :has-warning="dashboardData.overview?.tasks?.overdue > 0"
+            :warning-count-label="`${dashboardData.overview.tasks.overdue} overdue`"
+            color="blue"
+          />
         </CardContent>
       </Card>
 
-      <Card class="relative overflow-hidden hover:shadow-lg transition-all duration-200 border-l-4 border-l-green-500">
-        <CardContent class="p-6">
-          <div class="flex items-center justify-between">
-            <div class="space-y-2">
-              <p class="text-sm font-medium text-muted-foreground">Active Projects</p>
-              <p class="text-3xl font-bold text-green-600 dark:text-green-400">
-                {{ dashboardData.overview?.projects?.active || 0 }}
-              </p>
-              <div class="flex items-center gap-2 text-xs text-muted-foreground">
-                <Target class="h-3 w-3 text-green-500" />
-                {{ dashboardData.overview?.projects?.completed_this_month || 0 }} completed this month
-              </div>
-            </div>
-            <div class="rounded-full bg-green-100 p-3 dark:bg-green-900/20">
-              <Briefcase class="h-6 w-6 text-green-600 dark:text-green-400" />
-            </div>
-          </div>
-          <div v-if="dashboardData.overview?.projects?.overdue > 0" class="mt-4">
-            <Badge variant="destructive" class="text-xs">
-              {{ dashboardData.overview.projects.overdue }} overdue
-            </Badge>
-          </div>
+      <Card class="bg-green-400/10 dark:bg-green-900/20 relative overflow-hidden hover:shadow-lg transition-all duration-200 border-l-4 border-l-green-500">
+        <CardContent class="flex flex-col h-full">
+          <QuickStats
+            title="Active Projects"
+            :main-icon="Briefcase"
+            :main-count="dashboardData.overview?.projects?.active || 0"
+            :sub-count-label="`${dashboardData.overview?.projects?.completed_this_month || 0} completed this month`"
+            :sub-count-icon="Target"
+            :has-warning="dashboardData.overview?.projects?.overdue > 0"
+            :warning-count-label="`${dashboardData.overview.projects.overdue} overdue`"
+            color="green"
+          />
         </CardContent>
       </Card>
 
-      <Card class="relative overflow-hidden hover:shadow-lg transition-all duration-200 border-l-4 border-l-purple-500">
-        <CardContent class="p-6">
-          <div class="flex items-center justify-between">
-            <div class="space-y-2">
-              <p class="text-sm font-medium text-muted-foreground">Interactions</p>
-              <p class="text-3xl font-bold text-purple-600 dark:text-purple-400">
-                {{ dashboardData.overview?.interactions?.this_week || 0 }}
-              </p>
-              <div class="flex items-center gap-2 text-xs text-muted-foreground">
-                <Bell class="h-3 w-3 text-purple-500" />
-                {{ dashboardData.overview?.interactions?.follow_ups_today || 0 }} follow-ups today
-              </div>
-            </div>
-            <div class="rounded-full bg-purple-100 p-3 dark:bg-purple-900/20">
-              <IconUsers class="h-6 w-6 text-purple-600 dark:text-purple-400" />
-            </div>
-          </div>
-          <div v-if="dashboardData.overview?.interactions?.follow_ups_overdue > 0" class="mt-4">
-            <Badge variant="destructive" class="text-xs">
-              {{ dashboardData.overview.interactions.follow_ups_overdue }} overdue follow-ups
-            </Badge>
-          </div>
+      <Card class="bg-purple-400/10 dark:bg-purple-900/20 relative overflow-hidden hover:shadow-lg transition-all duration-200 border-l-4 border-l-purple-500">
+        <CardContent class="flex flex-col h-full">
+          <QuickStats
+            title="Recorded Interactions"
+            :main-icon="IconUsers"
+            :main-count="dashboardData.overview?.interactions?.this_week || 0"
+            :sub-count-label="`${dashboardData.overview?.interactions?.follow_ups_today || 0} follow-ups today`"
+            :sub-count-icon="Bell"
+            :has-warning="dashboardData.overview?.interactions?.follow_ups_overdue > 0"
+            :warning-count-label="`${dashboardData.overview.interactions.follow_ups_overdue} overdue follow-ups`"
+            color="purple"
+          />
         </CardContent>
       </Card>
 
-      <Card class="relative overflow-hidden hover:shadow-lg transition-all duration-200 border-l-4 border-l-orange-500">
-        <CardContent class="p-6">
-          <div class="flex items-center justify-between">
-            <div class="space-y-2">
-              <p class="text-sm font-medium text-muted-foreground">Reports</p>
-              <p class="text-3xl font-bold text-orange-600 dark:text-orange-400">
-                {{ dashboardData.overview?.reports?.generated_this_month || 0 }}
-              </p>
-              <div class="flex items-center gap-2 text-xs text-muted-foreground">
-                <Clock class="h-3 w-3 text-orange-500" />
-                {{ dashboardData.overview?.reports?.pending || 0 }} pending
-              </div>
-            </div>
-            <div class="rounded-full bg-orange-100 p-3 dark:bg-orange-900/20">
-              <IconFileText class="h-6 w-6 text-orange-600 dark:text-orange-400" />
-            </div>
-          </div>
+      <Card class="bg-orange-400/10 dark:bg-orange-900/20 relative overflow-hidden hover:shadow-lg transition-all duration-200 border-l-4 border-l-orange-500">
+        <CardContent class="flex flex-col h-full">
+          <QuickStats
+            title="Processed Reports"
+            :main-icon="IconFileText"
+            :main-count="dashboardData.overview?.reports?.generated_this_month || 0"
+            :sub-count-label="`${dashboardData.overview?.reports?.pending || 0} pending`"
+            :sub-count-icon="Clock"
+            :has-warning="false"
+            color="orange"
+          />
         </CardContent>
       </Card>
     </div>
