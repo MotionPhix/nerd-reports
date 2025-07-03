@@ -52,7 +52,7 @@ import {
 import { router, usePoll, Link } from '@inertiajs/vue3';
 import { Badge } from '@/components/ui/badge';
 import { useDark } from '@vueuse/core';
-import AppSidebarLayout from '@/layouts/AppSidebarLayout.vue';
+import AppSidebarLayout from '@/layouts/AppLayout.vue';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
   DropdownMenu,

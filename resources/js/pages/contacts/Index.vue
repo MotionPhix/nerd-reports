@@ -45,7 +45,7 @@ import {
   Users, Building2, Mail, Calendar, Search, Plus, Download, Upload,
   Eye, Edit, Copy, Trash2, MoreHorizontal, X, ChevronLeft, ChevronRight
 } from "lucide-vue-next"
-import AppSidebarLayout from "@/layouts/AppSidebarLayout.vue"
+import AppSidebarLayout from "@/layouts/AppLayout.vue"
 
 // Props
 const props = defineProps({

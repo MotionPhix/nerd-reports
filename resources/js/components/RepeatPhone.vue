@@ -1,184 +1,3 @@
-<script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import PhoneInput from './PhoneInput.vue'
-import {
-  PlusIcon,
-  TrashIcon,
-  StarIcon,
-  PhoneIcon,
-  CheckCircleIcon,
-  DownloadIcon,
-  SunIcon,
-  MoonIcon
-} from 'lucide-vue-next'
-
-// Props
-const props = defineProps({
-  maxPhoneNumbers: {
-    type: Number,
-    default: 5
-  },
-  minPhoneNumbers: {
-    type: Number,
-    default: 1
-  },
-  defaultCountry: {
-    type: String,
-    default: 'US'
-  }
-})
-
-// Emits
-const emit = defineEmits(['update:phoneNumbers', 'validation-change'])
-
-// Refs
-const phoneNumbers = ref([])
-const isDark = ref(false)
-let nextId = 1
-
-// Computed
-const validPhoneNumbers = computed(() => {
-  return phoneNumbers.value.filter(phone => phone.isValid).length
-})
-
-const primaryPhone = computed(() => {
-  return phoneNumbers.value.find(phone => phone.isPrimary)
-})
-
-// Methods
-const addPhoneNumber = () => {
-  if (phoneNumbers.value.length >= props.maxPhoneNumbers) return
-
-  const newPhone = {
-    id: nextId++,
-    value: '',
-    label: 'mobile',
-    country: props.defaultCountry,
-    isValid: false,
-    error: '',
-    isPrimary: phoneNumbers.value.length === 0,
-    required: phoneNumbers.value.length === 0
-  }
-
-  phoneNumbers.value.push(newPhone)
-  emitUpdate()
-}
-
-const removePhoneNumber = (id) => {
-  if (phoneNumbers.value.length <= props.minPhoneNumbers) return
-
-  const index = phoneNumbers.value.findIndex(phone => phone.id === id)
-  if (index === -1) return
-
-  const removedPhone = phoneNumbers.value[index]
-  phoneNumbers.value.splice(index, 1)
-
-  // If we removed the primary phone, set the first phone as primary
-  if (removedPhone.isPrimary && phoneNumbers.value.length > 0) {
-    phoneNumbers.value[0].isPrimary = true
-  }
-
-  emitUpdate()
-}
-
-const setPrimary = (id) => {
-  phoneNumbers.value.forEach(phone => {
-    phone.isPrimary = phone.id === id
-  })
-  emitUpdate()
-}
-
-const updateCountry = (id, country) => {
-  const phone = phoneNumbers.value.find(p => p.id === id)
-  if (phone) {
-    phone.country = country.code
-    emitUpdate()
-  }
-}
-
-const updateValidation = (id, validation) => {
-  const phone = phoneNumbers.value.find(p => p.id === id)
-  if (phone) {
-    phone.isValid = validation.isValid
-    phone.error = validation.error
-    emitUpdate()
-  }
-}
-
-const validateAll = () => {
-  // This would trigger validation on all phone inputs
-  // The actual validation is handled by individual PhoneInput components
-  emit('validation-change', {
-    total: phoneNumbers.value.length,
-    valid: validPhoneNumbers.value,
-    invalid: phoneNumbers.value.length - validPhoneNumbers.value
-  })
-}
-
-const clearAll = () => {
-  if (confirm('Are you sure you want to clear all phone numbers?')) {
-    phoneNumbers.value = []
-    nextId = 1
-    addPhoneNumber() // Add one default phone number
-  }
-}
-
-const exportData = () => {
-  const data = phoneNumbers.value.map(phone => ({
-    value: phone.value,
-    label: phone.label,
-    country: phone.country,
-    isValid: phone.isValid,
-    isPrimary: phone.isPrimary
-  }))
-
-  const blob = new Blob([JSON.stringify(data, null, 2)], {
-    type: 'application/json'
-  })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = 'phone-numbers.json'
-  a.click()
-  URL.revokeObjectURL(url)
-}
-
-const toggleTheme = () => {
-  isDark.value = !isDark.value
-  if (isDark.value) {
-    document.documentElement.classList.add('dark')
-    localStorage.setItem('theme', 'dark')
-  } else {
-    document.documentElement.classList.remove('dark')
-    localStorage.setItem('theme', 'light')
-  }
-}
-
-const emitUpdate = () => {
-  emit('update:phoneNumbers', phoneNumbers.value)
-}
-
-// Initialize theme
-const initializeTheme = () => {
-  const savedTheme = localStorage.getItem('theme')
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-
-  isDark.value = savedTheme === 'dark' || (!savedTheme && prefersDark)
-
-  if (isDark.value) {
-    document.documentElement.classList.add('dark')
-  } else {
-    document.documentElement.classList.remove('dark')
-  }
-}
-
-// Lifecycle
-onMounted(() => {
-  initializeTheme()
-  addPhoneNumber() // Add initial phone number
-})
-</script>
-
 <template>
   <div class="w-full max-w-4xl mx-auto p-6 bg-white dark:bg-gray-900 rounded-lg shadow-lg">
     <!-- Header -->
@@ -381,6 +200,187 @@ onMounted(() => {
     </div>
   </div>
 </template>
+
+<script setup>
+import { ref, computed, onMounted } from 'vue'
+import PhoneInput from './PhoneInput.vue'
+import {
+  PlusIcon,
+  TrashIcon,
+  StarIcon,
+  PhoneIcon,
+  CheckCircleIcon,
+  DownloadIcon,
+  SunIcon,
+  MoonIcon
+} from 'lucide-vue-next'
+
+// Props
+const props = defineProps({
+  maxPhoneNumbers: {
+    type: Number,
+    default: 5
+  },
+  minPhoneNumbers: {
+    type: Number,
+    default: 1
+  },
+  defaultCountry: {
+    type: String,
+    default: 'US'
+  }
+})
+
+// Emits
+const emit = defineEmits(['update:phoneNumbers', 'validation-change'])
+
+// Refs
+const phoneNumbers = ref([])
+const isDark = ref(false)
+let nextId = 1
+
+// Computed
+const validPhoneNumbers = computed(() => {
+  return phoneNumbers.value.filter(phone => phone.isValid).length
+})
+
+const primaryPhone = computed(() => {
+  return phoneNumbers.value.find(phone => phone.isPrimary)
+})
+
+// Methods
+const addPhoneNumber = () => {
+  if (phoneNumbers.value.length >= props.maxPhoneNumbers) return
+
+  const newPhone = {
+    id: nextId++,
+    value: '',
+    label: 'mobile',
+    country: props.defaultCountry,
+    isValid: false,
+    error: '',
+    isPrimary: phoneNumbers.value.length === 0,
+    required: phoneNumbers.value.length === 0
+  }
+
+  phoneNumbers.value.push(newPhone)
+  emitUpdate()
+}
+
+const removePhoneNumber = (id) => {
+  if (phoneNumbers.value.length <= props.minPhoneNumbers) return
+
+  const index = phoneNumbers.value.findIndex(phone => phone.id === id)
+  if (index === -1) return
+
+  const removedPhone = phoneNumbers.value[index]
+  phoneNumbers.value.splice(index, 1)
+
+  // If we removed the primary phone, set the first phone as primary
+  if (removedPhone.isPrimary && phoneNumbers.value.length > 0) {
+    phoneNumbers.value[0].isPrimary = true
+  }
+
+  emitUpdate()
+}
+
+const setPrimary = (id) => {
+  phoneNumbers.value.forEach(phone => {
+    phone.isPrimary = phone.id === id
+  })
+  emitUpdate()
+}
+
+const updateCountry = (id, country) => {
+  const phone = phoneNumbers.value.find(p => p.id === id)
+  if (phone) {
+    phone.country = country.code
+    emitUpdate()
+  }
+}
+
+const updateValidation = (id, validation) => {
+  const phone = phoneNumbers.value.find(p => p.id === id)
+  if (phone) {
+    phone.isValid = validation.isValid
+    phone.error = validation.error
+    emitUpdate()
+  }
+}
+
+const validateAll = () => {
+  // This would trigger validation on all phone inputs
+  // The actual validation is handled by individual PhoneInput components
+  emit('validation-change', {
+    total: phoneNumbers.value.length,
+    valid: validPhoneNumbers.value,
+    invalid: phoneNumbers.value.length - validPhoneNumbers.value
+  })
+}
+
+const clearAll = () => {
+  if (confirm('Are you sure you want to clear all phone numbers?')) {
+    phoneNumbers.value = []
+    nextId = 1
+    addPhoneNumber() // Add one default phone number
+  }
+}
+
+const exportData = () => {
+  const data = phoneNumbers.value.map(phone => ({
+    value: phone.value,
+    label: phone.label,
+    country: phone.country,
+    isValid: phone.isValid,
+    isPrimary: phone.isPrimary
+  }))
+
+  const blob = new Blob([JSON.stringify(data, null, 2)], {
+    type: 'application/json'
+  })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'phone-numbers.json'
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+const toggleTheme = () => {
+  isDark.value = !isDark.value
+  if (isDark.value) {
+    document.documentElement.classList.add('dark')
+    localStorage.setItem('theme', 'dark')
+  } else {
+    document.documentElement.classList.remove('dark')
+    localStorage.setItem('theme', 'light')
+  }
+}
+
+const emitUpdate = () => {
+  emit('update:phoneNumbers', phoneNumbers.value)
+}
+
+// Initialize theme
+const initializeTheme = () => {
+  const savedTheme = localStorage.getItem('theme')
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+
+  isDark.value = savedTheme === 'dark' || (!savedTheme && prefersDark)
+
+  if (isDark.value) {
+    document.documentElement.classList.add('dark')
+  } else {
+    document.documentElement.classList.remove('dark')
+  }
+}
+
+// Lifecycle
+onMounted(() => {
+  initializeTheme()
+  addPhoneNumber() // Add initial phone number
+})
+</script>
 
 <style scoped>
 /* Transition animations */

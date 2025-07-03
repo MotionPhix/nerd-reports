@@ -23,7 +23,7 @@ import {
   MapPin, Calendar, Tag, Star, Plus, X, Check, Upload, Download,
   MessageCircle, Briefcase, Clock, User, Globe
 } from 'lucide-vue-next'
-import AppSidebarLayout from "@/layouts/AppSidebarLayout.vue"
+import AppSidebarLayout from "@/layouts/AppLayout.vue"
 
 // Props
 const props = defineProps({

@@ -81,8 +81,7 @@ import {
   CheckCircle2,
   AlertTriangle
 } from 'lucide-vue-next';
-import AppLayout from '@/layouts/AppLayout.vue';
-import AppSidebarLayout from '@/layouts/AppSidebarLayout.vue';
+import AppSidebarLayout from '@/layouts/AppLayout.vue';
 
 // Types
 interface Firm {

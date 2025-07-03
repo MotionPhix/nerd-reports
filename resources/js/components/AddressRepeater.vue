@@ -1,7 +1,6 @@
 <script setup>
 import InputError from '@/components/InputError.vue';
 import TextInput from '@/components/TextInput.vue';
-import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue';
 import { usePage } from '@inertiajs/vue3';
 import { onMounted } from 'vue';
 
