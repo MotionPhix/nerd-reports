@@ -66,7 +66,7 @@ import {
   Settings,
   BarChart3
 } from 'lucide-vue-next'
-import AppSidebarLayout from '@/layouts/AppSidebarLayout.vue'
+import AppSidebarLayout from '@/layouts/AppLayout.vue'
 import { debounce } from 'lodash-es'
 
 // Types

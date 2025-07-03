@@ -43,7 +43,7 @@ import {
   CheckCircle2,
   Loader2
 } from 'lucide-vue-next'
-import AppSidebarLayout from '@/layouts/AppSidebarLayout.vue'
+import AppSidebarLayout from '@/layouts/AppLayout.vue'
 
 // Types
 interface Props {

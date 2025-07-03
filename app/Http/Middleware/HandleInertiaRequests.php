@@ -44,12 +44,10 @@ class HandleInertiaRequests extends Middleware
           ]
           : null,
 
-        'avatar' => fn() => $request->user()
-          ? $request->user()->avatar_url
-          : null,
-
         'unreadNotifications' => fn() => $request->user()?->unreadNotifications()->count(),
       ],
+
+      'appName' => env('APP_NAME', 'Rapports'),
     ];
   }
 }

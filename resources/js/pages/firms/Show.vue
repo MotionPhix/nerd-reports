@@ -61,7 +61,7 @@ import {
   Forward,
   ListRestart
 } from 'lucide-vue-next'
-import AppSidebarLayout from '@/layouts/AppSidebarLayout.vue'
+import AppSidebarLayout from '@/layouts/AppLayout.vue'
 
 // Types
 interface Firm {
