@@ -525,8 +525,7 @@ onMounted(() => {
               v-if="hasActiveFilters"
               variant="outline"
               @click="clearFilters"
-              class="gap-2"
-            >
+              class="gap-2">
               <XCircle class="h-4 w-4" />
               Clear Filters
             </Button>
@@ -599,11 +598,11 @@ onMounted(() => {
                     <a
                       :href="route('projects.show', project.uuid)"
                       class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors line-clamp-2 block"
-                      :title="project.name"
-                    >
+                      :title="project.name">
                       {{ project.name }}
                     </a>
                   </CardTitle>
+
                   <CardDescription class="text-sm truncate">
                     {{ project.contact.full_name }}
                     <span v-if="project.contact.firm" class="text-xs opacity-75">
@@ -684,12 +683,14 @@ onMounted(() => {
                   <span class="text-muted-foreground">Progress</span>
                   <span class="font-medium">{{ project.progress.percentage }}%</span>
                 </div>
+
                 <div class="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
                   <div
                     class="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                    :style="{ width: `${project.progress.percentage}%` }"
-                  ></div>
+                    :style="{ width: `${project.progress.percentage}%` }">
+                  </div>
                 </div>
+
                 <div class="flex items-center justify-between text-xs text-muted-foreground">
                   <span>{{ project.progress.completed_tasks }}/{{ project.progress.total_tasks }} tasks</span>
                   <span>{{ project.stats.team_members }} members</span>
@@ -702,10 +703,12 @@ onMounted(() => {
                   <div class="text-sm font-medium">{{ project.stats.total_hours }}</div>
                   <div class="text-xs text-muted-foreground">Hours</div>
                 </div>
+
                 <div class="p-2 bg-muted/50 rounded-lg">
                   <div class="text-sm font-medium">{{ project.stats.overdue_tasks }}</div>
                   <div class="text-xs text-muted-foreground">Overdue</div>
                 </div>
+
                 <div class="p-2 bg-muted/50 rounded-lg">
                   <div class="text-sm font-medium">{{ project.stats.completion_rate }}%</div>
                   <div class="text-xs text-muted-foreground">Complete</div>
