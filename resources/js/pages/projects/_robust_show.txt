@@ -1,0 +1,755 @@
+<script setup lang="ts">
+import { ref, computed, onMounted } from "vue"
+import { router } from "@inertiajs/vue3"
+import { toast } from "vue-sonner"
+import { useDark, useStorage } from "@vueuse/core"
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent
+} from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Progress } from "@/components/ui/progress"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Separator } from "@/components/ui/separator"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel
+} from "@/components/ui/dropdown-menu"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger
+} from "@/components/ui/alert-dialog"
+import {
+  ArrowLeft,
+  Edit,
+  Trash2,
+  MoreHorizontal,
+  Users,
+  Clock,
+  Calendar,
+  DollarSign,
+  CheckCircle,
+  AlertTriangle,
+  Play,
+  Pause,
+  Square,
+  Plus,
+  FileText,
+  MessageSquare,
+  Settings,
+  Share2,
+  Download,
+  RefreshCw,
+  Briefcase,
+  Target,
+  TrendingUp,
+  Activity,
+  User,
+  Building,
+  Mail,
+  Phone,
+  ExternalLink,
+  Archive,
+  Star,
+  Flag
+} from "lucide-vue-next"
+import AppSidebarLayout from "@/layouts/AppLayout.vue"
+
+// Types
+interface Contact {
+  uuid: string
+  first_name: string
+  last_name: string
+  full_name: string
+  primary_email: string | null
+  primary_phone_number: string | null
+  job_title: string | null
+  avatar_url: string | null
+  firm?: {
+    uuid: string
+    name: string
+  }
+}
+
+interface Task {
+  uuid: string
+  title: string
+  description: string | null
+  status: string
+  priority: string
+  due_date: string | null
+  assigned_to: string | null
+  estimated_hours: number | null
+  actual_hours: number | null
+  created_at: string
+  updated_at: string
+  assignedUser?: {
+    uuid: string
+    name: string
+    avatar_url: string | null
+  }
+}
+
+interface TeamMember {
+  uuid: string
+  name: string
+  email: string
+  role: string
+  avatar_url: string | null
+  hours_logged: number
+  tasks_assigned: number
+  tasks_completed: number
+}
+
+interface TimeEntry {
+  uuid: string
+  description: string
+  hours: number
+  date: string
+  user: {
+    uuid: string
+    name: string
+    avatar_url: string | null
+  }
+  task?: {
+    uuid: string
+    title: string
+  }
+}
+
+interface Project {
+  uuid: string
+  name: string
+  description: string | null
+  status: string
+  priority: string
+  due_date: string | null
+  deadline: string | null
+  estimated_hours: number | null
+  budget: number | null
+  hourly_rate: number | null
+  is_billable: boolean
+  notes: string | null
+  created_at: string
+  updated_at: string
+  contact: Contact
+  progress: {
+    percentage: number
+    completed_tasks: number
+    total_tasks: number
+    status: string
+  }
+  stats: {
+    total_tasks: number
+    completed_tasks: number
+    in_progress_tasks: number
+    todo_tasks: number
+    overdue_tasks: number
+    total_hours: number
+    estimated_hours: number
+    completion_rate: number
+    team_members: number
+    budget_used: number
+    budget_remaining: number
+  }
+  tags: Array<{
+    id: number
+    name: string
+    type: string | null
+  }>
+}
+
+interface Props {
+  project: Project
+  tasks?: Task[]
+  teamMembers?: TeamMember[]
+  recentTimeEntries?: TimeEntry[]
+  recentActivity?: Array<{
+    id: number
+    type: string
+    description: string
+    user: {
+      name: string
+      avatar_url: string | null
+    }
+    created_at: string
+  }>
+}
+
+// Props
+const props = defineProps<Props>()
+
+// Reactive state
+const isLoading = ref(false)
+const isDeleting = ref(false)
+const activeTab = useStorage("project_tabs", "overview")
+const isDark = useDark()
+
+// Computed properties
+const projectInitials = computed(() => {
+  return props.project.name
+    .split(" ")
+    .map(word => word.charAt(0))
+    .join("")
+    .toUpperCase()
+    .slice(0, 2)
+})
+
+const statusColor = computed(() => {
+  const colors = {
+    "in_progress": "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400",
+    "approved": "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400",
+    "completed": "bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400",
+    "cancelled": "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400",
+    "done": "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400"
+  }
+  return colors[props.project.status] || colors["in_progress"]
+})
+
+const priorityColor = computed(() => {
+  const colors = {
+    "low": "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400",
+    "medium": "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400",
+    "high": "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400"
+  }
+  return colors[props.project.priority] || colors["medium"]
+})
+
+// Safe access to tasks with fallback
+const tasks = computed(() => props.tasks || [])
+const teamMembers = computed(() => props.teamMembers || [])
+const recentTimeEntries = computed(() => props.recentTimeEntries || [])
+const recentActivity = computed(() => props.recentActivity || [])
+
+// Task-related computed properties
+const overdueTasks = computed(() => {
+  return tasks.value.filter(task => {
+    if (!task.due_date || task.status === 'completed') return false
+    return new Date(task.due_date) < new Date()
+  })
+})
+
+const tasksByStatus = computed(() => {
+  return {
+    todo: tasks.value.filter(task => task.status === 'todo'),
+    in_progress: tasks.value.filter(task => task.status === 'in_progress'),
+    completed: tasks.value.filter(task => task.status === 'completed'),
+    cancelled: tasks.value.filter(task => task.status === 'cancelled'),
+  }
+})
+
+// Helper functions
+const formatDate = (date: string | null) => {
+  if (!date) return 'No date set'
+  return new Date(date).toLocaleDateString()
+}
+
+const formatCurrency = (amount: number | null) => {
+  if (!amount) return '$0.00'
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD'
+  }).format(amount)
+}
+
+const getTaskStatusColor = (status: string) => {
+  const colors = {
+    "todo": "bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400",
+    "in_progress": "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400",
+    "completed": "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400",
+    "cancelled": "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400",
+    "on_hold": "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400",
+    "review": "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400"
+  }
+  return colors[status] || colors["todo"]
+}
+
+const getTaskPriorityColor = (priority: string) => {
+  const colors = {
+    "low": "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400",
+    "medium": "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400",
+    "high": "bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400",
+    "urgent": "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400"
+  }
+  return colors[priority] || colors["medium"]
+}
+
+// Actions
+const deleteProject = async () => {
+  if (isDeleting.value) return
+
+  isDeleting.value = true
+  try {
+    await router.delete(route('projects.destroy', props.project.uuid))
+    toast.success('Project deleted successfully')
+  } catch (error) {
+    toast.error('Failed to delete project')
+  } finally {
+    isDeleting.value = false
+  }
+}
+
+const goBack = () => {
+  router.visit(route('projects.index'))
+}
+</script>
+
+<template>
+  <AppSidebarLayout>
+    <div class="container mx-auto py-6 space-y-6">
+      <!-- Header -->
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <Button variant="ghost" size="sm" @click="goBack" class="gap-2">
+            <ArrowLeft class="h-4 w-4" />
+            Back to Projects
+          </Button>
+          <div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">
+              {{ project.name }}
+            </h1>
+            <p v-if="project.description" class="text-muted-foreground mt-1">
+              {{ project.description }}
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <Badge :class="statusColor">{{ project.status }}</Badge>
+          <Badge :class="priorityColor">{{ project.priority }} priority</Badge>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger as-child>
+              <Button variant="outline" size="sm">
+                <MoreHorizontal class="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem as="a" :href="route('projects.edit', project.uuid)">
+                <Edit class="h-4 w-4 mr-2" />
+                Edit Project
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Share2 class="h-4 w-4 mr-2" />
+                Share
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Download class="h-4 w-4 mr-2" />
+                Export
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <AlertDialog>
+                <AlertDialogTrigger as-child>
+                  <DropdownMenuItem class="text-red-600 dark:text-red-400">
+                    <Trash2 class="h-4 w-4 mr-2" />
+                    Delete Project
+                  </DropdownMenuItem>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete Project</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to delete this project? This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction @click="deleteProject" :disabled="isDeleting">
+                      {{ isDeleting ? 'Deleting...' : 'Delete' }}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+
+      <!-- Project Overview Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card>
+          <CardContent class="p-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium text-muted-foreground">Progress</p>
+                <p class="text-2xl font-bold">{{ project.progress?.percentage || 0 }}%</p>
+              </div>
+              <Target class="h-8 w-8 text-muted-foreground" />
+            </div>
+            <Progress :value="project.progress?.percentage || 0" class="mt-3" />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent class="p-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium text-muted-foreground">Tasks</p>
+                <p class="text-2xl font-bold">{{ project.stats?.completed_tasks || 0 }}/{{ project.stats?.total_tasks || 0 }}</p>
+              </div>
+              <CheckCircle class="h-8 w-8 text-muted-foreground" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent class="p-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium text-muted-foreground">Hours Logged</p>
+                <p class="text-2xl font-bold">{{ project.stats?.total_hours || 0 }}h</p>
+              </div>
+              <Clock class="h-8 w-8 text-muted-foreground" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent class="p-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium text-muted-foreground">Budget</p>
+                <p class="text-2xl font-bold">{{ formatCurrency(project.budget) }}</p>
+              </div>
+              <DollarSign class="h-8 w-8 text-muted-foreground" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <!-- Tabs -->
+      <Tabs v-model="activeTab" class="space-y-6">
+        <TabsList>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="tasks">Tasks ({{ tasks.length }})</TabsTrigger>
+          <TabsTrigger value="team">Team ({{ teamMembers.length }})</TabsTrigger>
+          <TabsTrigger value="activity">Activity</TabsTrigger>
+        </TabsList>
+
+        <!-- Overview Tab -->
+        <TabsContent value="overview">
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Project Details -->
+            <div class="lg:col-span-2 space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Project Details</CardTitle>
+                </CardHeader>
+                <CardContent class="space-y-4">
+                  <div class="grid grid-cols-2 gap-4">
+                    <div>
+                      <label class="text-sm font-medium text-muted-foreground">Status</label>
+                      <div class="mt-1">
+                        <Badge :class="statusColor">{{ project.status }}</Badge>
+                      </div>
+                    </div>
+                    <div>
+                      <label class="text-sm font-medium text-muted-foreground">Priority</label>
+                      <div class="mt-1">
+                        <Badge :class="priorityColor">{{ project.priority }}</Badge>
+                      </div>
+                    </div>
+                    <div>
+                      <label class="text-sm font-medium text-muted-foreground">Due Date</label>
+                      <p class="mt-1">{{ formatDate(project.due_date) }}</p>
+                    </div>
+                    <div>
+                      <label class="text-sm font-medium text-muted-foreground">Estimated Hours</label>
+                      <p class="mt-1">{{ project.estimated_hours || 'Not set' }}h</p>
+                    </div>
+                  </div>
+
+                  <div v-if="project.notes">
+                    <label class="text-sm font-medium text-muted-foreground">Notes</label>
+                    <p class="mt-1 text-sm">{{ project.notes }}</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <!-- Recent Tasks -->
+              <Card>
+                <CardHeader class="flex flex-row items-center justify-between">
+                  <div>
+                    <CardTitle>Recent Tasks</CardTitle>
+                    <CardDescription>Latest task activity</CardDescription>
+                  </div>
+                  <Button variant="outline" size="sm" as="a" :href="route('tasks.create', { project: project.uuid })">
+                    <Plus class="h-4 w-4 mr-1" />
+                    Add Task
+                  </Button>
+                </CardHeader>
+                <CardContent>
+                  <div v-if="tasks.length === 0" class="text-center py-8 text-muted-foreground">
+                    <CheckCircle class="h-12 w-12 mx-auto mb-3 opacity-50" />
+                    <p>No tasks yet. Create your first task to get started.</p>
+                  </div>
+                  <div v-else class="space-y-3">
+                    <div v-for="task in tasks.slice(0, 5)" :key="task.uuid"
+                         class="flex items-center justify-between p-3 border rounded-lg">
+                      <div class="flex-1 min-w-0">
+                        <h4 class="font-medium">{{ task.title }}</h4>
+                        <div class="flex items-center gap-2 mt-1">
+                          <Badge :class="getTaskStatusColor(task.status)" class="text-xs">{{ task.status }}</Badge>
+                          <Badge :class="getTaskPriorityColor(task.priority)" class="text-xs">{{ task.priority }}</Badge>
+                        </div>
+                      </div>
+                      <Avatar v-if="task.assignedUser" class="h-8 w-8">
+                        <AvatarImage v-if="task.assignedUser.avatar_url" :src="task.assignedUser.avatar_url" />
+                        <AvatarFallback class="text-xs">{{ task.assignedUser.name.charAt(0) }}</AvatarFallback>
+                      </Avatar>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-6">
+              <!-- Contact Info -->
+              <Card>
+                <CardHeader>
+                  <CardTitle class="flex items-center gap-2">
+                    <User class="h-5 w-5" />
+                    Contact
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div class="flex items-center gap-3">
+                    <Avatar class="h-12 w-12">
+                      <AvatarImage v-if="project.contact.avatar_url" :src="project.contact.avatar_url" />
+                      <AvatarFallback>{{ project.contact.first_name.charAt(0) }}{{ project.contact.last_name.charAt(0) }}</AvatarFallback>
+                    </Avatar>
+                    <div class="flex-1 min-w-0">
+                      <h3 class="font-medium">{{ project.contact.first_name }} {{ project.contact.last_name }}</h3>
+                      <p v-if="project.contact.job_title" class="text-sm text-muted-foreground">{{ project.contact.job_title }}</p>
+                      <p v-if="project.contact.firm" class="text-sm text-muted-foreground">{{ project.contact.firm.name }}</p>
+                    </div>
+                  </div>
+
+                  <div class="mt-4 space-y-2">
+                    <div v-if="project.contact.primary_email" class="flex items-center gap-2 text-sm">
+                      <Mail class="h-4 w-4 text-muted-foreground" />
+                      <a :href="`mailto:${project.contact.primary_email}`" class="hover:underline">
+                        {{ project.contact.primary_email }}
+                      </a>
+                    </div>
+                    <div v-if="project.contact.primary_phone_number" class="flex items-center gap-2 text-sm">
+                      <Phone class="h-4 w-4 text-muted-foreground" />
+                      <a :href="`tel:${project.contact.primary_phone_number}`" class="hover:underline">
+                        {{ project.contact.primary_phone_number }}
+                      </a>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <!-- Project Stats -->
+              <Card>
+                <CardHeader>
+                  <CardTitle class="flex items-center gap-2">
+                    <TrendingUp class="h-5 w-5" />
+                    Statistics
+                  </CardTitle>
+                </CardHeader>
+                <CardContent class="space-y-4">
+                  <div class="flex justify-between">
+                    <span class="text-sm text-muted-foreground">Completion Rate</span>
+                    <span class="font-medium">{{ project.stats?.completion_rate || 0 }}%</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-sm text-muted-foreground">Overdue Tasks</span>
+                    <span class="font-medium text-red-600">{{ project.stats?.overdue_tasks || 0 }}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-sm text-muted-foreground">Team Members</span>
+                    <span class="font-medium">{{ teamMembers.length }}</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </TabsContent>
+
+        <!-- Tasks Tab -->
+        <TabsContent value="tasks">
+          <Card>
+            <CardHeader class="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle class="flex items-center gap-2">
+                  <CheckCircle class="h-5 w-5" />
+                  Tasks
+                </CardTitle>
+                <CardDescription>Manage project tasks and track progress</CardDescription>
+              </div>
+              <Button as="a" :href="route('tasks.create', { project: project.uuid })" class="gap-2">
+                <Plus class="h-4 w-4" />
+                Create Task
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div v-if="tasks.length === 0" class="text-center py-12 text-muted-foreground">
+                <CheckCircle class="h-16 w-16 mx-auto mb-4 opacity-50" />
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">No tasks yet</h3>
+                <p class="mb-4">Create your first task to start organizing project work.</p>
+                <Button as="a" :href="route('tasks.create', { project: project.uuid })">
+                  <Plus class="h-4 w-4 mr-1" />
+                  Create First Task
+                </Button>
+              </div>
+              <div v-else class="space-y-4">
+                <!-- Overdue Tasks Alert -->
+                <div v-if="overdueTasks.length > 0"
+                     class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                  <div class="flex items-center gap-2">
+                    <AlertTriangle class="h-5 w-5 text-red-600 dark:text-red-400" />
+                    <h3 class="font-medium text-red-800 dark:text-red-200">Overdue Tasks</h3>
+                  </div>
+                  <p class="text-sm text-red-700 dark:text-red-300 mt-1">
+                    {{ overdueTasks.length }} task{{ overdueTasks.length !== 1 ? "s are" : " is" }} overdue and
+                    need{{ overdueTasks.length === 1 ? "s" : "" }} attention.
+                  </p>
+                </div>
+
+                <!-- Tasks List -->
+                <div class="space-y-3">
+                  <div v-for="task in tasks" :key="task.uuid"
+                       class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <div class="flex items-start justify-between">
+                      <div class="flex-1 min-w-0">
+                        <h4 class="font-medium text-gray-900 dark:text-gray-100">
+                          <a :href="route('tasks.show', task.uuid)"
+                             class="hover:text-blue-600 dark:hover:text-blue-400">
+                            {{ task.title }}
+                          </a>
+                        </h4>
+                        <p v-if="task.description" class="text-sm text-muted-foreground mt-1 line-clamp-2">
+                          {{ task.description }}
+                        </p>
+                        <div class="flex items-center gap-2 mt-2">
+                          <Badge :class="getTaskStatusColor(task.status)">{{ task.status }}</Badge>
+                          <Badge :class="getTaskPriorityColor(task.priority)">{{ task.priority }}</Badge>
+                          <span v-if="task.due_date"
+                                class="text-xs text-muted-foreground">Due {{ formatDate(task.due_date) }}</span>
+                          <span v-if="task.estimated_hours"
+                                class="text-xs text-muted-foreground">{{ task.estimated_hours }}h estimated</span>
+                        </div>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <Avatar v-if="task.assignedUser" class="h-8 w-8">
+                          <AvatarImage v-if="task.assignedUser.avatar_url" :src="task.assignedUser.avatar_url" />
+                          <AvatarFallback class="text-xs">{{ task.assignedUser.name.charAt(0) }}</AvatarFallback>
+                        </Avatar>
+                        <Button variant="ghost" size="sm" as="a" :href="route('tasks.show', task.uuid)">
+                          <ExternalLink class="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <!-- Team Tab -->
+        <TabsContent value="team">
+          <Card>
+            <CardHeader class="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle class="flex items-center gap-2">
+                  <Users class="h-5 w-5" />
+                  Team Members
+                </CardTitle>
+                <CardDescription>People working on this project</CardDescription>
+              </div>
+              <Button variant="outline" size="sm" class="gap-2">
+                <Plus class="h-4 w-4" />
+                Add Member
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div v-if="teamMembers.length === 0" class="text-center py-12 text-muted-foreground">
+                <Users class="h-16 w-16 mx-auto mb-4 opacity-50" />
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">No team members</h3>
+                <p class="mb-4">Add team members to collaborate on this project.</p>
+                <Button variant="outline">
+                  <Plus class="h-4 w-4 mr-1" />
+                  Add Team Member
+                </Button>
+              </div>
+              <div v-else class="space-y-4">
+                <div v-for="member in teamMembers" :key="member.uuid"
+                     class="flex items-center justify-between p-4 border rounded-lg">
+                  <div class="flex items-center gap-3">
+                    <Avatar class="h-10 w-10">
+                      <AvatarImage v-if="member.avatar_url" :src="member.avatar_url" />
+                      <AvatarFallback>{{ member.name.charAt(0) }}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <h4 class="font-medium">{{ member.name }}</h4>
+                      <p class="text-sm text-muted-foreground">{{ member.role }}</p>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <p class="text-sm font-medium">{{ member.tasks_completed }}/{{ member.tasks_assigned }} tasks</p>
+                    <p class="text-xs text-muted-foreground">{{ member.hours_logged }}h logged</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <!-- Activity Tab -->
+        <TabsContent value="activity">
+          <Card>
+            <CardHeader>
+              <CardTitle class="flex items-center gap-2">
+                <Activity class="h-5 w-5" />
+                Recent Activity
+              </CardTitle>
+              <CardDescription>Latest project activity and updates</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div v-if="recentActivity.length === 0" class="text-center py-12 text-muted-foreground">
+                <Activity class="h-16 w-16 mx-auto mb-4 opacity-50" />
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">No activity yet</h3>
+                <p>Activity will appear here as team members work on the project.</p>
+              </div>
+              <div v-else class="space-y-4">
+                <div v-for="activity in recentActivity" :key="activity.id"
+                     class="flex items-start gap-3 p-3 border rounded-lg">
+                  <Avatar class="h-8 w-8">
+                    <AvatarImage v-if="activity.user.avatar_url" :src="activity.user.avatar_url" />
+                    <AvatarFallback class="text-xs">{{ activity.user.name.charAt(0) }}</AvatarFallback>
+                  </Avatar>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm">{{ activity.description }}</p>
+                    <p class="text-xs text-muted-foreground mt-1">{{ formatDate(activity.created_at) }}</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+  </AppSidebarLayout>
+</template>

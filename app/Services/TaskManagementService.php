@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Enums\TaskStatus;
 use App\Enums\TaskPriority;
-use App\Models\Board;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
@@ -22,11 +21,11 @@ class TaskManagementService
   {
     return DB::transaction(function () use ($data) {
       $task = Task::create([
-        'name' => $data['name'],
+        'title' => $data['title'] ?? $data['name'], // Use title as primary, fallback to name
+        'name' => $data['name'] ?? $data['title'], // Keep name for backward compatibility
         'description' => $data['description'] ?? null,
-        'board_id' => $data['board_id'],
         'project_id' => $data['project_id'] ?? null,
-        'assigned_to' => $data['assigned_to'],
+        'assigned_to' => $data['assigned_to'] ?? null,
         'assigned_by' => $data['assigned_by'] ?? auth()->id(),
         'status' => $data['status'] ?? TaskStatus::TODO,
         'priority' => $data['priority'] ?? TaskPriority::MEDIUM,
@@ -37,7 +36,7 @@ class TaskManagementService
 
       Log::info("Task created", [
         'task_id' => $task->uuid,
-        'name' => $task->name,
+        'title' => $task->title,
         'assigned_to' => $task->assigned_to,
         'project_id' => $task->project_id,
       ]);
@@ -55,7 +54,8 @@ class TaskManagementService
       $originalStatus = $task->status;
 
       $task->update([
-        'name' => $data['name'] ?? $task->name,
+        'title' => $data['title'] ?? $data['name'] ?? $task->title,
+        'name' => $data['name'] ?? $data['title'] ?? $task->name,
         'description' => $data['description'] ?? $task->description,
         'status' => $data['status'] ?? $task->status,
         'priority' => $data['priority'] ?? $task->priority,
@@ -64,9 +64,6 @@ class TaskManagementService
         'due_date' => isset($data['due_date']) ? Carbon::parse($data['due_date']) : $task->due_date,
         'notes' => $data['notes'] ?? $task->notes,
       ]);
-
-      // Handle status changes
-      $this->handleStatusChange($task, $originalStatus, $task->status);
 
       Log::info("Task updated", [
         'task_id' => $task->uuid,
@@ -90,7 +87,6 @@ class TaskManagementService
 
     $task->update([
       'status' => TaskStatus::IN_PROGRESS,
-      'started_at' => now(),
       'assigned_to' => $user->id,
     ]);
 
@@ -113,7 +109,6 @@ class TaskManagementService
 
     $task->update([
       'status' => TaskStatus::COMPLETED,
-      'completed_at' => now(),
       'actual_hours' => $actualHours ?? $task->actual_hours,
     ]);
 
@@ -141,7 +136,6 @@ class TaskManagementService
     if ($task->status === TaskStatus::TODO) {
       $task->update([
         'status' => TaskStatus::IN_PROGRESS,
-        'started_at' => now(),
       ]);
     }
 
@@ -150,27 +144,6 @@ class TaskManagementService
       'hours_logged' => $hours,
       'total_hours' => $newTotal,
       'description' => $description,
-    ]);
-
-    return $task;
-  }
-
-  /**
-   * Move task to different board
-   */
-  public function moveTask(Task $task, Board $targetBoard, float $position = null): Task
-  {
-    $oldBoardId = $task->board_id;
-
-    $task->update([
-      'board_id' => $targetBoard->uuid,
-      'position' => $position ?? $this->getNextPosition($targetBoard),
-    ]);
-
-    Log::info("Task moved between boards", [
-      'task_id' => $task->uuid,
-      'from_board' => $oldBoardId,
-      'to_board' => $targetBoard->uuid,
     ]);
 
     return $task;
@@ -204,20 +177,20 @@ class TaskManagementService
    */
   public function getUserTasks(User $user, array $filters = []): Collection
   {
-    $query = Task::where('assigned_to', $user->id)
-      ->with(['project.contact.firm']);
+    $query = Task::forUser($user->id)
+      ->with(['project.contact.firm', 'assignedUser']);
 
-    // Apply filters
+    // Apply filters using model scopes
     if (isset($filters['status'])) {
-      $query->where('status', $filters['status']);
+      $query->byStatus($filters['status']);
     }
 
     if (isset($filters['priority'])) {
-      $query->where('priority', $filters['priority']);
+      $query->byPriority($filters['priority']);
     }
 
     if (isset($filters['project_id'])) {
-      $query->where('project_id', $filters['project_id']);
+      $query->forProject($filters['project_id']);
     }
 
     if (isset($filters['due_date_from'])) {
@@ -229,8 +202,7 @@ class TaskManagementService
     }
 
     if (isset($filters['overdue']) && $filters['overdue']) {
-      $query->where('due_date', '<', now())
-        ->whereNotIn('status', [TaskStatus::COMPLETED, TaskStatus::CANCELLED]);
+      $query->overdue();
     }
 
     // Default ordering
@@ -248,16 +220,47 @@ class TaskManagementService
   }
 
   /**
-   * Get overdue tasks for a user
+   * Get tasks for a project
+   */
+  public function getProjectTasks(Project $project, array $filters = []): Collection
+  {
+    $query = Task::forProject($project->uuid)
+      ->with(['assignedUser']);
+
+    // Apply filters using model scopes
+    if (isset($filters['status'])) {
+      $query->byStatus($filters['status']);
+    }
+
+    if (isset($filters['priority'])) {
+      $query->byPriority($filters['priority']);
+    }
+
+    if (isset($filters['assigned_to'])) {
+      $query->forUser($filters['assigned_to']);
+    }
+
+    if (isset($filters['overdue']) && $filters['overdue']) {
+      $query->overdue();
+    }
+
+    // Default ordering by priority then due date
+    $query->orderByRaw("FIELD(priority, 'urgent', 'high', 'medium', 'low')")
+      ->orderBy('due_date', 'asc');
+
+    return $query->get();
+  }
+
+  /**
+   * Get overdue tasks for a user (using model scope)
    */
   public function getOverdueTasks(User $user = null): Collection
   {
-    $query = Task::where('due_date', '<', now())
-      ->whereNotIn('status', [TaskStatus::COMPLETED, TaskStatus::CANCELLED])
-      ->with(['project.contact.firm', 'user']);
+    $query = Task::overdue()
+      ->with(['project.contact.firm', 'assignedUser']);
 
     if ($user) {
-      $query->where('assigned_to', $user->id);
+      $query->forUser($user->id);
     }
 
     return $query->orderBy('due_date', 'asc')->get();
@@ -271,7 +274,7 @@ class TaskManagementService
     $startDate = $startDate ?? now()->startOfMonth();
     $endDate = $endDate ?? now()->endOfMonth();
 
-    $tasks = Task::where('assigned_to', $user->id)
+    $tasks = Task::forUser($user->id)
       ->whereBetween('created_at', [$startDate, $endDate])
       ->get();
 
@@ -283,9 +286,7 @@ class TaskManagementService
       'completed_tasks' => $completedTasks->count(),
       'in_progress_tasks' => $tasks->where('status', TaskStatus::IN_PROGRESS)->count(),
       'todo_tasks' => $tasks->where('status', TaskStatus::TODO)->count(),
-      'overdue_tasks' => $tasks->where('due_date', '<', now())
-        ->whereNotIn('status', [TaskStatus::COMPLETED, TaskStatus::CANCELLED])
-        ->count(),
+      'overdue_tasks' => $tasks->filter(fn($task) => $task->isOverdue())->count(),
       'total_hours' => $totalHours,
       'average_hours_per_task' => $completedTasks->count() > 0 ? round($totalHours / $completedTasks->count(), 2) : 0,
       'completion_rate' => $tasks->count() > 0 ? round(($completedTasks->count() / $tasks->count()) * 100, 1) : 0,
@@ -299,51 +300,24 @@ class TaskManagementService
   }
 
   /**
-   * Handle status changes and update timestamps
+   * Get task statistics for a project
    */
-  private function handleStatusChange(Task $task, TaskStatus $oldStatus, TaskStatus $newStatus): void
+  public function getProjectTaskStats(Project $project): array
   {
-    // If moving to in progress and wasn't started
-    if ($newStatus === TaskStatus::IN_PROGRESS && !$task->started_at) {
-      $task->update(['started_at' => now()]);
-    }
+    $tasks = Task::forProject($project->uuid)->get();
+    $completedTasks = $tasks->where('status', TaskStatus::COMPLETED);
+    $totalHours = $tasks->sum('actual_hours');
+    $estimatedHours = $tasks->sum('estimated_hours');
 
-    // If completing task
-    if ($newStatus === TaskStatus::COMPLETED && $oldStatus !== TaskStatus::COMPLETED) {
-      $task->update(['completed_at' => now()]);
-    }
-
-    // If reopening completed task
-    if ($oldStatus === TaskStatus::COMPLETED && $newStatus !== TaskStatus::COMPLETED) {
-      $task->update(['completed_at' => null]);
-    }
-  }
-
-  /**
-   * Get next position for a board
-   */
-  private function getNextPosition(Board $board): float
-  {
-    $lastTask = Task::where('board_id', $board->uuid)
-      ->orderByDesc('position')
-      ->first();
-
-    return ($lastTask?->position ?? 0) + Task::POSITION_GAP;
-  }
-
-  /**
-   * Bulk update task positions (for drag and drop)
-   */
-  public function updateTaskPositions(array $taskPositions): void
-  {
-    DB::transaction(function () use ($taskPositions) {
-      foreach ($taskPositions as $taskData) {
-        Task::where('uuid', $taskData['id'])
-          ->update([
-            'position' => $taskData['position'],
-            'board_id' => $taskData['board_id'] ?? null,
-          ]);
-      }
-    });
+    return [
+      'total_tasks' => $tasks->count(),
+      'completed_tasks' => $completedTasks->count(),
+      'in_progress_tasks' => $tasks->where('status', TaskStatus::IN_PROGRESS)->count(),
+      'todo_tasks' => $tasks->where('status', TaskStatus::TODO)->count(),
+      'overdue_tasks' => $tasks->filter(fn($task) => $task->isOverdue())->count(),
+      'total_hours' => $totalHours,
+      'estimated_hours' => $estimatedHours,
+      'completion_rate' => $tasks->count() > 0 ? round(($completedTasks->count() / $tasks->count()) * 100, 1) : 0,
+    ];
   }
 }

@@ -108,6 +108,65 @@ class Project extends Model
     );
   }
 
+  /**
+   * Get team members for a project
+   */
+  public function getProjectTeamMembers(): array
+  {
+    // Get unique users assigned to tasks in this project
+    $users = \App\Models\User::whereHas('assignedTasks', function ($query) {
+      $query->where('project_id', $this->uuid);
+    })
+      ->withCount([
+        'assignedTasks as tasks_assigned' => function ($query) {
+          $query->where('project_id', $this->uuid);
+        },
+        'assignedTasks as tasks_completed' => function ($query) {
+          $query->where('project_id', $this->uuid)
+            ->where('status', \App\Enums\TaskStatus::COMPLETED);
+        }
+      ])
+      ->get();
+
+    return $users->map(function ($user) {
+      // Calculate hours logged for this project
+      $hoursLogged = \App\Models\Task::where('project_id', $this->uuid)
+        ->where('assigned_to', $user->id)
+        ->sum('actual_hours') ?? 0;
+
+      return [
+        'uuid' => $user->uuid,
+        'name' => $user->name,
+        'email' => $user->email,
+        'role' => $user->role ?? 'Team Member',
+        'avatar_url' => $user->avatar_url,
+        'hours_logged' => $hoursLogged,
+        'tasks_assigned' => $user->tasks_assigned,
+        'tasks_completed' => $user->tasks_completed,
+      ];
+    })->toArray();
+  }
+
+  /**
+   * Get recent time entries for a project
+   */
+  public function getRecentTimeEntries(): array
+  {
+    // This would typically come from a TimeEntry model
+    // For now, we'll return an empty array or mock data
+    return [];
+  }
+
+  /**
+   * Get recent activity for a project
+   */
+  public function getRecentActivity(): array
+  {
+    // This would typically come from an Activity/Audit log
+    // For now, we'll return an empty array or mock data
+    return [];
+  }
+
   // Scopes for filtering
   public function scopeByStatus($query, $status)
   {

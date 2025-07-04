@@ -69,7 +69,7 @@ class Task extends Model implements HasMedia
     );
   }
 
-  public function user(): BelongsTo
+  public function assignedUser(): BelongsTo
   {
     return $this->belongsTo(User::class, 'assigned_to');
   }

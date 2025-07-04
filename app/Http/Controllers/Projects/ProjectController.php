@@ -7,13 +7,15 @@ use App\Models\Contact;
 use App\Models\Firm;
 use App\Models\Project;
 use App\Services\ProjectManagementService;
+use App\Services\TaskManagementService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class ProjectController extends Controller
 {
   public function __construct(
-    private ProjectManagementService $projectService
+    private ProjectManagementService $projectService,
+    private TaskManagementService $taskService
   ) {}
 
   public function index(Request $request)
@@ -70,14 +72,34 @@ class ProjectController extends Controller
 
   public function show(Project $project)
   {
-    $project->load(['contact.firm', 'tasks.assignedUser', 'author']);
+    // Load project relationships
+    $project->load([
+      'contact.firm',
+      'author',
+    ]);
 
-    // Add progress and stats
+    // Get project tasks using the task service
+    $tasks = $this->taskService->getProjectTasks($project);
+
+    // Get team members (users assigned to tasks in this project)
+    $teamMembers = $project->getProjectTeamMembers();
+
+    // Get recent time entries for this project
+    $recentTimeEntries = $project->getRecentTimeEntries();
+
+    // Get recent activity for this project
+    $recentActivity = $project->getRecentActivity();
+
+    // Add progress and stats using project service
     $project->progress = $this->projectService->getProjectProgress($project);
     $project->stats = $this->projectService->getProjectStats($project);
 
     return Inertia::render('projects/Show', [
       'project' => $project,
+      'tasks' => $tasks,
+      'teamMembers' => $teamMembers,
+      'recentTimeEntries' => $recentTimeEntries,
+      'recentActivity' => $recentActivity,
     ]);
   }
 

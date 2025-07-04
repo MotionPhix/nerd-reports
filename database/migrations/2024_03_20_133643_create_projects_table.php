@@ -24,7 +24,7 @@ return new class extends Migration
 
       $table->enum(
         'status',
-        ['in_progress', 'approved', 'completed', 'cancelled', 'done'
+        ['in_progress', 'approved', 'completed', 'cancelled'
       ])->default('in_progress');
 
       $table->foreignUuid('contact_id')->index()->constrained('contacts', 'uuid');
