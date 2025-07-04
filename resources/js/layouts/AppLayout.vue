@@ -45,16 +45,16 @@ const items = computed(() => [
     active: currentUrl.value.startsWith(new URL(route('firms.index')).pathname)
   },
   {
-    title: 'Projects',
-    url: route('projects.index'),
-    icon: Home,
-    active: currentUrl.value.startsWith(new URL(route('projects.index')).pathname)
-  },
-  {
     title: 'Contacts',
     url: route('contacts.index'),
     icon: Users,
     active: currentUrl.value.startsWith(new URL(route('contacts.index')).pathname)
+  },
+  {
+    title: 'Projects',
+    url: route('projects.index'),
+    icon: Home,
+    active: currentUrl.value.startsWith(new URL(route('projects.index')).pathname)
   },
   {
     title: 'Tasks',

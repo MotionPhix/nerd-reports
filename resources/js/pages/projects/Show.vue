@@ -376,17 +376,18 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
-    <div class="p-6 space-y-6">
+  <div class="p-6 space-y-6">
       <!-- Header -->
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div class="flex items-center gap-4">
-          <Button variant="ghost" size="sm" as="a" :href="route('projects.index')" class="gap-2">
-            <ArrowLeft class="h-4 w-4" />
-            Back to Projects
-          </Button>
-          <Separator orientation="vertical" class="h-6" />
           <div>
+            <div>
+              <Button variant="ghost" size="sm" as="a" :href="route('projects.index')" class="gap-2">
+                <ArrowLeft class="h-4 w-4" />
+                Back to Projects
+              </Button>
+            </div>
+
             <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
               {{ project.name }}
             </h1>
@@ -526,7 +527,7 @@ onMounted(() => {
                   <span class="text-sm font-medium text-gray-900 dark:text-gray-100">Project Progress</span>
                   <span class="text-sm font-medium">{{ project.progress.percentage }}%</span>
                 </div>
-                <Progress :value="project.progress.percentage" class="h-2" />
+                <Progress v-model="project.progress.percentage" class="h-1 rounded-none" />
                 <div class="flex items-center justify-between text-xs text-muted-foreground">
                   <span>{{ project.progress.completed_tasks }}/{{ project.progress.total_tasks }} tasks completed</span>
                   <span>{{ project.stats.team_members }} team members</span>
@@ -1011,5 +1012,4 @@ onMounted(() => {
         </TabsContent>
       </Tabs>
     </div>
-  </div>
 </template>

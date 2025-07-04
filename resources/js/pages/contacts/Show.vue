@@ -24,6 +24,7 @@ import {
   MessageCircle, Briefcase, Clock, User, Globe
 } from 'lucide-vue-next'
 import AppSidebarLayout from "@/layouts/AppLayout.vue"
+import { useStorage } from '@vueuse/core';
 
 // Props
 const props = defineProps({
@@ -32,6 +33,7 @@ const props = defineProps({
 })
 
 // Reactive data
+const activeContactInfoTab = useStorage('contact-info-tabs', 'contact-info')
 const showDeleteDialog = ref(false)
 const showAddEmailDialog = ref(false)
 const showAddPhoneDialog = ref(false)
@@ -263,7 +265,7 @@ defineOptions({
           <div class="lg:col-span-2 space-y-6">
             <!-- Contact Overview -->
             <Card>
-              <CardContent class="p-6">
+              <CardContent>
                 <div class="flex items-start gap-6">
                   <Avatar class="h-24 w-24">
                     <AvatarImage
@@ -346,7 +348,7 @@ defineOptions({
             </Card>
 
             <!-- Detailed Information Tabs -->
-            <Tabs default-value="contact-info" class="w-full">
+            <Tabs v-model="activeContactInfoTab" class="w-full">
               <TabsList class="grid w-full grid-cols-4">
                 <TabsTrigger value="contact-info">Contact Info</TabsTrigger>
                 <TabsTrigger value="interactions">Interactions</TabsTrigger>

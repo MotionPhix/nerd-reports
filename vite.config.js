@@ -21,7 +21,7 @@ export default defineConfig({
   ],
   server: {
     cors: {
-      origin: /^https?:\/\/(?:(?:[^:]+\.)?localhost|nerd-reports|reports\.test|127\.0\.0\.1|\[::1\])(?::\d+)?$/,
+      origin: /^https?:\/\/(?:(?:[^:]+\.)?localhost|reports|nerd-reports\.test|127\.0\.0\.1|\[::1\])(?::\d+)?$/,
     },
   },
 })

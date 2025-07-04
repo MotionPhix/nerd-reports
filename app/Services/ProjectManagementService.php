@@ -73,7 +73,7 @@ class ProjectManagementService
   }
 
   /**
-   * Get projects for a user with filters
+   * Get projects for a user with filters - using model scopes
    */
   public function getUserProjects(User $user, array $filters = []): Collection
   {
@@ -83,53 +83,64 @@ class ProjectManagementService
       })
       ->with(['contact.firm', 'tasks']);
 
-    // Apply filters
-    if (isset($filters['status'])) {
-      $query->where('status', $filters['status']);
-    }
+    // Apply filters using model scopes
+    $query->byStatus($filters['status'] ?? null)
+      ->byContact($filters['contact_id'] ?? null)
+      ->byFirm($filters['firm_id'] ?? null)
+      ->byDateRange($filters['due_date_from'] ?? null, $filters['due_date_to'] ?? null)
+      ->search($filters['search'] ?? null);
 
-    if (isset($filters['contact_id'])) {
-      $query->where('contact_id', $filters['contact_id']);
-    }
-
-    if (isset($filters['firm_id'])) {
-      $query->whereHas('contact', function ($q) use ($filters) {
-        $q->where('firm_id', $filters['firm_id']);
-      });
-    }
-
-    if (isset($filters['due_date_from'])) {
-      $query->where('due_date', '>=', Carbon::parse($filters['due_date_from']));
-    }
-
-    if (isset($filters['due_date_to'])) {
-      $query->where('due_date', '<=', Carbon::parse($filters['due_date_to']));
-    }
-
+    // Handle overdue filter
     if (isset($filters['overdue']) && $filters['overdue']) {
-      $query->where('due_date', '<', now())
-        ->whereNotIn('status', [ProjectStatus::COMPLETED, ProjectStatus::CANCELLED]);
+      $query->overdue();
     }
 
-    // Search
-    if (isset($filters['search'])) {
-      $search = $filters['search'];
-      $query->where(function ($q) use ($search) {
-        $q->where('name', 'like', "%{$search}%")
-          ->orWhere('description', 'like', "%{$search}%")
-          ->orWhereHas('contact', function ($contactQuery) use ($search) {
-            $contactQuery->where('first_name', 'like', "%{$search}%")
-              ->orWhere('last_name', 'like', "%{$search}%");
-          });
-      });
-    }
-
-    // Ordering
+    // Apply ordering
     $orderBy = $filters['order_by'] ?? 'created_at';
     $orderDirection = $filters['order_direction'] ?? 'desc';
     $query->orderBy($orderBy, $orderDirection);
 
     return $query->get();
+  }
+
+  /**
+   * Get overdue projects for a user
+   */
+  public function getOverdueProjects(User $user): Collection
+  {
+    return Project::where('created_by', $user->id)
+      ->orWhereHas('tasks', function ($q) use ($user) {
+        $q->where('assigned_to', $user->id);
+      })
+      ->overdue()
+      ->with(['contact.firm', 'tasks'])
+      ->orderBy('due_date', 'asc')
+      ->get();
+  }
+
+  /**
+   * Get recently active projects for a user
+   */
+  public function getRecentlyActiveProjects(User $user, int $days = 7): Collection
+  {
+    $startDate = now()->subDays($days);
+
+    return Project::where('created_by', $user->id)
+      ->orWhereHas('tasks', function ($q) use ($user) {
+        $q->where('assigned_to', $user->id);
+      })
+      ->where(function ($query) use ($startDate) {
+        $query->where('updated_at', '>=', $startDate)
+          ->orWhereHas('tasks', function ($taskQuery) use ($startDate) {
+            $taskQuery->where('updated_at', '>=', $startDate);
+          })
+          ->orWhereHas('interactions', function ($interactionQuery) use ($startDate) {
+            $interactionQuery->where('created_at', '>=', $startDate);
+          });
+      })
+      ->with(['contact.firm', 'tasks'])
+      ->orderBy('updated_at', 'desc')
+      ->get();
   }
 
   /**
@@ -163,70 +174,6 @@ class ProjectManagementService
       'average_task_completion_time' => $this->calculateAverageCompletionTime($completedTasks),
       'team_members' => $tasks->pluck('assigned_to')->unique()->count(),
     ];
-  }
-
-  /**
-   * Get overdue projects
-   */
-  public function getOverdueProjects(User $user = null): Collection
-  {
-    $query = Project::where('due_date', '<', now())
-      ->whereNotIn('status', [ProjectStatus::COMPLETED, ProjectStatus::CANCELLED])
-      ->with(['contact.firm', 'tasks']);
-
-    if ($user) {
-      $query->where(function ($q) use ($user) {
-        $q->where('created_by', $user->id)
-          ->orWhereHas('tasks', function ($taskQuery) use ($user) {
-            $taskQuery->where('assigned_to', $user->id);
-          });
-      });
-    }
-
-    return $query->orderBy('due_date', 'asc')->get();
-  }
-
-  /**
-   * Get projects with recent activity
-   */
-  public function getRecentlyActiveProjects(User $user, int $days = 7): Collection
-  {
-    $since = now()->subDays($days);
-
-    return Project::where(function ($query) use ($user) {
-      $query->where('created_by', $user->id)
-        ->orWhereHas('tasks', function ($q) use ($user) {
-          $q->where('assigned_to', $user->id);
-        });
-    })
-      ->where(function ($query) use ($since) {
-        $query->where('updated_at', '>=', $since)
-          ->orWhereHas('tasks', function ($q) use ($since) {
-            $q->where('updated_at', '>=', $since);
-          });
-      })
-      ->with(['contact.firm', 'tasks' => function ($q) use ($since) {
-        $q->where('updated_at', '>=', $since);
-      }])
-      ->orderBy('updated_at', 'desc')
-      ->get();
-  }
-
-  /**
-   * Archive a project
-   */
-  public function archiveProject(Project $project): Project
-  {
-    $project->update([
-      'status' => ProjectStatus::COMPLETED,
-    ]);
-
-    Log::info("Project archived", [
-      'project_id' => $project->uuid,
-      'name' => $project->name,
-    ]);
-
-    return $project;
   }
 
   /**
@@ -266,66 +213,47 @@ class ProjectManagementService
   }
 
   /**
-   * Handle project status changes
+   * Add progress and stats to a collection of projects
+   */
+  public function addProgressAndStats(Collection $projects): Collection
+  {
+    return $projects->map(function ($project) {
+      $project->progress = $this->getProjectProgress($project);
+      $project->stats = $this->getProjectStats($project);
+      return $project;
+    });
+  }
+
+  /**
+   * Handle status change logic
    */
   private function handleStatusChange(Project $project, ProjectStatus $oldStatus, ProjectStatus $newStatus): void
   {
-    // Log status change
     Log::info("Project status changed", [
       'project_id' => $project->uuid,
-      'from_status' => $oldStatus->value,
-      'to_status' => $newStatus->value,
+      'old_status' => $oldStatus->value,
+      'new_status' => $newStatus->value,
     ]);
 
-    // Additional logic for status changes can be added here
-    // For example, notifications, webhooks, etc.
+    // Add any status change logic here (notifications, etc.)
   }
 
   /**
    * Calculate average task completion time
    */
-  private function calculateAverageCompletionTime(Collection $completedTasks): ?float
+  private function calculateAverageCompletionTime(Collection $completedTasks): float
   {
-    $tasksWithTimes = $completedTasks->filter(function ($task) {
-      return $task->started_at && $task->completed_at;
-    });
-
-    if ($tasksWithTimes->isEmpty()) {
-      return null;
+    if ($completedTasks->isEmpty()) {
+      return 0;
     }
 
-    $totalHours = $tasksWithTimes->sum(function ($task) {
-      return $task->started_at->diffInHours($task->completed_at);
+    $totalDays = $completedTasks->sum(function ($task) {
+      if (!$task->completed_at || !$task->created_at) {
+        return 0;
+      }
+      return $task->created_at->diffInDays($task->completed_at);
     });
 
-    return round($totalHours / $tasksWithTimes->count(), 1);
-  }
-
-  /**
-   * Get project timeline data
-   */
-  public function getProjectTimeline(Project $project): array
-  {
-    $tasks = $project->tasks()
-      ->whereNotNull('started_at')
-      ->orderBy('started_at')
-      ->get();
-
-    $timeline = [];
-
-    foreach ($tasks as $task) {
-      $timeline[] = [
-        'id' => $task->uuid,
-        'name' => $task->name,
-        'start_date' => $task->started_at,
-        'end_date' => $task->completed_at ?? $task->due_date,
-        'status' => $task->status->value,
-        'assigned_to' => $task->user->name ?? 'Unassigned',
-        'progress' => $task->status->value === 'completed' ? 100 :
-          ($task->status->value === 'in_progress' ? 50 : 0),
-      ];
-    }
-
-    return $timeline;
+    return round($totalDays / $completedTasks->count(), 1);
   }
 }

@@ -37,7 +37,7 @@ class TaskController extends Controller
     $overdueTasks = $this->taskService->getOverdueTasks($user);
     $taskStats = $this->taskService->getUserTaskStats($user);
 
-    return Inertia::render('Tasks/Index', [
+    return Inertia::render('tasks/Index', [
       'tasks' => $tasks,
       'overdueTasks' => $overdueTasks,
       'taskStats' => $taskStats,
@@ -56,13 +56,12 @@ class TaskController extends Controller
 
     $task->load([
       'project.contact.firm',
-      'board',
       'user',
       'assignee',
       'comments.user'
     ]);
 
-    return Inertia::render('Tasks/Show', [
+    return Inertia::render('tasks/Show', [
       'task' => $task,
       'timeLog' => $task->getFormattedTimeSpent(),
     ]);
@@ -73,8 +72,8 @@ class TaskController extends Controller
    */
   public function create(Request $request)
   {
-    return Inertia::render('Tasks/Create', [
-      'projects' => Project::with(['boards', 'contact.firm'])->get(),
+    return Inertia::render('tasks/Create', [
+      'projects' => Project::with(['contact.firm'])->get(),
       'users' => User::select(['id', 'first_name', 'last_name'])->get(),
       'defaultProject' => $request->project_id,
       'defaultBoard' => $request->board_id,
@@ -89,7 +88,6 @@ class TaskController extends Controller
     $request->validate([
       'name' => 'required|string|max:255',
       'description' => 'nullable|string',
-      'board_id' => 'required|exists:boards,uuid',
       'project_id' => 'nullable|exists:projects,uuid',
       'assigned_to' => 'required|exists:users,id',
       'priority' => 'required|in:low,medium,high,urgent',
@@ -115,11 +113,11 @@ class TaskController extends Controller
   {
     $this->authorize('update', $task);
 
-    $task->load(['project.boards', 'board']);
+    $task->load(['project', 'assignee']);
 
     return Inertia::render('Tasks/Edit', [
       'task' => $task,
-      'projects' => Project::with(['boards', 'contact.firm'])->get(),
+      'projects' => Project::with(['contact.firm'])->get(),
       'users' => User::select(['id', 'first_name', 'last_name'])->get(),
     ]);
   }

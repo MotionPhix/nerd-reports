@@ -70,6 +70,7 @@ class Project extends Model
     );
   }
 
+  // Relationships
   public function contact(): BelongsTo
   {
     return $this->belongsTo(Contact::class, 'contact_id', 'uuid');
@@ -107,7 +108,124 @@ class Project extends Model
     );
   }
 
-  // Reporting helper methods
+  // Scopes for filtering
+  public function scopeByStatus($query, $status)
+  {
+    if (empty($status)) {
+      return $query;
+    }
+
+    // Handle both enum instances and string values
+    if ($status instanceof ProjectStatus) {
+      return $query->where('status', $status->value);
+    }
+
+    // Handle string values - convert to enum value if needed
+    $enumValue = ProjectStatus::tryFrom($status);
+    if ($enumValue) {
+      return $query->where('status', $enumValue->value);
+    }
+
+    // Fallback to direct string comparison
+    return $query->where('status', $status);
+  }
+
+  public function scopeByContact($query, $contactId)
+  {
+    if (empty($contactId)) {
+      return $query;
+    }
+
+    return $query->where('contact_id', $contactId);
+  }
+
+  public function scopeByFirm($query, $firmId)
+  {
+    if (empty($firmId)) {
+      return $query;
+    }
+
+    return $query->whereHas('contact', function ($q) use ($firmId) {
+      $q->where('firm_id', $firmId);
+    });
+  }
+
+  public function scopeByDateRange($query, $startDate = null, $endDate = null)
+  {
+    if ($startDate) {
+      $query->where('due_date', '>=', Carbon::parse($startDate));
+    }
+
+    if ($endDate) {
+      $query->where('due_date', '<=', Carbon::parse($endDate));
+    }
+
+    return $query;
+  }
+
+  public function scopeOverdue($query)
+  {
+    return $query->where('due_date', '<', now())
+      ->whereNotIn('status', [ProjectStatus::COMPLETED->value, ProjectStatus::CANCELLED->value]);
+  }
+
+  public function scopeActive($query)
+  {
+    return $query->whereIn('status', [ProjectStatus::PENDING->value, ProjectStatus::APPROVED->value]);
+  }
+
+  public function scopeCompleted($query)
+  {
+    return $query->where('status', ProjectStatus::COMPLETED->value);
+  }
+
+  public function scopeWithActivityInWeek($query, Carbon $startOfWeek, Carbon $endOfWeek, $userId = null)
+  {
+    return $query->whereHas('tasks', function ($taskQuery) use ($startOfWeek, $endOfWeek, $userId) {
+      $taskQuery->workedOnInWeek($startOfWeek, $endOfWeek);
+      if ($userId) {
+        $taskQuery->forUser($userId);
+      }
+    });
+  }
+
+  public function scopeSearch($query, $search)
+  {
+    if (empty($search)) {
+      return $query;
+    }
+
+    return $query->where(function ($q) use ($search) {
+      $q->where('name', 'like', "%{$search}%")
+        ->orWhere('description', 'like', "%{$search}%")
+        ->orWhereHas('contact', function ($contactQuery) use ($search) {
+          $contactQuery->where('first_name', 'like', "%{$search}%")
+            ->orWhere('last_name', 'like', "%{$search}%")
+            ->orWhereRaw("CONCAT(first_name, ' ', last_name) like ?", ["%{$search}%"]);
+        })
+        ->orWhereHas('contact.firm', function ($firmQuery) use ($search) {
+          $firmQuery->where('name', 'like', "%{$search}%");
+        });
+    });
+  }
+
+  // Simple helper methods (keep these as they're model-specific)
+  public function isActive(): bool
+  {
+    return in_array($this->status, [ProjectStatus::PENDING, ProjectStatus::APPROVED]);
+  }
+
+  public function isCompleted(): bool
+  {
+    return $this->status === ProjectStatus::COMPLETED;
+  }
+
+  public function isOverdue(): bool
+  {
+    return $this->due_date && $this->due_date->isPast() && !$this->isCompleted();
+  }
+
+  // Reporting helper methods for weekly reports
   public function getTasksWorkedOnInWeek(Carbon $startOfWeek, Carbon $endOfWeek, $userId = null)
   {
     $query = $this->tasks()->workedOnInWeek($startOfWeek, $endOfWeek);
@@ -144,76 +262,5 @@ class Project extends Model
   public function hasActivityInWeek(Carbon $startOfWeek, Carbon $endOfWeek, $userId = null): bool
   {
     return $this->getTasksWorkedOnInWeek($startOfWeek, $endOfWeek, $userId)->isNotEmpty();
-  }
-
-  public function scopeWithActivityInWeek($query, Carbon $startOfWeek, Carbon $endOfWeek, $userId = null)
-  {
-    return $query->whereHas('tasks', function ($taskQuery) use ($startOfWeek, $endOfWeek, $userId) {
-      $taskQuery->workedOnInWeek($startOfWeek, $endOfWeek);
-      if ($userId) {
-        $taskQuery->forUser($userId);
-      }
-    });
-  }
-
-  // Project status helpers
-  public function isActive(): bool
-  {
-    return in_array($this->status, ['in_progress', 'approved']);
-  }
-
-  public function isCompleted(): bool
-  {
-    return $this->status === 'completed';
-  }
-
-  public function isOverdue(): bool
-  {
-    return $this->due_date && $this->due_date->isPast() && !$this->isCompleted();
-  }
-
-  // Project progress calculation
-  public function getProgress(): array
-  {
-    $totalTasks = $this->tasks()->count();
-    $completedTasks = $this->tasks()->where('status', 'completed')->count();
-
-    $percentage = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100) : 0;
-
-    return [
-      'percentage' => $percentage,
-      'completed_tasks' => $completedTasks,
-      'total_tasks' => $totalTasks,
-      'status' => $this->getProgressStatus($percentage),
-    ];
-  }
-
-  private function getProgressStatus(int $percentage): string
-  {
-    if ($percentage === 100) return 'completed';
-    if ($percentage >= 75) return 'nearly_done';
-    if ($percentage >= 50) return 'on_track';
-    if ($percentage >= 25) return 'started';
-    return 'not_started';
-  }
-
-  // Project statistics
-  public function getStats(): array
-  {
-    $tasks = $this->tasks;
-
-    return [
-      'total_tasks' => $tasks->count(),
-      'completed_tasks' => $tasks->where('status', 'completed')->count(),
-      'in_progress_tasks' => $tasks->where('status', 'in_progress')->count(),
-      'todo_tasks' => $tasks->where('status', 'todo')->count(),
-      'overdue_tasks' => $tasks->filter(function ($task) {
-        return $task->due_date && $task->due_date->isPast() && $task->status !== 'completed';
-      })->count(),
-      'total_hours' => $tasks->sum('actual_hours') ?? 0,
-      'estimated_hours' => $tasks->sum('estimated_hours') ?? 0,
-      'completion_rate' => $this->getProgress()['percentage'],
-      'team_members' => $tasks->whereNotNull('assigned_to')->pluck('assigned_to')->unique()->count(),
-    ];
   }
 }

@@ -310,7 +310,7 @@ defineOptions({
       <!-- Stats Cards -->
       <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
-          <CardContent class="p-4">
+          <CardContent>
             <div class="flex items-center">
               <div class="flex-shrink-0">
                 <Users class="h-8 w-8 text-blue-600" />
@@ -328,7 +328,7 @@ defineOptions({
         </Card>
 
         <Card>
-          <CardContent class="p-4">
+          <CardContent>
             <div class="flex items-center">
               <div class="flex-shrink-0">
                 <Building2 class="h-8 w-8 text-green-600" />
@@ -346,7 +346,7 @@ defineOptions({
         </Card>
 
         <Card>
-          <CardContent class="p-4">
+          <CardContent>
             <div class="flex items-center">
               <div class="flex-shrink-0">
                 <Mail class="h-8 w-8 text-purple-600" />
@@ -364,7 +364,7 @@ defineOptions({
         </Card>
 
         <Card>
-          <CardContent class="p-4">
+          <CardContent>
             <div class="flex items-center">
               <div class="flex-shrink-0">
                 <Calendar class="h-8 w-8 text-orange-600" />
@@ -384,7 +384,7 @@ defineOptions({
 
       <!-- Filters and Search -->
       <Card class="mb-6">
-        <CardContent class="p-6">
+        <CardContent>
           <div class="grid gap-4 md:grid-cols-4">
             <!-- Search -->
             <div class="relative">
@@ -399,9 +399,10 @@ defineOptions({
 
             <!-- Firm Filter -->
             <Select v-model="filters.firm_id" @update:modelValue="applyFilters">
-              <SelectTrigger>
+              <SelectTrigger class="w-full">
                 <SelectValue placeholder="All Firms" />
               </SelectTrigger>
+
               <SelectContent>
                 <SelectItem :value="null">All Firms</SelectItem>
                 <SelectItem
@@ -416,7 +417,7 @@ defineOptions({
 
             <!-- Tags Filter -->
             <Select v-model="filters.tags" @update:modelValue="applyFilters">
-              <SelectTrigger>
+              <SelectTrigger class="w-full">
                 <SelectValue placeholder="All Tags" />
               </SelectTrigger>
 
@@ -425,8 +426,7 @@ defineOptions({
                 <SelectItem
                   v-for="tag in availableTags"
                   :key="tag"
-                  :value="tag"
-                >
+                  :value="tag">
                   {{ tag }}
                 </SelectItem>
               </SelectContent>
@@ -434,7 +434,7 @@ defineOptions({
 
             <!-- Sort Options -->
             <Select v-model="filters.sort_by" @update:modelValue="applyFilters">
-              <SelectTrigger>
+              <SelectTrigger class="w-full">
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
 
@@ -453,8 +453,7 @@ defineOptions({
             <Badge
               v-if="filters.search"
               variant="secondary"
-              class="flex items-center gap-1"
-            >
+              class="flex items-center gap-1">
               Search: {{ filters.search }}
               <X
                 class="h-3 w-3 cursor-pointer"
@@ -465,8 +464,7 @@ defineOptions({
             <Badge
               v-if="filters.firm_id"
               variant="secondary"
-              class="flex items-center gap-1"
-            >
+              class="flex items-center gap-1">
               Firm: {{ getFirmName(filters.firm_id) }}
               <X
                 class="h-3 w-3 cursor-pointer"
@@ -476,8 +474,7 @@ defineOptions({
             <Badge
               v-if="filters.tags"
               variant="secondary"
-              class="flex items-center gap-1"
-            >
+              class="flex items-center gap-1">
               Tag: {{ filters.tags }}
               <X
                 class="h-3 w-3 cursor-pointer"
@@ -488,8 +485,7 @@ defineOptions({
               variant="ghost"
               size="sm"
               @click="clearAllFilters"
-              class="text-xs"
-            >
+              class="text-xs">
               Clear All
             </Button>
           </div>
@@ -499,8 +495,7 @@ defineOptions({
       <!-- Bulk Actions -->
       <div
         v-if="selectedContacts.length > 0"
-        class="mb-4 flex items-center justify-between rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20"
-      >
+        class="mb-4 flex items-center justify-between rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
         <div class="flex items-center gap-2">
           <Checkbox
             :checked="isAllSelected"
@@ -515,17 +510,16 @@ defineOptions({
             variant="outline"
             size="sm"
             @click="bulkExport"
-            class="flex items-center gap-1"
-          >
+            class="flex items-center gap-1">
             <Download class="h-3 w-3" />
             Export Selected
           </Button>
+
           <Button
             variant="destructive"
             size="sm"
             @click="confirmBulkDelete"
-            class="flex items-center gap-1"
-          >
+            class="flex items-center gap-1">
             <Trash2 class="h-3 w-3" />
             Delete Selected
           </Button>
@@ -549,8 +543,7 @@ defineOptions({
                   <TableHead>Firm</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Phone</TableHead>
-                  <TableHead>Tags</TableHead>
-                  <TableHead class="w-20">Actions</TableHead>
+                  <TableHead class="w-20" />
                 </TableRow>
               </TableHeader>
 
@@ -630,7 +623,7 @@ defineOptions({
                     </span>
                   </TableCell>
 
-                  <TableCell>
+                  <!--TableCell>
                     <div class="flex flex-wrap gap-1">
                       <Badge
                         v-for="tag in contact.tags.slice(0, 2)"
@@ -647,7 +640,7 @@ defineOptions({
                         +{{ contact.tags.length - 2 }}
                       </Badge>
                     </div>
-                  </TableCell>
+                  </TableCell-->
 
                   <!--TableCell>
                     <time
