@@ -68,7 +68,6 @@ interface Firm {
 
 interface Props {
   contacts: Contact[]
-  firms: Firm[]
   preselectedContact?: string
   preselectedFirm?: string
 }
@@ -289,7 +288,7 @@ onMounted(() => {
                   <div class="space-y-2">
                     <Label for="status">Status</Label>
                     <Select v-model="form.status">
-                      <SelectTrigger :class="{ 'border-red-500': form.errors.status }">
+                      <SelectTrigger class="w-full" :class="{ 'border-red-500': form.errors.status }">
                         <SelectValue placeholder="Select project status" />
                       </SelectTrigger>
                       <SelectContent>
@@ -309,7 +308,7 @@ onMounted(() => {
                   <div class="space-y-2">
                     <Label for="priority">Priority</Label>
                     <Select v-model="form.priority">
-                      <SelectTrigger :class="{ 'border-red-500': form.errors.priority }">
+                      <SelectTrigger class="w-full" :class="{ 'border-red-500': form.errors.priority }">
                         <SelectValue placeholder="Select priority" />
                       </SelectTrigger>
                       <SelectContent>
@@ -346,7 +345,7 @@ onMounted(() => {
                     Contact <span class="text-red-500">*</span>
                   </Label>
                   <Select v-model="form.contact_id">
-                    <SelectTrigger :class="{ 'border-red-500': form.errors.contact_id }">
+                    <SelectTrigger class="w-full" :class="{ 'border-red-500': form.errors.contact_id }">
                       <SelectValue placeholder="Select a contact" />
                     </SelectTrigger>
                     <SelectContent>

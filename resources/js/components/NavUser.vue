@@ -1,14 +1,10 @@
 <script setup lang="ts">
 import {
-  BadgeCheck,
-  Bell,
+  UserIcon,
   ChevronsUpDown,
-  ChevronUpIcon,
-  CreditCard,
   LogOut,
   Moon,
-  Sun,
-  UserIcon
+  Sun
 } from 'lucide-vue-next';
 import {
   Avatar,
@@ -104,19 +100,10 @@ const { isMobile } = useSidebar()
           <DropdownMenuSeparator />
 
           <DropdownMenuGroup>
-            <DropdownMenuItem>
-              <BadgeCheck />
+            <DropdownMenuItem
+              :as="Link" :href="route('profile.edit')">
+              <UserIcon />
               Account
-            </DropdownMenuItem>
-
-            <DropdownMenuItem>
-              <CreditCard />
-              Billing
-            </DropdownMenuItem>
-
-            <DropdownMenuItem>
-              <Bell />
-              Notifications
             </DropdownMenuItem>
           </DropdownMenuGroup>
 
