@@ -68,6 +68,7 @@ import {
 } from 'lucide-vue-next'
 import AppSidebarLayout from '@/layouts/AppLayout.vue'
 import { debounce } from 'lodash-es'
+import Heading from '@/components/Heading.vue';
 
 // Types
 interface Contact {
@@ -369,17 +370,14 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="space-y-6 p-6">
+  <div class="space-y-6 p-6 max-w-5xl">
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-      <div>
-        <h1 class="text-3xl font-bold tracking-tight">
-          Projects
-        </h1>
-        <p class="text-muted-foreground mt-1">
-          Manage and track your projects
-        </p>
-      </div>
+
+      <Heading
+        title="Projects"
+        description="Manage and track your projects"
+      />
 
       <div class="flex items-center gap-3">
         <Button
@@ -595,8 +593,8 @@ onMounted(() => {
 
     <!-- Projects Tabs -->
     <Tabs v-model="activeTab" class="space-y-6">
-      <TabsList class="grid w-full grid-cols-5">
-        <TabsTrigger value="all">All Projects ({{ projectStats.total }})</TabsTrigger>
+      <TabsList class="grid w-full grid-cols-5 max-w-2xl mx-auto">
+        <TabsTrigger value="all">All ({{ projectStats.total }})</TabsTrigger>
         <TabsTrigger value="active">Active ({{ projectStats.active }})</TabsTrigger>
         <TabsTrigger value="overdue">Overdue ({{ projectStats.overdue }})</TabsTrigger>
         <TabsTrigger value="completed">Completed ({{ projectStats.completed }})</TabsTrigger>
@@ -643,7 +641,7 @@ onMounted(() => {
               </p>
             </div>
 
-            <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            <div class="grid gap-6 grid-cols-1 md:grid-cols-2">
               <Card
                 v-for="project in filteredProjects"
                 :key="project.uuid"

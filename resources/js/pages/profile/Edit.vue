@@ -4,6 +4,7 @@ import UpdatePasswordForm from '@/pages/profile/partials/UpdatePasswordForm.vue'
 import UpdateProfileInformationForm from '@/pages/profile/partials/UpdateProfileInformationForm.vue';
 import { Head } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
+import Heading from '@/components/Heading.vue';
 
 defineProps({
   mustVerifyEmail: {
@@ -22,11 +23,13 @@ defineOptions({
 <template>
   <Head title="Profile" />
 
-  <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-    Profile
-  </h2>
+  <div class="p-6 max-w-4xl space-y-6">
 
-  <div class="py-12 p-6 max-w-4xl space-y-6">
+    <Heading
+      title="Profile"
+      description="Update your profile information and email address."
+    />
+
     <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
       <UpdateProfileInformationForm
         :must-verify-email="mustVerifyEmail"

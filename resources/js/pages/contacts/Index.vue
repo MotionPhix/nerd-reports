@@ -46,6 +46,7 @@ import {
   Eye, Edit, Copy, Trash2, MoreHorizontal, X, ChevronLeft, ChevronRight
 } from "lucide-vue-next"
 import AppSidebarLayout from "@/layouts/AppLayout.vue"
+import Heading from '@/components/Heading.vue';
 
 // Props
 const props = defineProps({
@@ -268,17 +269,12 @@ defineOptions({
 </script>
 
 <template>
-  <div class="p-6 space-y-6">
+  <div class="p-6 space-y-6 max-w-5xl">
     <div class="flex items-center justify-between">
-      <div>
-        <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
-          Contacts
-        </h2>
-
-        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-          Manage your business contacts and relationships
-        </p>
-      </div>
+      <Heading
+        title="Contacts"
+        description="Manage your business contacts and relationships"
+      />
 
       <div class="flex items-center gap-3">
         <Button
