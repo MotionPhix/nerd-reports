@@ -22,7 +22,6 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import {
   ArrowLeft,
   Save,
@@ -32,11 +31,14 @@ import {
   Clock,
   User,
   Building,
-  AlertCircle,
-  CheckCircle
+  FileText,
+  CheckCircle,
+  Settings
 } from 'lucide-vue-next';
 import AppSidebarLayout from '@/layouts/AppLayout.vue';
 import Heading from '@/components/Heading.vue';
+import DatePicker from '@/components/DatePicker.vue';
+import InputError from '@/components/InputError.vue';
 
 // Types
 interface Contact {
@@ -227,9 +229,7 @@ onMounted(() => {
               :class="{ 'border-red-500': form.errors.name }"
               required
             />
-            <p v-if="form.errors.name" class="text-sm text-red-600 dark:text-red-400">
-              {{ form.errors.name }}
-            </p>
+            <InputError :message="form.errors.name" class="mt-2" />
           </div>
 
           <!-- Description -->
@@ -242,16 +242,15 @@ onMounted(() => {
               rows="3"
               :class="{ 'border-red-500': form.errors.description }"
             />
-            <p v-if="form.errors.description" class="text-sm text-red-600 dark:text-red-400">
-              {{ form.errors.description }}
-            </p>
+
+            <InputError :message="form.errors.description" class="mt-2" />
           </div>
 
           <!-- Contact Selection -->
           <div class="space-y-2">
             <Label for="contact_id">Client Contact *</Label>
             <Select v-model="form.contact_id" required>
-              <SelectTrigger :class="{ 'border-red-500': form.errors.contact_id }">
+              <SelectTrigger class="w-full" :class="{ 'border-red-500': form.errors.contact_id }">
                 <SelectValue placeholder="Select a contact" />
               </SelectTrigger>
               <SelectContent>
@@ -267,9 +266,8 @@ onMounted(() => {
                 </SelectItem>
               </SelectContent>
             </Select>
-            <p v-if="form.errors.contact_id" class="text-sm text-red-600 dark:text-red-400">
-              {{ form.errors.contact_id }}
-            </p>
+
+            <InputError :message="form.errors.contact_id" class="mt-2" />
 
             <!-- Selected Contact Info -->
             <div v-if="selectedContact" class="mt-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
@@ -297,6 +295,7 @@ onMounted(() => {
             <Settings class="h-5 w-5" />
             Project Settings
           </CardTitle>
+
           <CardDescription>
             Configure project status, priority, and timeline
           </CardDescription>
@@ -307,7 +306,7 @@ onMounted(() => {
             <div class="space-y-2">
               <Label for="status">Status</Label>
               <Select v-model="form.status">
-                <SelectTrigger>
+                <SelectTrigger class="w-full">
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -322,16 +321,15 @@ onMounted(() => {
                   </SelectItem>
                 </SelectContent>
               </Select>
-              <p v-if="form.errors.status" class="text-sm text-red-600 dark:text-red-400">
-                {{ form.errors.status }}
-              </p>
+
+              <InputError :message="form.errors.status" class="mt-2" />
             </div>
 
             <!-- Priority -->
             <div class="space-y-2">
               <Label for="priority">Priority</Label>
               <Select v-model="form.priority">
-                <SelectTrigger>
+                <SelectTrigger class="w-full">
                   <SelectValue placeholder="Select priority" />
                 </SelectTrigger>
                 <SelectContent>
@@ -346,9 +344,8 @@ onMounted(() => {
                   </SelectItem>
                 </SelectContent>
               </Select>
-              <p v-if="form.errors.priority" class="text-sm text-red-600 dark:text-red-400">
-                {{ form.errors.priority }}
-              </p>
+
+              <InputError :message="form.errors.priority" class="mt-2" />
             </div>
           </div>
 
@@ -358,15 +355,13 @@ onMounted(() => {
               <Calendar class="h-4 w-4" />
               Due Date
             </Label>
-            <Input
+            <DatePicker
               id="due_date"
               v-model="form.due_date"
-              type="date"
               :class="{ 'border-red-500': form.errors.due_date }"
             />
-            <p v-if="form.errors.due_date" class="text-sm text-red-600 dark:text-red-400">
-              {{ form.errors.due_date }}
-            </p>
+
+            <InputError :message="form.errors.due_date" class="mt-2" />
           </div>
         </CardContent>
       </Card>
@@ -399,9 +394,8 @@ onMounted(() => {
                 placeholder="0"
                 :class="{ 'border-red-500': form.errors.estimated_hours }"
               />
-              <p v-if="form.errors.estimated_hours" class="text-sm text-red-600 dark:text-red-400">
-                {{ form.errors.estimated_hours }}
-              </p>
+
+              <InputError :message="form.errors.estimated_hours" class="mt-2" />
             </div>
 
             <!-- Budget -->
@@ -416,9 +410,7 @@ onMounted(() => {
                 placeholder="0.00"
                 :class="{ 'border-red-500': form.errors.budget }"
               />
-              <p v-if="form.errors.budget" class="text-sm text-red-600 dark:text-red-400">
-                {{ form.errors.budget }}
-              </p>
+              <InputError :message="form.errors.budget" class="mt-2" />
             </div>
           </div>
 
@@ -435,9 +427,7 @@ onMounted(() => {
                 placeholder="0.00"
                 :class="{ 'border-red-500': form.errors.hourly_rate }"
               />
-              <p v-if="form.errors.hourly_rate" class="text-sm text-red-600 dark:text-red-400">
-                {{ form.errors.hourly_rate }}
-              </p>
+              <InputError :message="form.errors.hourly_rate" class="mt-2" />
             </div>
 
             <!-- Billable Toggle -->
@@ -452,9 +442,8 @@ onMounted(() => {
                   This is a billable project
                 </Label>
               </div>
-              <p v-if="form.errors.is_billable" class="text-sm text-red-600 dark:text-red-400">
-                {{ form.errors.is_billable }}
-              </p>
+
+              <InputError :message="form.errors.is_billable" class="mt-2" />
             </div>
           </div>
         </CardContent>
@@ -481,9 +470,7 @@ onMounted(() => {
               rows="4"
               :class="{ 'border-red-500': form.errors.notes }"
             />
-            <p v-if="form.errors.notes" class="text-sm text-red-600 dark:text-red-400">
-              {{ form.errors.notes }}
-            </p>
+            <InputError :message="form.errors.notes" class="mt-2" />
           </div>
         </CardContent>
       </Card>

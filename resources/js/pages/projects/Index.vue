@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
-import { router } from '@inertiajs/vue3'
+import { router, Link } from '@inertiajs/vue3'
 import { toast } from 'vue-sonner'
 import { useDark, useStorage } from '@vueuse/core';
 import {
@@ -675,7 +675,7 @@ onMounted(() => {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem as="a" :href="route('projects.show', project.uuid)" class="gap-2">
+                        <DropdownMenuItem :as="Link" :href="route('projects.show', project.uuid)" class="gap-2">
                           <Eye class="h-4 w-4" />
                           View Project
                         </DropdownMenuItem>
